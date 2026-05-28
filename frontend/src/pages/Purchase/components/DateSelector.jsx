@@ -23,7 +23,7 @@ export const DateSelector = ({ paymentOngoing }) => {
           }
         );
         setShowDatesData(response.data);
-        dispatch(resetCart());
+        if (userDate === "") dispatch(resetCart());
       } catch (err) {
         console.error(err);
       } finally {
@@ -32,7 +32,7 @@ export const DateSelector = ({ paymentOngoing }) => {
     };
 
     theatreId !== "" && fetchData();
-  }, [theatreId, dispatch]);
+  }, [theatreId, dispatch, userDate]);
 
   const checkedColor = (val) => {
     return {

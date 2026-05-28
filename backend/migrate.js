@@ -85,6 +85,25 @@ async function tableExists(connection, tableName) {
   return rows.length > 0;
 }
 
+async function columnExists(connection, tableName, columnName) {
+  const rows = await query(
+    connection,
+    "SELECT COUNT(*) AS columnCount FROM information_schema.columns WHERE table_schema = ? AND table_name = ? AND column_name = ?",
+    [dbName, tableName, columnName]
+  );
+  return rows[0].columnCount > 0;
+}
+
+async function ensureColumn(connection, tableName, columnName, definition) {
+  if (await columnExists(connection, tableName, columnName)) return;
+  await query(
+    connection,
+    `ALTER TABLE ${mysql.escapeId(tableName)} ADD COLUMN ${mysql.escapeId(
+      columnName
+    )} ${definition}`
+  );
+}
+
 async function normalizeSeedPhoneNumbers(connection) {
   const seedPhoneNumbers = [
     ["admin@gmail.com", "0858200725"],
@@ -109,7 +128,115 @@ async function normalizeSeedPhoneNumbers(connection) {
   }
 }
 
+async function normalizeSeedMovieMetadata(connection) {
+  const rows = await query(
+    connection,
+    "SELECT COUNT(*) AS movieCount, MAX(release_date) AS latestReleaseDate FROM movie"
+  );
+  const latestReleaseDate = rows[0].latestReleaseDate
+    ? new Date(rows[0].latestReleaseDate)
+    : null;
+
+  if (
+    rows[0].movieCount > 6 ||
+    (latestReleaseDate && latestReleaseDate >= new Date("2026-01-01"))
+  ) {
+    return;
+  }
+
+  const seedMovies = [
+    [1, "Hoa Kỳ", "136", "Phụ Đề", "T13: Phim dành cho khán giả từ đủ 13 tuổi trở lên (13+)", "2026-05-28"],
+    [2, "Hoa Kỳ", "123", "Phụ Đề", "T16: Phim dành cho khán giả từ đủ 16 tuổi trở lên (16+)", "2026-05-28"],
+    [3, "Hoa Kỳ", "90", "Lồng Tiếng", "K: Phim dành cho khán giả dưới 13 tuổi xem cùng cha, mẹ hoặc người giám hộ", "2026-05-29"],
+    [4, "Hoa Kỳ", "163", "Phụ Đề", "T16: Phim dành cho khán giả từ đủ 16 tuổi trở lên (16+)", "2026-05-29"],
+    [5, "Hoa Kỳ", "180", "Phụ Đề", "T18: Phim dành cho khán giả từ đủ 18 tuổi trở lên (18+)", "2026-05-30"],
+    [6, "Hoa Kỳ", "114", "Lồng Tiếng", "P: Phim dành cho khán giả mọi lứa tuổi", "2026-05-30"],
+  ];
+
+  for (const [id, language, duration, audioType, ageRating, releaseDate] of seedMovies) {
+    await query(
+      connection,
+      "UPDATE movie SET language = ?, duration = ?, audio_type = ?, age_rating = ?, release_date = ? WHERE id = ?",
+      [language, duration, audioType, ageRating, releaseDate, id]
+    );
+  }
+}
+
+async function normalizeSeedShowtimes(connection) {
+  const rows = await query(
+    connection,
+    "SELECT COUNT(*) AS showtimeCount, MAX(showtime_date) AS latestShowDate FROM showtimes"
+  );
+  const latestShowDate = rows[0].latestShowDate
+    ? new Date(rows[0].latestShowDate)
+    : null;
+
+  if (
+    rows[0].showtimeCount > 12 ||
+    (latestShowDate && latestShowDate >= new Date("2026-01-01"))
+  ) {
+    return;
+  }
+
+  const seedShowtimes = [
+    [1, "11:30", "2D", "Standard", "2026-05-28", 120000],
+    [2, "13:00", "2D", "Standard", "2026-05-28", 120000],
+    [3, "15:30", "3D", "Standard", "2026-05-28", 150000],
+    [4, "18:20", "2D", "Standard", "2026-05-28", 120000],
+    [5, "19:45", "3D", "Deluxe", "2026-05-29", 180000],
+    [6, "20:45", "2D", "Standard", "2026-05-29", 120000],
+    [7, "09:10", "2D", "Standard", "2026-05-29", 120000],
+    [8, "11:20", "2D", "Standard", "2026-05-29", 120000],
+    [9, "15:50", "3D", "Standard", "2026-05-30", 150000],
+    [10, "18:40", "2D", "Standard", "2026-05-30", 120000],
+    [11, "21:20", "3D", "Deluxe", "2026-05-30", 180000],
+    [12, "22:45", "3D", "Standard", "2026-05-31", 150000],
+  ];
+
+  for (const [id, startTime, showType, screenType, showDate, price] of seedShowtimes) {
+    await query(
+      connection,
+      "UPDATE showtimes SET movie_start_time = ?, show_type = ?, screen_type = ?, showtime_date = ?, price_per_seat = ? WHERE id = ?",
+      [startTime, showType, screenType, showDate, price, id]
+    );
+  }
+}
+
 async function applySchemaMigrations(connection) {
+  if (await tableExists(connection, "movie")) {
+    await ensureColumn(
+      connection,
+      "movie",
+      "audio_type",
+      "VARCHAR(30) DEFAULT 'Phụ Đề'"
+    );
+    await ensureColumn(
+      connection,
+      "movie",
+      "age_rating",
+      "VARCHAR(160) DEFAULT 'P: Phim dành cho khán giả mọi lứa tuổi'"
+    );
+    await query(
+      connection,
+      "UPDATE movie SET audio_type = COALESCE(NULLIF(audio_type, ''), 'Phụ Đề'), age_rating = COALESCE(NULLIF(age_rating, ''), 'P: Phim dành cho khán giả mọi lứa tuổi')"
+    );
+    await normalizeSeedMovieMetadata(connection);
+  }
+
+  if (await tableExists(connection, "showtimes")) {
+    await ensureColumn(
+      connection,
+      "showtimes",
+      "screen_type",
+      "VARCHAR(30) DEFAULT 'Standard'"
+    );
+    await query(
+      connection,
+      "UPDATE showtimes SET screen_type = COALESCE(NULLIF(screen_type, ''), 'Standard')"
+    );
+    await normalizeSeedShowtimes(connection);
+  }
+
   if (!(await tableExists(connection, "person"))) return;
 
   await normalizeSeedPhoneNumbers(connection);

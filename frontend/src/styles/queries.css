@@ -4,6 +4,78 @@
   }
 }
 
+/* New public showtimes layout overrides old responsive showtimes rules. */
+@media (max-width: 64em) {
+  .showtimes-movies-list {
+    grid-template-columns: 1fr;
+  }
+
+  .showtimes-card {
+    display: grid;
+    grid-template-columns: 17rem minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 42em) {
+  .showtimes-card {
+    grid-template-columns: 11rem minmax(0, 1fr);
+  }
+
+  .showtimes-age-desktop {
+    display: none !important;
+  }
+
+  .showtimes-age-mobile {
+    display: flex;
+  }
+}
+
+@media (max-width: 30em) {
+  .showtimes-card {
+    grid-template-columns: 1fr;
+  }
+
+  .showtimes-poster-wrap {
+    max-width: 18rem;
+  }
+}
+
+/* New public showtimes layout */
+@media (max-width: 64em) {
+  .showtimes-movies-list {
+    grid-template-columns: 1fr;
+  }
+
+  .showtimes-card {
+    display: grid;
+    grid-template-columns: 17rem minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 42em) {
+  .showtimes-card {
+    grid-template-columns: 11rem minmax(0, 1fr);
+  }
+
+  .showtimes-age-desktop {
+    display: none !important;
+  }
+
+  .showtimes-age-mobile {
+    display: flex;
+  }
+}
+
+@media (max-width: 30em) {
+  .showtimes-card {
+    grid-template-columns: 1fr;
+  }
+
+  .showtimes-poster-wrap {
+    max-width: 18rem;
+  }
+}
+
 @media (max-width: 74em) {
   html {
     font-size: 50%;
@@ -601,5 +673,41 @@
   .form-movie-add div input {
     width: 100%;
     margin-left: 0;
+  }
+}
+
+/* New public showtimes layout overrides old responsive showtimes rules. */
+@media (max-width: 64em) {
+  .showtimes-movies-list {
+    grid-template-columns: 1fr;
+  }
+
+  .showtimes-card {
+    display: grid;
+    grid-template-columns: 17rem minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 42em) {
+  .showtimes-card {
+    grid-template-columns: 11rem minmax(0, 1fr);
+  }
+
+  .showtimes-age-desktop {
+    display: none !important;
+  }
+
+  .showtimes-age-mobile {
+    display: flex;
+  }
+}
+
+@media (max-width: 30em) {
+  .showtimes-card {
+    grid-template-columns: 1fr;
+  }
+
+  .showtimes-poster-wrap {
+    max-width: 18rem;
   }
 }

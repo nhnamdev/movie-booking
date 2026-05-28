@@ -1237,6 +1237,352 @@ header {
   border: 2px solid transparent;
 }
 
+.showtimes-collection {
+  padding-top: 3.2rem;
+  padding-bottom: 7.2rem;
+}
+
+.showtimes-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 1.2rem;
+  margin-bottom: 3.2rem;
+  border: 1px solid rgba(230, 230, 232, 0.12);
+  border-radius: 8px;
+  background-color: rgba(26, 29, 44, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.showtimes-tab-btn {
+  flex: 0 0 auto;
+  min-height: 4.4rem;
+  padding: 0 2rem;
+  border: 1px solid rgba(230, 230, 232, 0.16);
+  border-radius: 999px;
+  background-color: transparent;
+  color: #e6e6e8;
+  font-family: inherit;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.showtimes-tab-btn:hover,
+.showtimes-tab-btn.active {
+  border-color: transparent;
+  background-color: #eb3656;
+  transform: translateY(-0.1rem);
+}
+
+.re-head {
+  margin-bottom: 3.2rem;
+}
+
+.re-head .heading {
+  color: #e6e6e8;
+  font-size: 3rem;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.--t-center {
+  text-align: center;
+}
+
+.showtimes-movies-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2.4rem;
+}
+
+.showtimes-card {
+  display: grid;
+  grid-template-columns: 17rem minmax(0, 1fr);
+  gap: 2rem;
+  min-width: 0;
+  padding: 1.6rem;
+  overflow: visible;
+  border: 1px solid rgba(230, 230, 232, 0.12);
+  border-radius: 8px;
+  background-color: #1a1d2c;
+  box-shadow: 0 1.8rem 3.8rem rgba(0, 0, 0, 0.18);
+}
+
+.showtimes-poster-wrap {
+  min-width: 0;
+}
+
+.showtimes-poster-link {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.showtimes-img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.showtimes-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.showtimes-title {
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.showtimes-title button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #e6e6e8;
+  font-family: inherit;
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+.showtimes-title button:hover {
+  color: #ef5e78;
+}
+
+.showtimes-metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  list-style: none;
+}
+
+.showtimes-metadata li,
+.showtimes-age-mobile {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  color: #babbc0;
+  font-size: 1.35rem;
+  line-height: 1.45;
+}
+
+.showtimes-metadata svg,
+.showtimes-age-mobile svg {
+  flex: 0 0 auto;
+  margin-top: 0.2rem;
+  color: #eb3656;
+}
+
+.showtimes-age-mobile {
+  display: none;
+  margin-top: 1rem;
+}
+
+.showtimes-rp {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.showtimes-rp-block {
+  overflow: hidden;
+  border: 1px solid rgba(230, 230, 232, 0.12);
+  border-radius: 8px;
+  background-color: #222638;
+}
+
+.showtimes-rp-day {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.4rem;
+  color: #e6e6e8;
+  font-size: 1.45rem;
+  font-weight: 700;
+  background-color: #2a2f43;
+}
+
+.showtimes-rp-body {
+  padding: 1.4rem;
+}
+
+.showtimes-rp-item + .showtimes-rp-item {
+  margin-top: 1.4rem;
+}
+
+.showtimes-rp-title {
+  margin-bottom: 1rem;
+  color: #e6e6e8;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.showtimes-time-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.showtimes-time-item {
+  min-width: 7.2rem;
+  min-height: 3.8rem;
+  padding: 0 1.3rem;
+  border: 2px solid #eb3656;
+  border-radius: 999px;
+  background-color: transparent;
+  color: #e6e6e8;
+  font-family: inherit;
+  font-size: 1.35rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.showtimes-time-item:hover {
+  border-color: transparent;
+  background-color: #eb3656;
+  transform: translateY(-0.15rem);
+}
+
+.showtimes-see-more {
+  width: fit-content;
+  margin-top: auto;
+  padding: 1rem 1.8rem;
+  border: none;
+  border-radius: 999px;
+  background-color: #eb3656;
+  color: #e6e6e8;
+  font-family: inherit;
+  font-size: 1.35rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.showtimes-see-more:hover {
+  background-color: #ef5e78;
+  transform: translateY(-0.15rem);
+}
+
+.showtimes-empty {
+  color: #babbc0;
+  font-size: 1.6rem;
+  text-align: center;
+}
+
+.showtimes-price-panel {
+  max-width: 86rem;
+  margin: 0 auto;
+  padding: 2.4rem;
+  border: 1px solid rgba(230, 230, 232, 0.12);
+  border-radius: 8px;
+  background-color: #1a1d2c;
+}
+
+.showtimes-price-panel h2 {
+  margin-bottom: 2rem;
+  color: #e6e6e8;
+  font-size: 2.4rem;
+  text-align: center;
+}
+
+.showtimes-price-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.showtimes-price-grid div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.4rem;
+  border-radius: 8px;
+  background-color: #222638;
+  color: #e6e6e8;
+  font-size: 1.5rem;
+}
+
+.showtimes-price-grid strong {
+  color: #ef5e78;
+  white-space: nowrap;
+}
+
+@media (max-width: 64em) {
+  .showtimes-movies-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 42em) {
+  .showtimes-tabs {
+    margin-left: -1.6rem;
+    margin-right: -1.6rem;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+  }
+
+  .showtimes-card {
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: 1.3rem;
+    padding: 1.2rem;
+  }
+
+  .showtimes-title button {
+    font-size: 1.55rem;
+  }
+
+  .showtimes-metadata {
+    gap: 0.7rem;
+  }
+
+  .showtimes-age-desktop {
+    display: none !important;
+  }
+
+  .showtimes-age-mobile {
+    display: flex;
+  }
+
+  .showtimes-rp-day {
+    font-size: 1.25rem;
+  }
+
+  .showtimes-price-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 30em) {
+  .showtimes-card {
+    grid-template-columns: 1fr;
+  }
+
+  .showtimes-poster-wrap {
+    max-width: 18rem;
+  }
+}
+
 /* genre selector */
 
 .genre-container {
@@ -2234,8 +2580,20 @@ header {
   margin-bottom: 2.4rem;
 }
 
+.form-admin-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.admin-heading-icon {
+  flex: 0 0 auto;
+  color: #eb3656;
+  font-size: 2.2rem;
+}
+
 .form-movie-add {
-  width: 40%;
+  width: min(100%, 64rem);
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
@@ -2256,7 +2614,7 @@ header {
 }
 
 .form-movie-add div input {
-  width: 32rem;
+  width: min(100%, 32rem);
   margin-left: auto;
   font-family: inherit;
   padding: 1.2rem;
@@ -2269,6 +2627,10 @@ header {
 }
 
 .btn-admin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
   margin-top: 2.4rem;
   border-radius: 2.8rem;
   padding: 1.2rem 3.2rem;
@@ -2284,6 +2646,11 @@ header {
   margin-right: auto;
 }
 
+.btn-admin svg {
+  flex: 0 0 auto;
+  font-size: 1.7rem;
+}
+
 .btn-admin:hover {
   background-color: #ef5e78;
   transform: translateY(-0.2rem);
@@ -2292,18 +2659,236 @@ header {
 
 .btn-admin-arrow {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
   background-color: transparent;
   border: none;
   transition: all 0.3s;
+  cursor: pointer;
 }
 
 .btn-admin-arrow:hover {
   transform: translateY(-0.2rem);
+  background-color: rgba(235, 54, 86, 0.1);
 }
 .admin-icon {
   height: 2.8rem;
   width: 2.8rem;
   color: #eb3656;
+}
+
+.admin-movie-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6rem;
+  margin-top: 2.4rem;
+  margin-bottom: 2.4rem;
+}
+
+.admin-movie-refresh {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.admin-movie-empty {
+  color: #babbc0;
+  font-size: 1.6rem;
+}
+
+.admin-movie-loading {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  color: #babbc0;
+  font-size: 1.6rem;
+}
+
+.admin-movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr));
+  gap: 2rem;
+}
+
+.admin-movie-card {
+  display: grid;
+  grid-template-columns: 12rem 1fr;
+  gap: 1.6rem;
+  padding: 1.6rem;
+  border: 1px solid rgba(230, 230, 232, 0.12);
+  border-radius: 8px;
+  background-color: #222638;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.admin-movie-card:hover {
+  border-color: rgba(235, 54, 86, 0.45);
+  box-shadow: 0 1.4rem 3rem rgba(0, 0, 0, 0.16);
+  transform: translateY(-0.2rem);
+}
+
+.admin-movie-poster {
+  width: 12rem;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 6px;
+  background-color: #1a1d2c;
+}
+
+.admin-movie-card-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.admin-movie-card-body h3 {
+  color: #e6e6e8;
+  font-size: 1.8rem;
+  line-height: 1.3;
+}
+
+.admin-movie-card-body p {
+  color: #babbc0;
+  font-size: 1.4rem;
+  line-height: 1.5;
+}
+
+.admin-movie-genre-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.admin-movie-genre-line svg {
+  flex: 0 0 auto;
+  color: #eb3656;
+}
+
+.admin-movie-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.admin-movie-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  background-color: #1a1d2c;
+  color: #e6e6e8;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.admin-movie-meta svg {
+  flex: 0 0 auto;
+  color: #eb3656;
+}
+
+.admin-movie-description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.admin-movie-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.admin-movie-actions .btn-admin {
+  margin: 0;
+}
+
+.admin-btn-secondary {
+  background-color: #4b5563;
+}
+
+.admin-btn-secondary:hover {
+  background-color: #6b7280;
+}
+
+.admin-btn-danger {
+  background-color: #b91c1c;
+}
+
+.admin-btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.admin-movie-edit-form {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.admin-ai-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  width: fit-content;
+  padding: 1rem 1.6rem;
+  border: 1px solid rgba(230, 230, 232, 0.18);
+  border-radius: 8px;
+  background-color: #30364b;
+  color: #e6e6e8;
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s, transform 0.2s;
+}
+
+.admin-ai-btn:hover:not(:disabled) {
+  border-color: rgba(235, 54, 86, 0.5);
+  background-color: #3a4058;
+  transform: translateY(-0.1rem);
+}
+
+.admin-ai-btn:disabled,
+.btn-admin:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 640px) {
+  .admin-movie-list-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-movie-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-movie-card {
+    grid-template-columns: 8.8rem 1fr;
+    padding: 1.2rem;
+  }
+
+  .admin-movie-poster {
+    width: 8.8rem;
+  }
+
+  .form-movie-add div {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .form-movie-add div input {
+    width: 100%;
+    margin-left: 0;
+  }
 }
 
 /* admin showtimeAdd section */

@@ -1,7 +1,6 @@
 import { Navbar } from "../../components/Navbar";
 import { ShowTimesHeader } from "./components/ShowTimesHeader";
 import { ShowTimesCollection } from "./components/ShowTimesCollection";
-import { AISearchBox } from "./components/AISearchBox";
 import { Footer } from "../../components/Footer";
 
 const ShowtimesPage = () => {
@@ -9,7 +8,6 @@ const ShowtimesPage = () => {
     <>
       <Navbar />
       <ShowTimesHeader />
-      <AISearchBox />
       <ShowTimesCollection />
       <Footer />
     </>

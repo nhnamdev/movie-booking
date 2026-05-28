@@ -157,9 +157,42 @@ app.post("/showtimes", (req, res) => {
   const theatreName = req.body.theatreName;
   const userGenre = req.body.userGenre;
 
-  sql1 = `SELECT M.id, M.name AS movie_name, M.image_path, S.showtime_date, S.movie_start_time, S.show_type, MG.genre FROM theatre T JOIN hall H ON T.id = H.theatre_id JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id JOIN movie M ON SI.movie_id = M.id JOIN movie_genre MG ON MG.movie_id = M.id JOIN ( SELECT DISTINCT showtime_date FROM showtimes ORDER BY showtime_date DESC LIMIT 4 ) AS LatestDates ON S.showtime_date = LatestDates.showtime_date WHERE T.name =? and MG.genre=? ORDER BY S.showtime_date ASC`;
+  const baseSql = `
+    SELECT
+      M.id,
+      M.name AS movie_name,
+      M.image_path,
+      M.language,
+      M.duration,
+      M.release_date,
+      M.audio_type,
+      M.age_rating,
+      S.id AS showtime_id,
+      H.id AS hall_id,
+      H.name AS hall_name,
+      S.showtime_date,
+      S.movie_start_time,
+      S.show_type,
+      S.screen_type,
+      S.price_per_seat,
+      MG.genre
+    FROM theatre T
+    JOIN hall H ON T.id = H.theatre_id
+    JOIN shown_in SI ON H.id = SI.hall_id
+    JOIN showtimes S ON SI.showtime_id = S.id
+    JOIN movie M ON SI.movie_id = M.id
+    JOIN movie_genre MG ON MG.movie_id = M.id
+    JOIN (
+      SELECT DISTINCT showtime_date
+      FROM showtimes
+      ORDER BY showtime_date DESC
+      LIMIT 4
+    ) AS LatestDates ON S.showtime_date = LatestDates.showtime_date
+    WHERE T.name = ?
+  `;
 
-  sql2 = `SELECT M.id, M.name AS movie_name, M.image_path, S.showtime_date, S.movie_start_time, S.show_type, MG.genre FROM theatre T JOIN hall H ON T.id = H.theatre_id JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id JOIN movie M ON SI.movie_id = M.id JOIN movie_genre MG ON MG.movie_id = M.id JOIN ( SELECT DISTINCT showtime_date FROM showtimes ORDER BY showtime_date DESC LIMIT 4 ) AS LatestDates ON S.showtime_date = LatestDates.showtime_date WHERE T.name =?  ORDER BY S.showtime_date ASC`;
+  const sql1 = `${baseSql} AND MG.genre = ? ORDER BY S.showtime_date ASC, S.movie_start_time ASC, M.name ASC`;
+  const sql2 = `${baseSql} ORDER BY S.showtime_date ASC, S.movie_start_time ASC, M.name ASC`;
 
   userGenre === "All"
     ? db.query(sql2, [theatreName], (err, data) => {
@@ -240,7 +273,7 @@ app.post("/halls", (req, res) => {
   const movieId = req.body.userMovieId;
 
   const sql =
-    "SELECT H.id AS hall_id, H.name AS hall_name, SI.showtime_id, S.show_type,S.movie_start_time, S.price_per_seat FROM hall H JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id WHERE H.theatre_id = ? AND S.showtime_date = ? AND SI.movie_id = ?";
+    "SELECT H.id AS hall_id, H.name AS hall_name, SI.showtime_id, S.show_type, S.screen_type, S.movie_start_time, S.price_per_seat FROM hall H JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id WHERE H.theatre_id = ? AND S.showtime_date = ? AND SI.movie_id = ?";
   db.query(sql, [theatreId, showtimeDate, movieId], (err, data) => {
     if (err) return res.json(err);
 
@@ -545,6 +578,149 @@ app.post("/customerPurchases", (req, res) => {
 // /////
 
 // 12.1.14  Backend thêm phim vào data
+
+const verifyAdmin = (email, password, callback) => {
+  const sql = `SELECT email from person WHERE email = ? and password = ? and person_type = ?`;
+
+  db.query(sql, [email, password, "Admin"], (err, data) => {
+    if (err) return callback(err);
+    return callback(null, data.length > 0);
+  });
+};
+
+const adminAuthFailed = (res) =>
+  res.status(403).json({ message: "Xin lỗi, bạn không phải là Admin!" });
+
+const queryDb = (sql, params = []) =>
+  new Promise((resolve, reject) => {
+    db.query(sql, params, (err, data) => {
+      if (err) reject(err);
+      else resolve(data);
+    });
+  });
+
+const normalizeAdminList = (value) => {
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
+app.post("/adminMovies", (req, res) => {
+  const { email, password } = req.body;
+
+  verifyAdmin(email, password, (authErr, isAdmin) => {
+    if (authErr) return res.status(500).json(authErr);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    const sql = `
+      SELECT
+        m.id,
+        m.name,
+        m.image_path,
+        m.language,
+        m.synopsis,
+        m.rating,
+        m.duration,
+        m.top_cast,
+        m.release_date,
+        GROUP_CONCAT(DISTINCT mg.genre ORDER BY mg.genre SEPARATOR ', ') AS genres,
+        GROUP_CONCAT(DISTINCT md.director ORDER BY md.director SEPARATOR ', ') AS directors,
+        COUNT(DISTINCT si.showtime_id) AS showtime_count,
+        COUNT(DISTINCT t.id) AS ticket_count
+      FROM movie m
+      LEFT JOIN movie_genre mg ON m.id = mg.movie_id
+      LEFT JOIN movie_directors md ON m.id = md.movie_id
+      LEFT JOIN shown_in si ON m.id = si.movie_id
+      LEFT JOIN ticket t ON m.id = t.movie_id
+      GROUP BY m.id
+      ORDER BY m.release_date DESC, m.id DESC
+    `;
+
+    db.query(sql, (err, data) => {
+      if (err) return res.status(500).json(err);
+      return res.json(data);
+    });
+  });
+});
+
+app.post("/adminMovieUpdate", async (req, res) => {
+  const {
+    email,
+    password,
+    movieId,
+    name,
+    image_path,
+    language,
+    synopsis,
+    rating,
+    duration,
+    top_cast,
+    release_date,
+  } = req.body;
+  const genres = normalizeAdminList(req.body.genres);
+  const directors = normalizeAdminList(req.body.directors);
+
+  verifyAdmin(email, password, async (authErr, isAdmin) => {
+    if (authErr) return res.status(500).json(authErr);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    if (!movieId || !name || !image_path || !language || !synopsis || !rating || !duration || !top_cast || !release_date) {
+      return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin phim" });
+    }
+
+    try {
+      await queryDb("START TRANSACTION");
+      await queryDb(
+        `UPDATE movie
+         SET name = ?, image_path = ?, language = ?, synopsis = ?, rating = ?, duration = ?, top_cast = ?, release_date = ?
+         WHERE id = ?`,
+        [name, image_path, language, synopsis, rating, duration, top_cast, release_date, movieId]
+      );
+      await queryDb("DELETE FROM movie_genre WHERE movie_id = ?", [movieId]);
+      await queryDb("DELETE FROM movie_directors WHERE movie_id = ?", [movieId]);
+
+      for (const genre of genres) {
+        await queryDb("INSERT INTO movie_genre(movie_id, genre) VALUES (?, ?)", [movieId, genre]);
+      }
+
+      for (const director of directors) {
+        await queryDb("INSERT INTO movie_directors(movie_id, director) VALUES (?, ?)", [movieId, director]);
+      }
+
+      await queryDb("COMMIT");
+      return res.json({ message: "Cập nhật phim thành công" });
+    } catch (err) {
+      await queryDb("ROLLBACK").catch(() => {});
+      return res.status(500).json(err);
+    }
+  });
+});
+
+app.post("/adminMovieDelete", (req, res) => {
+  const { email, password, movieId } = req.body;
+
+  verifyAdmin(email, password, async (authErr, isAdmin) => {
+    if (authErr) return res.status(500).json(authErr);
+    if (!isAdmin) return adminAuthFailed(res);
+    if (!movieId) return res.status(400).json({ message: "Thiếu mã phim" });
+
+    try {
+      const ticketRows = await queryDb("SELECT COUNT(*) AS ticketCount FROM ticket WHERE movie_id = ?", [movieId]);
+      if (ticketRows[0].ticketCount > 0) {
+        return res.status(409).json({
+          message: "Không thể xoá phim đã có vé để tránh mất lịch sử mua vé",
+        });
+      }
+
+      await queryDb("DELETE FROM movie WHERE id = ?", [movieId]);
+      return res.json({ message: "Xoá phim thành công" });
+    } catch (err) {
+      return res.status(500).json(err);
+    }
+  });
+});
 
 app.post("/adminMovieAdd", (req, res) => {
   //admin revalidation

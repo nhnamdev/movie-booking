@@ -1,137 +1,148 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import {
+  FiChevronDown,
+  FiClock,
+  FiGlobe,
+  FiMonitor,
+  FiTag,
+  FiUserCheck,
+} from "react-icons/fi";
 import { showLoginModal } from "../../../reducers/authSlice";
-import { resetCart } from "../../../reducers/cartSlice";
+import {
+  resetCart,
+  setMovie,
+  setShowDate,
+  setShowDetail,
+} from "../../../reducers/cartSlice";
 
-export const ShowtimesCard = (props) => {
-  const dates3d = props["3D"] ? Object.keys(props["3D"]) : [];
-  const dates2d = props["2D"] ? Object.keys(props["2D"]) : [];
+const formatDate = (value) =>
+  new Date(value).toLocaleDateString("vi-VN", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 
+export const ShowtimesCard = ({
+  id,
+  movie_name,
+  image_path,
+  genres,
+  duration,
+  language,
+  audio_type,
+  age_rating,
+  dates,
+}) => {
   const navigate = useNavigate();
   const { isAuthenticated, signedPerson } = useSelector(
     (store) => store.authentication
   );
   const dispatch = useDispatch();
 
-  const show_types_3d =
-    dates3d.length &&
-    dates3d.map((curDate, id) => {
-      const curStartTimes = props["3D"][curDate].map((curStartTime) => {
-        return (
-          <li key={`${props["movie_name"]} 3d ${curStartTime}`}>
-            <button
-              className="showtimes-startime-btn"
-              onClick={() => {
-                dispatch(resetCart());
-                isAuthenticated && signedPerson.person_type === "Customer"
-                  ? navigate("/purchase")
-                  : dispatch(showLoginModal());
-              }}
-            >
-              {curStartTime}
-            </button>
-          </li>
-        );
-      });
+  const handleSelectShowtime = (date, time) => {
+    dispatch(resetCart());
 
-      const formattedDate = new Date(curDate).toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-
-      return (
-        <div
-          className="showtimes-schedule"
-          key={`${props["movie_name"]} 3d ${id}`}
-        >
-          <h3 className="showtimes-date">{formattedDate}</h3>
-          <ul className="showtimes-startime-btn-list">{curStartTimes}</ul>
-        </div>
-      );
-    });
-
-  const show_types_2d =
-    dates2d.length &&
-    dates2d.map((curDate, id) => {
-      const curStartTimes = props["2D"][curDate].map((curStartTime) => {
-        return (
-          <li key={`${props["movie_name"]} 2d ${curStartTime}`}>
-            <button
-              className="showtimes-startime-btn"
-              onClick={() => {
-                dispatch(resetCart());
-                isAuthenticated && signedPerson.person_type === "Customer"
-                  ? navigate("/purchase")
-                  : dispatch(showLoginModal());
-              }}
-            >
-              {curStartTime}
-            </button>
-          </li>
-        );
-      });
-
-      const formattedDate = new Date(curDate).toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-
-      return (
-        <div
-          key={`${props["movie_name"]} 2d ${id}`}
-          className="showtimes-schedule"
-        >
-          <h3 className="showtimes-date">{formattedDate}</h3>
-          <ul className="showtimes-startime-btn-list">{curStartTimes}</ul>
-        </div>
-      );
-    });
+    if (isAuthenticated && signedPerson.person_type === "Customer") {
+      dispatch(setShowDate(date));
+      dispatch(setMovie(id));
+      dispatch(setShowDetail(`${time.showtimeId},${time.hallId},${time.price}`));
+      navigate("/purchase");
+    } else {
+      dispatch(showLoginModal());
+    }
+  };
 
   return (
-    <div className="showtimes-card">
-      <div className="showtimes-card-leftpart">
-        <div className="showtimes-img-box">
-          <img
-            className="showtimes-img"
-            src={props.image_path}
-            alt={props.movie_name}
-          />
+    <article className="showtimes-card">
+      <div className="showtimes-poster-wrap">
+        <button
+          type="button"
+          className="showtimes-poster-link"
+          onClick={() => navigate(`/movieDetails/${id}`)}
+        >
+          <img className="showtimes-img" src={image_path} alt={movie_name} />
+        </button>
+        <div className="showtimes-age-mobile">
+          <FiUserCheck />
+          <span>{age_rating}</span>
+        </div>
+      </div>
+
+      <div className="showtimes-content">
+        <h3 className="showtimes-title">
+          <button type="button" onClick={() => navigate(`/movieDetails/${id}`)}>
+            {movie_name}
+          </button>
+        </h3>
+
+        <ul className="showtimes-metadata">
+          <li>
+            <FiTag />
+            <span>{genres.join(", ")}</span>
+          </li>
+          <li>
+            <FiClock />
+            <span>{duration}</span>
+          </li>
+          <li>
+            <FiGlobe />
+            <span>{language}</span>
+          </li>
+          <li>
+            <FiMonitor />
+            <span>{audio_type}</span>
+          </li>
+          <li className="showtimes-age-desktop">
+            <FiUserCheck />
+            <span>{age_rating}</span>
+          </li>
+        </ul>
+
+        <div className="showtimes-rp">
+          {dates.map((dateBlock) => (
+            <div className="showtimes-rp-block" key={dateBlock.date}>
+              <div className="showtimes-rp-day">
+                <span>{formatDate(dateBlock.date)}</span>
+                <FiChevronDown />
+              </div>
+
+              <div className="showtimes-rp-body">
+                {dateBlock.screens.map((screen) => (
+                  <div
+                    className="showtimes-rp-item"
+                    key={`${dateBlock.date}-${screen.screenType}`}
+                  >
+                    <p className="showtimes-rp-title">{screen.screenType}</p>
+                    <div className="showtimes-time-list">
+                      {screen.times.map((time) => (
+                        <button
+                          type="button"
+                          className="showtimes-time-item"
+                          key={`${time.showtimeId}-${time.hallId}`}
+                          onClick={() => handleSelectShowtime(dateBlock.date, time)}
+                          title={`${time.hallName} - ${time.showType}`}
+                        >
+                          {time.startTime}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
-        <h2 className="showtimes-title">{props.movie_name}</h2>
-
-          {/* 6.1.8. Nhấn vào nút "See details" để xem chi tiết của phim*/}
-          <button
-          className="showtimes-details-btn"
-          onClick={() => navigate(`/movieDetails/${props.id}`)}
+        <button
+          className="showtimes-see-more"
+          type="button"
+          onClick={() => navigate(`/movieDetails/${id}`)}
         >
-          See details
+          Xem thêm lịch chiếu
         </button>
       </div>
-
-      <div className="showtimes-screen-container">
-        {dates3d.length !== 0 && (
-          <div
-            className="showtimes-schedule-container-3d"
-            style={
-              dates2d.length !== 0 ? { borderBottom: "1px solid #313441" } : {}
-            }
-          >
-            <h2 className="showtimes-screen">3D</h2>
-            {show_types_3d}
-          </div>
-        )}
-
-        {dates2d.length !== 0 && (
-          <div className="showtimes-schedule-container-2d">
-            <h2 className="showtimes-screen">2D</h2>
-
-            {show_types_2d}
-          </div>
-        )}
-      </div>
-    </div>
+    </article>
   );
 };

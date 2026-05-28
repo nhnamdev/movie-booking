@@ -84,6 +84,22 @@ export const adminMovieToast = () => {
   });
 };
 
+export const adminMovieUpdateToast = () => {
+  toast.success("Cập nhật phim thành công", {
+    ...toastPrimaryCategories,
+    theme: "light",
+    style: toastFontStyle,
+  });
+};
+
+export const adminMovieDeleteToast = () => {
+  toast.success("Xoá phim thành công", {
+    ...toastPrimaryCategories,
+    theme: "light",
+    style: toastFontStyle,
+  });
+};
+
 export const adminShowtimeToast = () => {
   toast.success("Thêm suất chiếu thành công", {
     ...toastPrimaryCategories,
