@@ -1,7 +1,7 @@
 // Dưới đây là cách khởi tạo kết nối DB
 // Import các module cần thiết
 const express = require("express");
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const cors = require("cors");
 // Import module dotenv để sử dụng biến môi trường
 require("dotenv").config();
@@ -9,6 +9,7 @@ require("dotenv").config();
 // Kiểm tra xem các biến môi trường đã được định nghĩa chưa
 console.log("ENV loaded:");
 console.log("DB_HOST =", process.env.DB_HOST);
+console.log("DB_PORT =", process.env.DB_PORT);
 console.log("DB_NAME =", process.env.DB_NAME);
 
 // Khởi tạo cổng mặc định 7000
@@ -48,6 +49,7 @@ let db;
 // Định nghĩa cấu hình kết nối đến cơ sở dữ liệu
 const configuration = {
   host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT) || 3306,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
