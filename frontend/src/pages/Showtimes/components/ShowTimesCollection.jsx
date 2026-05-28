@@ -43,7 +43,7 @@ const buildMovieSchedule = (rows) => {
     const dateKey = toDateKey(row.showtime_date);
     if (!movie.dates.has(dateKey)) movie.dates.set(dateKey, new Map());
 
-    const screenType = row.screen_type || "Standard";
+    const screenType = row.screen_type || "Tiêu chuẩn";
     const screenMap = movie.dates.get(dateKey);
     if (!screenMap.has(screenType)) screenMap.set(screenType, new Map());
 
@@ -78,19 +78,19 @@ const TicketPriceTable = () => (
     <h2>BẢNG GIÁ VÉ</h2>
     <div className="showtimes-price-grid">
       <div>
-        <span>Standard 2D</span>
+        <span>Tiêu chuẩn 2D</span>
         <strong>120.000 VNĐ</strong>
       </div>
       <div>
-        <span>Standard 3D</span>
+        <span>Tiêu chuẩn 3D</span>
         <strong>150.000 VNĐ</strong>
       </div>
       <div>
-        <span>Deluxe 2D</span>
+        <span>Cao cấp 2D</span>
         <strong>150.000 VNĐ</strong>
       </div>
       <div>
-        <span>Deluxe 3D</span>
+        <span>Cao cấp 3D</span>
         <strong>180.000 VNĐ</strong>
       </div>
     </div>

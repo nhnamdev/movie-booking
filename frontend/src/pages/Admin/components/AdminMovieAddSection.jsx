@@ -68,7 +68,7 @@ const toMovieForm = (movie) => ({
 
 const formatRating = (rating) => {
   const ratingNumber = Number(rating);
-  return Number.isFinite(ratingNumber) ? ratingNumber.toFixed(1) : "N/A";
+  return Number.isFinite(ratingNumber) ? ratingNumber.toFixed(1) : "Chưa có";
 };
 
 const movieCardMotion = {

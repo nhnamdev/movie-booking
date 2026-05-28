@@ -181,11 +181,7 @@ export const AdminShownInModifySection = ({ selectedDate }) => {
     });
     const formattedDate = `${year}-${monthNumber}-${day}`;
 
-    const visualDate = new Date(dateData).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const visualDate = new Date(dateData).toLocaleDateString("vi-VN");
 
     return { formattedDate, visualDate };
   };
@@ -199,7 +195,7 @@ export const AdminShownInModifySection = ({ selectedDate }) => {
       <input
         type="radio"
         id={i + 1}
-        name="Select Showdate"
+        name="select-showdate"
         value={dateObj.formattedDate}
         onChange={(e) => handleSelectedDate(e)}
         checked={dateObj.formattedDate === selectedShowDate}
@@ -223,7 +219,7 @@ export const AdminShownInModifySection = ({ selectedDate }) => {
       <input
         type="radio"
         id={i + 1}
-        name="Select Showtime"
+        name="select-showtime"
         value={showtimeObj.id}
         onChange={(e) => handleSelectedShowtime(e)}
         checked={showtimeObj.id === selectedShowtime}
@@ -244,7 +240,7 @@ export const AdminShownInModifySection = ({ selectedDate }) => {
       <input
         type="radio"
         id={i + 1}
-        name="Replace Movie"
+        name="replace-movie"
         value={movieObj.movie_id}
         onChange={(e) => handleSelectedReplace(e)}
         checked={movieObj.movie_id === selectedReplace}
@@ -281,7 +277,7 @@ export const AdminShownInModifySection = ({ selectedDate }) => {
     <section className="section-admin-movie-modify">
       <div className="section-movie-playlist container">
         <div className="form-heading-container">
-          <h2 className="form-admin-heading playlist">Update Movie Playlist</h2>
+          <h2 className="form-admin-heading playlist">Cập nhật lịch chiếu phim</h2>
           <button className="btn-admin-arrow" onClick={toggleDropDown}>
             {!moviePlaylistDropDown ? (
               <svg
@@ -324,7 +320,7 @@ export const AdminShownInModifySection = ({ selectedDate }) => {
 
             {selectedShowDate.length > 0 && (
               <>
-                <h3 className="admin-heading-secondary">Select a Slot</h3>
+                <h3 className="admin-heading-secondary">Chọn khung giờ</h3>
                 <div className="form-admin-radio-options">
                   {latestShowtimesHtml}
                 </div>
@@ -333,7 +329,7 @@ export const AdminShownInModifySection = ({ selectedDate }) => {
 
             {selectedShowtime !== "" && (
               <>
-                <h3 className="admin-heading-secondary">Replace</h3>
+                <h3 className="admin-heading-secondary">Thay phim</h3>
                 <div className="form-admin-radio-options">
                   {replaceOptionsHtml}
                 </div>
@@ -342,7 +338,7 @@ export const AdminShownInModifySection = ({ selectedDate }) => {
 
             {selectedReplace !== "" && (
               <>
-                <h3 className="admin-heading-secondary">With</h3>
+                <h3 className="admin-heading-secondary">Bằng phim</h3>
                 <div className="form-admin-radio-options">
                   {newMovieOptionsHtml}
                 </div>
@@ -355,7 +351,7 @@ export const AdminShownInModifySection = ({ selectedDate }) => {
                 disabled={loading}
                 onClick={handleMovieSwap}
               >
-                CONFIRM
+                Xác nhận
               </button>
             )}
           </form>

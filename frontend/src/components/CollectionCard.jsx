@@ -18,11 +18,11 @@ export const CollectionCard = ({
   );
   const dispatch = useDispatch();
 
-  const releaseDate = new Date(release_date).toLocaleDateString("en-GB");
+  const releaseDate = new Date(release_date).toLocaleDateString("vi-VN");
   const ratingNumber = Number(rating);
   const displayRating = Number.isFinite(ratingNumber)
     ? ratingNumber.toFixed(1)
-    : "N/A";
+    : "Chưa có";
 
   return (
     <div

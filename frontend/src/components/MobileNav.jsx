@@ -52,7 +52,7 @@ export const MobileNav = () => {
                 navigate("/");
               }}
             >
-              Home
+              Trang chủ
             </button>
           </li>
           <li className="mobile-nav-list-item">
@@ -63,7 +63,7 @@ export const MobileNav = () => {
                 navigate("/showtimes");
               }}
             >
-              Showtimes
+              Lịch chiếu
             </button>
           </li>
           <li className="mobile-nav-list-item">
@@ -74,7 +74,7 @@ export const MobileNav = () => {
                 navigate("/aboutus");
               }}
             >
-              About Us
+              Về CGV
             </button>
           </li>
           {isAuthenticated && signedPerson.person_type === "Admin" && (
@@ -86,7 +86,7 @@ export const MobileNav = () => {
                   navigate("/admin");
                 }}
               >
-                Admin
+                Quản trị
               </button>
             </li>
           )}
@@ -99,7 +99,7 @@ export const MobileNav = () => {
                 dispatch(showSignModal());
               }}
             >
-              Sign Up
+              Đăng ký
             </button>
           </li>
           <li className="mobile-nav-list-item">
@@ -110,7 +110,7 @@ export const MobileNav = () => {
                 dispatch(showLoginModal());
               }}
             >
-              Sign in
+              Đăng nhập
             </button>
           </li>
 
@@ -123,7 +123,7 @@ export const MobileNav = () => {
                   dispatch(toggleMenuState());
                 }}
               >
-                Log out
+                Đăng xuất
               </button>
             </li>
           )}
@@ -131,7 +131,7 @@ export const MobileNav = () => {
 
         {isAuthenticated && (
           <p className="mobile-nav-name">
-            Signed in as ({signedPerson.first_name})
+            Đang đăng nhập: {signedPerson.first_name}
           </p>
         )}
       </div>

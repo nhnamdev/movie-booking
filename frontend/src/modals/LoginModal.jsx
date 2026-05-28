@@ -83,7 +83,7 @@ export const LoginModal = () => {
         }}
       >
         <div className="signup-form-heading">
-          <h2 className="signup-form-heading-text">Sign in to CGV VIETNAM</h2>
+          <h2 className="signup-form-heading-text">Đăng nhập CGV Việt Nam</h2>
           <button
             type="button"
             className="btn-form-exit"
@@ -116,7 +116,7 @@ export const LoginModal = () => {
               type="email"
               disabled={loading}
               value={loginDetails.email}
-              placeholder="Enter Email"
+              placeholder="Nhập email"
               onChange={(e) => handleLoginDetails(e)}
               required
             />
@@ -132,7 +132,7 @@ export const LoginModal = () => {
                 disabled={loading}
                 value={loginDetails.password}
                 type={passViewState ? "text" : "password"}
-                placeholder="Enter Password"
+                placeholder="Nhập mật khẩu"
                 onChange={(e) => handleLoginDetails(e)}
                 required
               />
@@ -180,7 +180,7 @@ export const LoginModal = () => {
           </div>
           {/* 1.1.7: Người dùng nhấn nút Sign in */}
           <button type="submit" className="btn-reg" disabled={loading}>
-            {loading ? <BarLoader color="#e6e6e8" /> : "Sign in"}
+            {loading ? <BarLoader color="#e6e6e8" /> : "Đăng nhập"}
           </button>
         </div>
       </form>

@@ -62,11 +62,7 @@ export const AdminShowtimesAddSection = ({
   for (let i = 0; i < 4; i++) {
     let curDateStr = addDays(lastShowDate, i + 1);
 
-    const formattedDate = new Date(curDateStr).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const formattedDate = new Date(curDateStr).toLocaleDateString("vi-VN");
 
     showDateHtml.push(
       <div
@@ -77,7 +73,7 @@ export const AdminShowtimesAddSection = ({
         <input
           type="radio"
           id={i + 1}
-          name="Select Showdate"
+          name="select-showdate"
           value={curDateStr}
           onChange={(e) => handleSelectedDate(e)}
           checked={curDateStr === selectedShowDate}
@@ -127,7 +123,7 @@ export const AdminShowtimesAddSection = ({
   return (
     <section className="section-admin-showtimes container">
       <div className="form-heading-container">
-        <h2 className="form-admin-heading">Add Showtime Date</h2>
+        <h2 className="form-admin-heading">Thêm ngày chiếu</h2>
         <button
           className="btn-admin-arrow"
           onClick={toggleAdminShowtimesSection}
@@ -174,7 +170,7 @@ export const AdminShowtimesAddSection = ({
             disabled={loading}
             onClick={showtimeAdd}
           >
-            {loading ? "Loading..." : "CONFIRM"}
+            {loading ? "Đang xử lý..." : "Xác nhận"}
           </button>
         </form>
       )}

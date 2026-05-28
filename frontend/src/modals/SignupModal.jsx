@@ -98,7 +98,7 @@ export const SignupModal = () => {
       <form onSubmit={(e) => handleDataInsert(e)}>
         <div className="signup-form-heading">
           <h2 className="signup-form-heading-text">
-            Create a CGV Account
+            Tạo tài khoản CGV
           </h2>
           <button
             type="button"
@@ -126,13 +126,13 @@ export const SignupModal = () => {
           <div className="signup-form-category-sp">
             <div className="signup-form-category">
               <label>
-                First Name: <span>*</span>
+                Tên: <span>*</span>
               </label>
               <input
                 disabled={loading}
                 name="firstName"
                 type="text"
-                placeholder="Enter First Name"
+                placeholder="Nhập tên"
                 onChange={(e) => handleSignupDetails(e)}
                 value={signupDetails.firstName}
                 required
@@ -141,14 +141,14 @@ export const SignupModal = () => {
 
             <div className="signup-form-category">
               <label>
-                Last Name: <span>*</span>
+                Họ: <span>*</span>
               </label>
               <input
                 disabled={loading}
                 name="lastName"
                 type="text"
                 value={signupDetails.lastName}
-                placeholder="Enter Last Name"
+                placeholder="Nhập họ"
                 onChange={(e) => handleSignupDetails(e)}
                 required
               />
@@ -157,7 +157,7 @@ export const SignupModal = () => {
 
           <div className="signup-form-category">
             <label>
-              Phone Number(Vietnam, 10 digits): <span>*</span>
+              Số điện thoại Việt Nam (10 số): <span>*</span>
             </label>
             <input
               disabled={loading}
@@ -167,7 +167,7 @@ export const SignupModal = () => {
               pattern="0[0-9]{9}"
               maxLength={10}
               value={signupDetails.phoneNumber}
-              placeholder="Enter Phone No."
+              placeholder="Nhập số điện thoại"
               onChange={(e) => handleSignupDetails(e)}
               required
             />
@@ -182,7 +182,7 @@ export const SignupModal = () => {
               name="email"
               type="email"
               value={signupDetails.email}
-              placeholder="Enter Email"
+              placeholder="Nhập email"
               onChange={(e) => handleSignupDetails(e)}
               required
             />
@@ -190,7 +190,7 @@ export const SignupModal = () => {
 
           <div className="signup-form-category">
             <label>
-              Password(Must contain at least 8 digits): <span>*</span>
+              Mật khẩu (ít nhất 8 ký tự): <span>*</span>
             </label>
             <div className="input-password">
               <input
@@ -199,7 +199,7 @@ export const SignupModal = () => {
                 value={signupDetails.password}
                 type={passViewState ? "text" : "password"}
                 onChange={(e) => handleSignupDetails(e)}
-                placeholder="Enter Password"
+                placeholder="Nhập mật khẩu"
                 required
               />
               <button
@@ -246,7 +246,7 @@ export const SignupModal = () => {
           </div>
 
           <button type="submit" className="btn-reg" disabled={loading}>
-            {loading ? <BarLoader color="#e6e6e8" /> : "Sign up"}
+            {loading ? <BarLoader color="#e6e6e8" /> : "Đăng ký"}
           </button>
         </div>
       </form>

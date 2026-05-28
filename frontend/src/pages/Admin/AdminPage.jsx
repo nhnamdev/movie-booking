@@ -26,11 +26,11 @@ const AdminPage = () => {
   };
 
   const tabs = [
-    { id: "dashboard", label: "Dashboard", icon: "📊" },
+    { id: "dashboard", label: "Tổng quan", icon: "📊" },
     { id: "movies", label: "Quản lý phim", icon: "🎬" },
     { id: "showtimes", label: "Lịch chiếu", icon: "🕐" },
     { id: "modify", label: "Chỉnh sửa suất chiếu", icon: "🔄" },
-    { id: "ai", label: "AI Assistant", icon: "✨" },
+    { id: "ai", label: "Trợ lý AI", icon: "✨" },
   ];
 
   return (
@@ -60,7 +60,7 @@ const AdminPage = () => {
                 d="M360 94.59V296M443.13 212.87L296 360M417.41 360H216M299.13 443.13l-144-144M152 416V216M68.87 299.13l144-144M94.59 152H288M212.87 68.87L360 216"
               />
             </svg>
-            <h2>CGV Admin</h2>
+            <h2>CGV Quản trị</h2>
           </div>
         </div>
 

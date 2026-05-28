@@ -47,37 +47,37 @@ export const HeroSection = () => {
               <img
                 src="/Images/customers/customer-1.jpg"
                 className="customer-img"
-                alt="Customer Photo"
+                alt="Khách hàng CGV"
               />
               <img
                 src="/Images/customers/customer-2.jpg"
                 className="customer-img"
-                alt="Customer Photo"
+                alt="Khách hàng CGV"
               />
               <img
                 src="/Images/customers/customer-3.jpg"
                 className="customer-img"
-                alt="Customer Photo"
+                alt="Khách hàng CGV"
               />
               <img
                 src="/Images/customers/customer-4.jpg"
                 className="customer-img"
-                alt="Customer Photo"
+                alt="Khách hàng CGV"
               />
               <img
                 src="/Images/customers/customer-5.jpg"
                 className="customer-img"
-                alt="Customer Photo"
+                alt="Khách hàng CGV"
               />
               <img
                 src="/Images/customers/customer-6.jpg"
                 className="customer-img"
-                alt="Customer Photo"
+                alt="Khách hàng CGV"
               />
             </div>
 
             <p className="hero-review-text">
-              <span>100,000+</span> tickets sold last year
+              <span>100.000+</span> vé đã bán trong năm qua
             </p>
           </div>
         </div>
@@ -86,7 +86,7 @@ export const HeroSection = () => {
           <img
             className="hero-img"
             src="/Images/hero-img.webp"
-            alt="Hero Image"
+            alt="Không gian điện ảnh CGV"
           />
         </div>
       </div>

@@ -128,6 +128,30 @@ async function normalizeSeedPhoneNumbers(connection) {
   }
 }
 
+async function normalizeSeedPeople(connection) {
+  const seedPeople = [
+    ["admin@gmail.com", "Quản trị", "Viên"],
+    ["nam@gmail.com", "Nam", "Nguyễn"],
+    ["Belal123@gmail.com", "Minh", "Trần"],
+    ["farhan@gmail.com", "Huy", "Lê"],
+    ["jon@alu.com", "An", "Phạm"],
+    ["jon@potato.com", "Bảo", "Hoàng"],
+    ["Jon@snow.com", "Long", "Đỗ"],
+    ["neloy.saha456@gmail.com", "Khánh", "Vũ"],
+    ["niaz@nafi.com", "Duy", "Phan"],
+    ["rahim123@gmail.com", "Tú", "Ngô"],
+    ["sazin@gmail.com", "Linh", "Bùi"],
+  ];
+
+  for (const [email, firstName, lastName] of seedPeople) {
+    await query(
+      connection,
+      "UPDATE person SET first_name = ?, last_name = ? WHERE email = ?",
+      [firstName, lastName, email]
+    );
+  }
+}
+
 async function normalizeSeedMovieMetadata(connection) {
   const rows = await query(
     connection,
@@ -162,6 +186,45 @@ async function normalizeSeedMovieMetadata(connection) {
   }
 }
 
+async function normalizeSeedMoviePeople(connection) {
+  const seedCastReplacements = [
+    ["Oscar Isaac", "Quang Tuấn"],
+    ["Chris Hemsworth", "Kiều Minh Tuấn"],
+    ["Jennifer Aniston", "Thu Trang"],
+    ["Tom Cruise", "Ngô Thanh Vân"],
+    ["Cillian Murphy", "Trấn Thành"],
+    ["Margot Robbie", "Kaity Nguyễn"],
+  ];
+
+  const seedDirectorReplacements = [
+    ["Joaquim Dos Santos", "Nguyễn Quang Dũng"],
+    ["Justin K. Thompson", "Phan Gia Nhật Linh"],
+    ["Kemp Powers", "Victor Vũ"],
+    ["Sam Hargrave", "Lý Hải"],
+    ["Jeremy Garelick", "Nhất Trung"],
+    ["Christopher McQuarrie", "Charlie Nguyễn"],
+    ["Christopher Nolan", "Đinh Hà Uyên Thư"],
+    ["Greta Gerwig", "Vũ Ngọc Đãng"],
+  ];
+
+  for (const [oldName, newName] of seedCastReplacements) {
+    await query(connection, "UPDATE movie SET top_cast = ? WHERE top_cast = ?", [
+      newName,
+      oldName,
+    ]);
+  }
+
+  if (!(await tableExists(connection, "movie_directors"))) return;
+
+  for (const [oldName, newName] of seedDirectorReplacements) {
+    await query(
+      connection,
+      "UPDATE movie_directors SET director = ? WHERE director = ?",
+      [newName, oldName]
+    );
+  }
+}
+
 async function normalizeSeedShowtimes(connection) {
   const rows = await query(
     connection,
@@ -179,18 +242,18 @@ async function normalizeSeedShowtimes(connection) {
   }
 
   const seedShowtimes = [
-    [1, "11:30", "2D", "Standard", "2026-05-28", 120000],
-    [2, "13:00", "2D", "Standard", "2026-05-28", 120000],
-    [3, "15:30", "3D", "Standard", "2026-05-28", 150000],
-    [4, "18:20", "2D", "Standard", "2026-05-28", 120000],
-    [5, "19:45", "3D", "Deluxe", "2026-05-29", 180000],
-    [6, "20:45", "2D", "Standard", "2026-05-29", 120000],
-    [7, "09:10", "2D", "Standard", "2026-05-29", 120000],
-    [8, "11:20", "2D", "Standard", "2026-05-29", 120000],
-    [9, "15:50", "3D", "Standard", "2026-05-30", 150000],
-    [10, "18:40", "2D", "Standard", "2026-05-30", 120000],
-    [11, "21:20", "3D", "Deluxe", "2026-05-30", 180000],
-    [12, "22:45", "3D", "Standard", "2026-05-31", 150000],
+    [1, "11:30", "2D", "Tiêu chuẩn", "2026-05-28", 120000],
+    [2, "13:00", "2D", "Tiêu chuẩn", "2026-05-28", 120000],
+    [3, "15:30", "3D", "Tiêu chuẩn", "2026-05-28", 150000],
+    [4, "18:20", "2D", "Tiêu chuẩn", "2026-05-28", 120000],
+    [5, "19:45", "3D", "Cao cấp", "2026-05-29", 180000],
+    [6, "20:45", "2D", "Tiêu chuẩn", "2026-05-29", 120000],
+    [7, "09:10", "2D", "Tiêu chuẩn", "2026-05-29", 120000],
+    [8, "11:20", "2D", "Tiêu chuẩn", "2026-05-29", 120000],
+    [9, "15:50", "3D", "Tiêu chuẩn", "2026-05-30", 150000],
+    [10, "18:40", "2D", "Tiêu chuẩn", "2026-05-30", 120000],
+    [11, "21:20", "3D", "Cao cấp", "2026-05-30", 180000],
+    [12, "22:45", "3D", "Tiêu chuẩn", "2026-05-31", 150000],
   ];
 
   for (const [id, startTime, showType, screenType, showDate, price] of seedShowtimes) {
@@ -221,6 +284,7 @@ async function applySchemaMigrations(connection) {
       "UPDATE movie SET audio_type = COALESCE(NULLIF(audio_type, ''), 'Phụ Đề'), age_rating = COALESCE(NULLIF(age_rating, ''), 'P: Phim dành cho khán giả mọi lứa tuổi')"
     );
     await normalizeSeedMovieMetadata(connection);
+    await normalizeSeedMoviePeople(connection);
   }
 
   if (await tableExists(connection, "showtimes")) {
@@ -228,18 +292,34 @@ async function applySchemaMigrations(connection) {
       connection,
       "showtimes",
       "screen_type",
-      "VARCHAR(30) DEFAULT 'Standard'"
+      "VARCHAR(30) DEFAULT 'Tiêu chuẩn'"
     );
     await query(
       connection,
-      "UPDATE showtimes SET screen_type = COALESCE(NULLIF(screen_type, ''), 'Standard')"
+      "UPDATE showtimes SET screen_type = COALESCE(NULLIF(screen_type, ''), 'Tiêu chuẩn')"
+    );
+    await query(
+      connection,
+      "UPDATE showtimes SET screen_type = 'Tiêu chuẩn' WHERE screen_type = 'Standard'"
+    );
+    await query(
+      connection,
+      "UPDATE showtimes SET screen_type = 'Cao cấp' WHERE screen_type = 'Deluxe'"
     );
     await normalizeSeedShowtimes(connection);
+  }
+
+  if (await tableExists(connection, "payment")) {
+    await query(
+      connection,
+      "UPDATE payment SET method = 'Tiền mặt' WHERE method = 'Cash'"
+    );
   }
 
   if (!(await tableExists(connection, "person"))) return;
 
   await normalizeSeedPhoneNumbers(connection);
+  await normalizeSeedPeople(connection);
 
   const invalidRows = await query(
     connection,

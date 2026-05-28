@@ -52,10 +52,10 @@ export const CustomerInfoSection = () => {
         );
         const formattedData = response.data.map((dataObj) => {
           const purDate = new Date(dataObj.purchase_date).toLocaleDateString(
-            "en-GB"
+            "vi-VN"
           );
           const showDate = new Date(dataObj.showtime_date).toLocaleDateString(
-            "en-GB"
+            "vi-VN"
           );
           return {
             ...dataObj,
@@ -119,7 +119,7 @@ const cancelTicket = async (ticketId) => {
 
           <div className="purchase-ticket-id">
             <HiOutlineTicket size={16} />
-            <p className="ticket-id">Ticket No.: {cusTicket.ticket_ids}</p>
+            <p className="ticket-id">Mã vé: {cusTicket.ticket_ids}</p>
           </div>
 
           <div className="purchase-hall-info">
@@ -152,7 +152,7 @@ const cancelTicket = async (ticketId) => {
             </div>
             <div className="purchase-tags">
               <p>
-                Purchased at <strong>{cusTicket.purchase_date}</strong>
+                Đã mua lúc <strong>{cusTicket.purchase_date}</strong>
               </p>
             </div>
 
@@ -176,7 +176,7 @@ const cancelTicket = async (ticketId) => {
           <img
             className="purchase-item-img"
             src={cusTicket.movie_image}
-            alt="movie-photo"
+            alt={cusTicket.movie_name}
           />
         </div>
       </Link>
@@ -186,13 +186,13 @@ const cancelTicket = async (ticketId) => {
   return (
     <div className="section-customer-info">
       <div className="container">
-        <h3 className="customer-info-heading">Customer Info</h3>
+        <h3 className="customer-info-heading">Thông tin khách hàng</h3>
         {loading1 ? (
           <HashLoader cssOverride={override} color="#eb3656" />
         ) : (
           <div className="customer-info-details">
             <div>
-              <p>Name</p>
+              <p>Họ tên</p>
               <p>:</p>
               <p>
                 {cusProData &&
@@ -201,27 +201,27 @@ const cancelTicket = async (ticketId) => {
             </div>
 
             <div>
-              <p>Email Address</p>
+              <p>Địa chỉ email</p>
               <p>:</p>
               <p>{cusProData.email}</p>
             </div>
 
             <div>
-              <p>Phone No.</p>
+              <p>Số điện thoại</p>
               <p>:</p>
               <p>{cusProData.phone_number}</p>
             </div>
           </div>
         )}
 
-        <h3 className="customer-info-heading">Purchase History</h3>
+        <h3 className="customer-info-heading">Lịch sử mua vé</h3>
         {loading2 ? (
           <HashLoader cssOverride={override} color="#eb3656" />
         ) : (
           <>
             {cusTicketData.length === 0 && (
               <p className="customer-empty-status">
-                You haven&apos;t purchased any ticket yet
+                Bạn chưa mua vé nào.
               </p>
             )}
             <div className="purchase-history-section">

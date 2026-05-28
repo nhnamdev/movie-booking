@@ -21,7 +21,7 @@ export const PayMethodSelector = ({ paymentOngoing }) => {
             { id: 1, label: "MoMo", value: "MoMo" },
             { id: 2, label: "ZaloPay", value: "ZaloPay" },
             { id: 3, label: "Thẻ ATM", value: "ATM" },
-            { id: 4, label: "Tiền mặt", value: "Cash" },
+            { id: 4, label: "Tiền mặt", value: "Tiền mặt" },
           ].map(({ id, label, value }) => (
             <div
               className="pay-input-container"
@@ -32,7 +32,7 @@ export const PayMethodSelector = ({ paymentOngoing }) => {
                 disabled={paymentOngoing}
                 type="radio"
                 id={id}
-                name="Select Payment"
+                name="select-payment"
                 value={value}
                 onChange={(e) => dispatch(setPaymentMethod(e.target.value))}
                 checked={value === userPayMethod}

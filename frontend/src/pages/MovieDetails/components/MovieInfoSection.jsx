@@ -40,19 +40,19 @@ export const MovieInfoSection = () => {
 
         const formattedRelDate = new Date(
           movieDetailResponse.data[0].release_date
-        ).toLocaleDateString("en-GB");
+        ).toLocaleDateString("vi-VN");
         const durationDetail1 = movieDetailResponse.data[0].duration.replace(
           "h",
-          " hours"
+          " giờ"
         );
-        const duration = durationDetail1.replace("m", " minutes");
+        const duration = durationDetail1.replace("m", " phút");
         const ratingNumber = Number(movieDetailResponse.data[0].rating);
         const formattedMovieData = {
           ...movieDetailResponse.data[0],
           name: movieDetailResponse.data[0].name,
           duration,
           release_date: formattedRelDate,
-          rating: Number.isFinite(ratingNumber) ? ratingNumber.toFixed(1) : "N/A",
+          rating: Number.isFinite(ratingNumber) ? ratingNumber.toFixed(1) : "Chưa có",
         };
 
         setMovieData(formattedMovieData);
@@ -139,11 +139,7 @@ export const MovieInfoSection = () => {
         </li>
       );
     });
-    const formattedDate = new Date(showDate).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const formattedDate = new Date(showDate).toLocaleDateString("vi-VN");
 
     return (
       <div className="showtimes-schedule" key={`3d ${showDate}`}>
@@ -174,11 +170,7 @@ export const MovieInfoSection = () => {
         </li>
       );
     });
-    const formattedDate = new Date(showDate).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const formattedDate = new Date(showDate).toLocaleDateString("vi-VN");
 
     return (
       <div className="showtimes-schedule" key={`2d ${showDate}`}>

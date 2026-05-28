@@ -151,7 +151,7 @@ export const Navbar = () => {
                 to="/admin"
                 style={pageName === "admin" ? selectionTab : {}}
               >
-                Admin
+                Quản trị
               </Link>
             </li>
           )}

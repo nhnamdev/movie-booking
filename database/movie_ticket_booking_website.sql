@@ -454,12 +454,12 @@ CREATE TABLE `movie` (
 
 
 INSERT INTO `movie` (`id`, `name`, `image_path`, `language`, `synopsis`, `rating`, `duration`, `audio_type`, `age_rating`, `top_cast`, `release_date`) VALUES
-(1, 'Người Nhện: Du Hành Vũ Trụ Nhện', '/Images/movies/spiderman.webp', 'Hoa Kỳ', 'Miles Morales bước vào thế giới Đa Vũ Trụ và đối mặt với hàng loạt Người Nhện khác nhau. Khi xảy ra mâu thuẫn về cách xử lý hiểm họa mới, Miles phải học cách trở thành một người hùng theo cách riêng của mình.', 8.8, '136', 'Phụ Đề', 'T13: Phim dành cho khán giả từ đủ 13 tuổi trở lên (13+)', 'Oscar Isaac', '2026-05-28'),
-(2, 'Cuộc Giải Cứu 2', '/Images/movies/extraction2.webp', 'Hoa Kỳ', 'Tyler Rake quay trở lại sau khi sống sót sau nhiệm vụ sinh tử tại Dhaka. Anh và đồng đội tiếp tục lao vào một nhiệm vụ giải cứu đầy kịch tính và nguy hiểm mới.', 7.0, '123', 'Phụ Đề', 'T16: Phim dành cho khán giả từ đủ 16 tuổi trở lên (16+)', 'Chris Hemsworth', '2026-05-28'),
-(3, 'Vụ Án Bí Ẩn 2', '/Images/movies/murderMystery.webp', 'Hoa Kỳ', 'Hai thám tử nghiệp dư Nick và Audrey bất ngờ bị cuốn vào vụ bắt cóc quy mô quốc tế tại lễ cưới xa hoa của bạn họ - Maharaja. Liệu họ có thể phá án lần nữa?', 5.7, '90', 'Lồng Tiếng', 'K: Phim dành cho khán giả dưới 13 tuổi xem cùng cha, mẹ hoặc người giám hộ', 'Jennifer Aniston', '2026-05-29'),
-(4, 'Nhiệm Vụ Bất Khả Thi: Phần 1', '/Images/movies/missionImpossible.webp', 'Hoa Kỳ', 'Ethan Hunt và đội IMF phải ngăn chặn một vũ khí cực kỳ nguy hiểm trước khi nó rơi vào tay kẻ xấu. Cuộc đua nghẹt thở toàn cầu bắt đầu, đẩy Ethan đối mặt với thử thách lớn nhất trong sự nghiệp.', 8.0, '163', 'Phụ Đề', 'T16: Phim dành cho khán giả từ đủ 16 tuổi trở lên (16+)', 'Tom Cruise', '2026-05-29'),
-(5, 'Oppenheimer', '/Images/movies/oppenheimer.webp', 'Hoa Kỳ', 'Lấy bối cảnh Thế chiến II, nhà khoa học J. Robert Oppenheimer dẫn đầu Dự án Manhattan chế tạo bom nguyên tử. Bộ phim tái hiện cuộc đời và quyết định thay đổi lịch sử nhân loại của ông.', 9.4, '180', 'Phụ Đề', 'T18: Phim dành cho khán giả từ đủ 18 tuổi trở lên (18+)', 'Cillian Murphy', '2026-05-30'),
-(6, 'Barbie: Thế Giới Thực', '/Images/movies/barbie.webp', 'Hoa Kỳ', 'Barbie và Ken rời khỏi vùng đất mộng mơ để khám phá thế giới thực. Những điều kỳ diệu và rắc rối xảy đến khi họ phải đối mặt với thực tế phức tạp của con người.', 7.6, '114', 'Lồng Tiếng', 'P: Phim dành cho khán giả mọi lứa tuổi', 'Margot Robbie', '2026-05-30');
+(1, 'Người Nhện: Du Hành Vũ Trụ Nhện', '/Images/movies/spiderman.webp', 'Hoa Kỳ', 'Miles Morales bước vào thế giới Đa Vũ Trụ và đối mặt với hàng loạt Người Nhện khác nhau. Khi xảy ra mâu thuẫn về cách xử lý hiểm họa mới, Miles phải học cách trở thành một người hùng theo cách riêng của mình.', 8.8, '136', 'Phụ Đề', 'T13: Phim dành cho khán giả từ đủ 13 tuổi trở lên (13+)', 'Quang Tuấn', '2026-05-28'),
+(2, 'Cuộc Giải Cứu 2', '/Images/movies/extraction2.webp', 'Hoa Kỳ', 'Tyler Rake quay trở lại sau khi sống sót sau nhiệm vụ sinh tử tại Dhaka. Anh và đồng đội tiếp tục lao vào một nhiệm vụ giải cứu đầy kịch tính và nguy hiểm mới.', 7.0, '123', 'Phụ Đề', 'T16: Phim dành cho khán giả từ đủ 16 tuổi trở lên (16+)', 'Kiều Minh Tuấn', '2026-05-28'),
+(3, 'Vụ Án Bí Ẩn 2', '/Images/movies/murderMystery.webp', 'Hoa Kỳ', 'Hai thám tử nghiệp dư Nick và Audrey bất ngờ bị cuốn vào vụ bắt cóc quy mô quốc tế tại lễ cưới xa hoa của bạn họ - Maharaja. Liệu họ có thể phá án lần nữa?', 5.7, '90', 'Lồng Tiếng', 'K: Phim dành cho khán giả dưới 13 tuổi xem cùng cha, mẹ hoặc người giám hộ', 'Thu Trang', '2026-05-29'),
+(4, 'Nhiệm Vụ Bất Khả Thi: Phần 1', '/Images/movies/missionImpossible.webp', 'Hoa Kỳ', 'Ethan Hunt và đội IMF phải ngăn chặn một vũ khí cực kỳ nguy hiểm trước khi nó rơi vào tay kẻ xấu. Cuộc đua nghẹt thở toàn cầu bắt đầu, đẩy Ethan đối mặt với thử thách lớn nhất trong sự nghiệp.', 8.0, '163', 'Phụ Đề', 'T16: Phim dành cho khán giả từ đủ 16 tuổi trở lên (16+)', 'Ngô Thanh Vân', '2026-05-29'),
+(5, 'Oppenheimer', '/Images/movies/oppenheimer.webp', 'Hoa Kỳ', 'Lấy bối cảnh Thế chiến II, nhà khoa học J. Robert Oppenheimer dẫn đầu Dự án Manhattan chế tạo bom nguyên tử. Bộ phim tái hiện cuộc đời và quyết định thay đổi lịch sử nhân loại của ông.', 9.4, '180', 'Phụ Đề', 'T18: Phim dành cho khán giả từ đủ 18 tuổi trở lên (18+)', 'Trấn Thành', '2026-05-30'),
+(6, 'Barbie: Thế Giới Thực', '/Images/movies/barbie.webp', 'Hoa Kỳ', 'Barbie và Ken rời khỏi vùng đất mộng mơ để khám phá thế giới thực. Những điều kỳ diệu và rắc rối xảy đến khi họ phải đối mặt với thực tế phức tạp của con người.', 7.6, '114', 'Lồng Tiếng', 'P: Phim dành cho khán giả mọi lứa tuổi', 'Kaity Nguyễn', '2026-05-30');
 
 
 CREATE TABLE `movie_directors` (
@@ -468,14 +468,14 @@ CREATE TABLE `movie_directors` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `movie_directors` (`movie_id`, `director`) VALUES
-(1, 'Joaquim Dos Santos'),
-(1, 'Justin K. Thompson'),
-(1, 'Kemp Powers'),
-(2, 'Sam Hargrave'),
-(3, 'Jeremy Garelick'),
-(4, 'Christopher McQuarrie'),
-(5, 'Christopher Nolan'),
-(6, 'Greta Gerwig');
+(1, 'Nguyễn Quang Dũng'),
+(1, 'Phan Gia Nhật Linh'),
+(1, 'Victor Vũ'),
+(2, 'Lý Hải'),
+(3, 'Nhất Trung'),
+(4, 'Charlie Nguyễn'),
+(5, 'Đinh Hà Uyên Thư'),
+(6, 'Vũ Ngọc Đãng');
 
 CREATE TABLE `movie_genre` (
   `movie_id` int(11) NOT NULL,
@@ -509,14 +509,14 @@ CREATE TABLE `payment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `payment` (`id`, `payment_time`, `amount`, `method`, `customer_email`) VALUES
-(1, '2023-08-16 19:41:37', 140000, 'Cash', 'Belal123@gmail.com'),
-(2, '2023-08-16 19:43:03', 130000, 'Cash', 'rahim123@gmail.com'),
-(3, '2023-08-20 10:32:06', 130000, 'Cash', 'neloy.saha456@gmail.com'),
-(4, '2023-08-20 10:44:19', 70000, 'Cash', 'neloy.saha456@gmail.com'),
-(5, '2023-08-20 12:24:02', 70000, 'Cash', 'neloy.saha456@gmail.com'),
-(6, '2023-08-20 14:36:08', 270000, 'Cash', 'sazin@gmail.com'),
-(7, '2023-08-20 16:13:23', 70000, 'Cash', 'neloy.saha456@gmail.com'),
-(8, '2023-08-20 17:56:07', 90000, 'Cash', 'farhan@gmail.com');
+(1, '2023-08-16 19:41:37', 140000, 'Tiền mặt', 'Belal123@gmail.com'),
+(2, '2023-08-16 19:43:03', 130000, 'Tiền mặt', 'rahim123@gmail.com'),
+(3, '2023-08-20 10:32:06', 130000, 'Tiền mặt', 'neloy.saha456@gmail.com'),
+(4, '2023-08-20 10:44:19', 70000, 'Tiền mặt', 'neloy.saha456@gmail.com'),
+(5, '2023-08-20 12:24:02', 70000, 'Tiền mặt', 'neloy.saha456@gmail.com'),
+(6, '2023-08-20 14:36:08', 270000, 'Tiền mặt', 'sazin@gmail.com'),
+(7, '2023-08-20 16:13:23', 70000, 'Tiền mặt', 'neloy.saha456@gmail.com'),
+(8, '2023-08-20 17:56:07', 90000, 'Tiền mặt', 'farhan@gmail.com');
 
 CREATE TABLE `person` (
   `email` varchar(100) NOT NULL,
@@ -529,17 +529,17 @@ CREATE TABLE `person` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `person` (`email`, `first_name`, `last_name`, `password`, `phone_number`, `account_balance`, `person_type`) VALUES
-('admin@gmail.com', 'Admin', 'Nam', 'Admin12345', '0858200725', 100000, 'Admin'),
-('nam@gmail.com', 'Nam', 'Nam', 'Namne12345', '0912345678', 100000, 'Customer'),
-('Belal123@gmail.com', 'Belal', 'Hasan', '123', '0987654321', 1000000, 'Customer'),
-('farhan@gmail.com', 'Farhan', 'Abedin', 'farhan123', '0901234567', 100000, 'Customer'),
-('jon@alu.com', 'Test', 'Saha1', 'test1', '0934567890', 100000, 'Customer'),
-('jon@potato.com', 'Test', 'Saha', 'test1', '0967890123', 100000, 'Customer'),
-('Jon@snow.com', 'Jon', 'Snow', '456', '0971112233', 10000, 'Customer'),
-('neloy.saha456@gmail.com', 'Neloy', 'Saha', '1234', '0888888888', 100000, 'Customer'),
-('niaz@nafi.com', 'Niaz', 'Rahman', '123', '0866666666', 100000, 'Customer'),
-('rahim123@gmail.com', 'Rahim', 'Sheikh', '123', '0899999999', 100000, 'Customer'),
-('sazin@gmail.com', 'Sazin', 'Haque', 'sazin1234', '0323456789', 100000, 'Customer');
+('admin@gmail.com', 'Quản trị', 'Viên', 'Admin12345', '0858200725', 100000, 'Admin'),
+('nam@gmail.com', 'Nam', 'Nguyễn', 'Namne12345', '0912345678', 100000, 'Customer'),
+('Belal123@gmail.com', 'Minh', 'Trần', '123', '0987654321', 1000000, 'Customer'),
+('farhan@gmail.com', 'Huy', 'Lê', 'farhan123', '0901234567', 100000, 'Customer'),
+('jon@alu.com', 'An', 'Phạm', 'test1', '0934567890', 100000, 'Customer'),
+('jon@potato.com', 'Bảo', 'Hoàng', 'test1', '0967890123', 100000, 'Customer'),
+('Jon@snow.com', 'Long', 'Đỗ', '456', '0971112233', 10000, 'Customer'),
+('neloy.saha456@gmail.com', 'Khánh', 'Vũ', '1234', '0888888888', 100000, 'Customer'),
+('niaz@nafi.com', 'Duy', 'Phan', '123', '0866666666', 100000, 'Customer'),
+('rahim123@gmail.com', 'Tú', 'Ngô', '123', '0899999999', 100000, 'Customer'),
+('sazin@gmail.com', 'Linh', 'Bùi', 'sazin1234', '0323456789', 100000, 'Customer');
 
 CREATE TABLE `seat` (
   `id` int(11) NOT NULL,
@@ -704,24 +704,24 @@ CREATE TABLE `showtimes` (
   `id` int(11) NOT NULL,
   `movie_start_time` varchar(20) DEFAULT NULL,
   `show_type` char(2) DEFAULT NULL,
-  `screen_type` varchar(30) DEFAULT 'Standard',
+  `screen_type` varchar(30) DEFAULT 'Tiêu chuẩn',
   `showtime_date` date DEFAULT NULL,
   `price_per_seat` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `showtimes` (`id`, `movie_start_time`, `show_type`, `screen_type`, `showtime_date`, `price_per_seat`) VALUES
-(1, '11:30', '2D', 'Standard', '2026-05-28', 120000),
-(2, '13:00', '2D', 'Standard', '2026-05-28', 120000),
-(3, '15:30', '3D', 'Standard', '2026-05-28', 150000),
-(4, '18:20', '2D', 'Standard', '2026-05-28', 120000),
-(5, '19:45', '3D', 'Deluxe', '2026-05-29', 180000),
-(6, '20:45', '2D', 'Standard', '2026-05-29', 120000),
-(7, '09:10', '2D', 'Standard', '2026-05-29', 120000),
-(8, '11:20', '2D', 'Standard', '2026-05-29', 120000),
-(9, '15:50', '3D', 'Standard', '2026-05-30', 150000),
-(10, '18:40', '2D', 'Standard', '2026-05-30', 120000),
-(11, '21:20', '3D', 'Deluxe', '2026-05-30', 180000),
-(12, '22:45', '3D', 'Standard', '2026-05-31', 150000);
+(1, '11:30', '2D', 'Tiêu chuẩn', '2026-05-28', 120000),
+(2, '13:00', '2D', 'Tiêu chuẩn', '2026-05-28', 120000),
+(3, '15:30', '3D', 'Tiêu chuẩn', '2026-05-28', 150000),
+(4, '18:20', '2D', 'Tiêu chuẩn', '2026-05-28', 120000),
+(5, '19:45', '3D', 'Cao cấp', '2026-05-29', 180000),
+(6, '20:45', '2D', 'Tiêu chuẩn', '2026-05-29', 120000),
+(7, '09:10', '2D', 'Tiêu chuẩn', '2026-05-29', 120000),
+(8, '11:20', '2D', 'Tiêu chuẩn', '2026-05-29', 120000),
+(9, '15:50', '3D', 'Tiêu chuẩn', '2026-05-30', 150000),
+(10, '18:40', '2D', 'Tiêu chuẩn', '2026-05-30', 120000),
+(11, '21:20', '3D', 'Cao cấp', '2026-05-30', 180000),
+(12, '22:45', '3D', 'Tiêu chuẩn', '2026-05-31', 150000);
 
 CREATE TABLE `theatre` (
   `id` int(11) NOT NULL,

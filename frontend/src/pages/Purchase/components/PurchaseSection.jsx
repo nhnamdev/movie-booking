@@ -46,11 +46,7 @@ export const PurchaseSection = () => {
 
   const formattedDate =
     userDate !== "" &&
-    new Date(userDate).toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+    new Date(userDate).toLocaleDateString("vi-VN");
 
   const currentMovie =
     userMovieId !== "" &&

@@ -115,8 +115,8 @@ export const AdminDashboardPrimary = () => {
             <p className="admin-dashboard-val">
               {" "}
               {paymentData.length > 0 &&
-                paymentData[0].total_amount.toLocaleString("en-US")}
-                VND
+                paymentData[0].total_amount.toLocaleString("vi-VN")}
+                VNĐ
             </p>
           )}
           <div className="admin-dashboard-category">
@@ -159,7 +159,7 @@ export const AdminDashboardPrimary = () => {
             </p>
           )}
           <div className="admin-dashboard-category">
-            <p>Tổng số User</p>
+            <p>Tổng số khách hàng</p>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="admin-icon"

@@ -101,7 +101,7 @@ export const Footer = () => {
             dispatch(showSignModal());
           }}
         >
-          Create account
+          Tạo tài khoản
         </button>
       </div>
 
@@ -112,17 +112,17 @@ export const Footer = () => {
             dispatch(showLoginModal());
           }}
         >
-          Sign in
+          Đăng nhập
         </button>
       </div>
 
       <div className="footer-link-container">
         <Link className="footer-link" to="/aboutus">
-          About us
+          Về chúng tôi
         </Link>
       </div>
 
-      <h3 className="footer-heading">Our Theatres</h3>
+      <h3 className="footer-heading">Rạp của chúng tôi</h3>
 
       <p className="copyright">
         Copyright &copy;  2025 bởi CGV Việt Nam. 
