@@ -1,0 +1,262 @@
+/* ============================================================
+   AI FEATURES — Recommendations & Search
+   ============================================================ */
+
+/* ──────── Personal Recommendations Section ──────── */
+.section-ai-recommendations {
+  padding: 4rem 3.2rem;
+  background: linear-gradient(180deg, #1a1d2c 0%, #232636 100%);
+}
+
+.ai-recs-grid {
+  max-width: 132rem;
+  margin: 2.4rem auto 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.4rem;
+}
+
+.ai-rec-card {
+  background: #232636;
+  border: 1px solid #313441;
+  border-radius: 1.2rem;
+  padding: 1.6rem;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.ai-rec-card:hover {
+  transform: translateY(-4px);
+  border-color: #EB3656;
+}
+
+.ai-rec-img-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 0.8rem;
+  overflow: hidden;
+  margin-bottom: 1.2rem;
+}
+
+.ai-rec-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ai-rec-badge {
+  position: absolute;
+  top: 0.8rem;
+  left: 0.8rem;
+  background: linear-gradient(135deg, #EB3656, #d4314d);
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.ai-rec-title {
+  color: #e6e6e8;
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.ai-rec-reason {
+  color: #babbc0;
+  font-size: 1.3rem;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* ──────── AI Search Box ──────── */
+.ai-search-container {
+  max-width: 80rem;
+  margin: 2.4rem auto;
+  padding: 0 3.2rem;
+}
+
+.ai-search-box {
+  display: flex;
+  gap: 1rem;
+  background: #232636;
+  border: 1px solid #313441;
+  border-radius: 1rem;
+  padding: 0.8rem;
+  transition: border-color 0.2s;
+}
+
+.ai-search-box:focus-within { border-color: #EB3656; }
+
+.ai-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e6e6e8;
+  font-size: 1.4rem;
+  padding: 0.8rem 1.2rem;
+  font-family: inherit;
+}
+
+.ai-search-input::placeholder { color: #767780; }
+
+.ai-search-btn {
+  background: #EB3656;
+  color: #fff;
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0 2rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: background 0.15s;
+}
+
+.ai-search-btn:hover:not(:disabled) { background: #d4314d; }
+.ai-search-btn:disabled { background: #484a56; cursor: not-allowed; }
+
+.ai-search-interpretation {
+  margin-top: 1.2rem;
+  padding: 1rem 1.4rem;
+  background: rgba(235, 54, 86, 0.1);
+  border-left: 3px solid #EB3656;
+  border-radius: 0.4rem;
+  color: #e6e6e8;
+  font-size: 1.3rem;
+  line-height: 1.5;
+}
+
+/* ──────── Admin AI Panel ──────── */
+.admin-ai-panel {
+  background: #232636;
+  border: 1px solid #313441;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.admin-ai-title {
+  color: #e6e6e8;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.admin-ai-btn {
+  background: #EB3656;
+  color: #fff;
+  border: none;
+  border-radius: 0.6rem;
+  padding: 0.8rem 1.6rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.admin-ai-btn:hover:not(:disabled) { background: #d4314d; }
+.admin-ai-btn:disabled { background: #484a56; cursor: not-allowed; }
+
+.admin-ai-insights {
+  margin-top: 1.6rem;
+  padding: 1.4rem;
+  background: #1a1d2c;
+  border-radius: 0.6rem;
+  color: #cccdd0;
+  font-size: 1.3rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.admin-ai-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  margin-bottom: 1.6rem;
+}
+
+.admin-ai-stat {
+  background: #1a1d2c;
+  padding: 1.4rem;
+  border-radius: 0.6rem;
+  text-align: center;
+}
+
+.admin-ai-stat-label {
+  color: #767780;
+  font-size: 1.2rem;
+  margin-bottom: 0.6rem;
+}
+
+.admin-ai-stat-value {
+  color: #EB3656;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* ──────── AI Search Results ──────── */
+.ai-search-results {
+  margin-top: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-height: 32rem;
+  overflow-y: auto;
+}
+
+.ai-search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1rem 1.2rem;
+  background: #232636;
+  border: 1px solid #313441;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.ai-search-result-item:hover { border-color: #EB3656; }
+
+.ai-search-result-item img {
+  width: 4.8rem;
+  height: 6.4rem;
+  object-fit: cover;
+  border-radius: 0.4rem;
+  flex-shrink: 0;
+}
+
+.ai-search-result-name {
+  color: #e6e6e8;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.ai-search-result-genre {
+  color: #767780;
+  font-size: 1.2rem;
+}
+
+/* ──────── Responsive ──────── */
+@media (max-width: 900px) {
+  .ai-recs-grid { grid-template-columns: repeat(2, 1fr); }
+  .admin-ai-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .section-ai-recommendations { padding: 3rem 1.6rem; }
+  .ai-recs-grid { grid-template-columns: 1fr; }
+  .ai-search-container { padding: 0 1.6rem; }
+  .ai-search-btn { padding: 0 1.4rem; font-size: 1.2rem; }
+  .admin-ai-stats { grid-template-columns: 1fr; }
+}
