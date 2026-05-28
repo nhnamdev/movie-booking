@@ -24,8 +24,8 @@ export const SignupModal = () => {
     let value = e.target.value;
 
     if (name === "phoneNumber") {
-      // Keep only digits and cap at 11 so leading zero is preserved.
-      value = value.replace(/\D/g, "").slice(0, 11);
+      // Keep only digits and cap at 10 so Vietnamese leading zero is preserved.
+      value = value.replace(/\D/g, "").slice(0, 10);
     }
 
     setSignupDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
@@ -50,8 +50,8 @@ export const SignupModal = () => {
       return;
     }
 
-    if (!/^\d{11}$/.test(phoneNumber)) {
-      signupFailedToast("Số điện thoại phải đúng 11 chữ số");
+    if (!/^0\d{9}$/.test(phoneNumber)) {
+      signupFailedToast("Số điện thoại Việt Nam phải bắt đầu bằng 0 và đủ 10 chữ số");
       return;
     }
 
@@ -157,15 +157,15 @@ export const SignupModal = () => {
 
           <div className="signup-form-category">
             <label>
-              Phone Number(Must contain 11 digits): <span>*</span>
+              Phone Number(Vietnam, 10 digits): <span>*</span>
             </label>
             <input
               disabled={loading}
               name="phoneNumber"
               type="tel"
               inputMode="numeric"
-              pattern="[0-9]{11}"
-              maxLength={11}
+              pattern="0[0-9]{9}"
+              maxLength={10}
               value={signupDetails.phoneNumber}
               placeholder="Enter Phone No."
               onChange={(e) => handleSignupDetails(e)}

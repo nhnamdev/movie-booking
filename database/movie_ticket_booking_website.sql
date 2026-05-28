@@ -521,23 +521,23 @@ CREATE TABLE `person` (
   `first_name` varchar(20) DEFAULT NULL,
   `last_name` varchar(20) DEFAULT NULL,
   `password` varchar(100) DEFAULT NULL,
-  `phone_number` char(11) DEFAULT NULL,
+  `phone_number` char(10) DEFAULT NULL,
   `account_balance` int(11) DEFAULT NULL,
   `person_type` varchar(8) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `person` (`email`, `first_name`, `last_name`, `password`, `phone_number`, `account_balance`, `person_type`) VALUES
-('admin@gmail.com', 'Admin', 'Nam', 'Admin12345', '17579120791', 100000, 'Admin'),
-('nam@gmail.com', 'Nam', 'Nam', 'Namne12345', '01757912079', 100000, 'Customer'),
-('Belal123@gmail.com', 'Belal', 'Hasan', '123', '01757912079', 1000000, 'Customer'),
-('farhan@gmail.com', 'Farhan', 'Abedin', 'farhan123', '01757912079', 100000, 'Customer'),
-('jon@alu.com', 'Test', 'Saha1', 'test1', '123321311', 100000, 'Customer'),
-('jon@potato.com', 'Test', 'Saha', 'test1', '123321311', 100000, 'Customer'),
-('Jon@snow.com', 'Jon', 'Snow', '456', '123123233', 10000, 'Customer'),
-('neloy.saha456@gmail.com', 'Neloy', 'Saha', '1234', '01757912079', 100000, 'Customer'),
-('niaz@nafi.com', 'Niaz', 'Rahman', '123', '01821379981', 100000, 'Customer'),
-('rahim123@gmail.com', 'Rahim', 'Sheikh', '123', '01757912079', 100000, 'Customer'),
-('sazin@gmail.com', 'Sazin', 'Haque', 'sazin1234', '01757912079', 100000, 'Customer');
+('admin@gmail.com', 'Admin', 'Nam', 'Admin12345', '0858200725', 100000, 'Admin'),
+('nam@gmail.com', 'Nam', 'Nam', 'Namne12345', '0912345678', 100000, 'Customer'),
+('Belal123@gmail.com', 'Belal', 'Hasan', '123', '0987654321', 1000000, 'Customer'),
+('farhan@gmail.com', 'Farhan', 'Abedin', 'farhan123', '0901234567', 100000, 'Customer'),
+('jon@alu.com', 'Test', 'Saha1', 'test1', '0934567890', 100000, 'Customer'),
+('jon@potato.com', 'Test', 'Saha', 'test1', '0967890123', 100000, 'Customer'),
+('Jon@snow.com', 'Jon', 'Snow', '456', '0971112233', 10000, 'Customer'),
+('neloy.saha456@gmail.com', 'Neloy', 'Saha', '1234', '0888888888', 100000, 'Customer'),
+('niaz@nafi.com', 'Niaz', 'Rahman', '123', '0866666666', 100000, 'Customer'),
+('rahim123@gmail.com', 'Rahim', 'Sheikh', '123', '0899999999', 100000, 'Customer'),
+('sazin@gmail.com', 'Sazin', 'Haque', 'sazin1234', '0323456789', 100000, 'Customer');
 
 CREATE TABLE `seat` (
   `id` int(11) NOT NULL,

@@ -344,7 +344,7 @@ app.post("/registration", (req, res) => {
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
   const password = req.body.password;
-  const phoneNumber = req.body.phoneNumber;
+  const phoneNumber = String(req.body.phoneNumber || "").trim();
 
   logRegisterDebug("Incoming request", {
     method: req.method,
@@ -361,6 +361,12 @@ app.post("/registration", (req, res) => {
     hasPassword: Boolean(password),
     passwordLength: String(password || "").length,
   });
+
+  if (!/^0\d{9}$/.test(phoneNumber)) {
+    return res.status(400).json({
+      message: "Số điện thoại Việt Nam phải bắt đầu bằng 0 và đủ 10 chữ số",
+    });
+  }
 
   const sql = `INSERT INTO person (email, first_name, last_name, password, phone_number, person_type) VALUES (?, ?, ?, ?, ?, 'Customer')`;
 

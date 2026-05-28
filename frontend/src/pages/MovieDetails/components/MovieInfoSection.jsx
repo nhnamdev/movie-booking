@@ -46,12 +46,13 @@ export const MovieInfoSection = () => {
           " hours"
         );
         const duration = durationDetail1.replace("m", " minutes");
+        const ratingNumber = Number(movieDetailResponse.data[0].rating);
         const formattedMovieData = {
           ...movieDetailResponse.data[0],
           name: movieDetailResponse.data[0].name,
           duration,
           release_date: formattedRelDate,
-          rating: movieDetailResponse.data[0].rating.toFixed(1),
+          rating: Number.isFinite(ratingNumber) ? ratingNumber.toFixed(1) : "N/A",
         };
 
         setMovieData(formattedMovieData);
