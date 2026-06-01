@@ -1,360 +1,504 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { adminErrorToast, adminShowninToast } from "../../../toasts/toast";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import {
+  FiClock,
+  FiEdit3,
+  FiPlusCircle,
+  FiRefreshCw,
+  FiRotateCcw,
+  FiSave,
+  FiTrash2,
+  FiX,
+} from "react-icons/fi";
+import { ClipLoader } from "react-spinners";
+import { adminErrorToast, adminShowtimeToast, adminShowninToast } from "../../../toasts/toast";
 
-export const AdminShownInModifySection = ({ selectedDate }) => {
+const emptyShowtimeForm = {
+  movieId: "",
+  hallId: "",
+  showtimeDate: "",
+  movieStartTime: "",
+  showType: "2D",
+  screenType: "Tiêu chuẩn",
+  pricePerSeat: "120000",
+};
+
+const toDateInput = (value) => {
+  if (!value) return "";
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+    return value.slice(0, 10);
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 10);
+};
+
+const toVisualDate = (value) => {
+  const inputDate = toDateInput(value);
+  if (!inputDate) return "";
+  return new Date(`${inputDate}T00:00:00`).toLocaleDateString("vi-VN");
+};
+
+const slotKey = (slot) => `${slot.showtime_id}-${slot.hall_id}-${slot.movie_id}`;
+
+const toFormFromSlot = (slot) => ({
+  movieId: String(slot.movie_id || ""),
+  hallId: String(slot.hall_id || ""),
+  showtimeDate: toDateInput(slot.showtime_date),
+  movieStartTime: slot.movie_start_time || "",
+  showType: slot.show_type || "2D",
+  screenType: slot.screen_type || "Tiêu chuẩn",
+  pricePerSeat: String(slot.price_per_seat || ""),
+});
+
+export const AdminShownInModifySection = () => {
   const { signedPerson } = useSelector((store) => store.authentication);
-  const [moviePlaylistDropDown, setMoviePlaylistDropDown] = useState(false);
-  const [latestShowDates, setLatestShowDates] = useState([]);
+  const [slots, setSlots] = useState([]);
+  const [movies, setMovies] = useState([]);
+  const [halls, setHalls] = useState([]);
+  const [showtimeOptions, setShowtimeOptions] = useState([]);
   const [selectedShowDate, setSelectedShowDate] = useState("");
-  const [showtimeData, setShowtimeData] = useState([]);
-  const [selectedShowtime, setSelectedShowtime] = useState("");
-  const [movieReplaceData, setMovieReplaceData] = useState([]);
-  const [selectedReplace, setSelectedReplace] = useState("");
-  const [movieAltData, setMovieAltData] = useState([]);
-  const [selectedAlt, setSelectedAlt] = useState("");
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [showtimeForm, setShowtimeForm] = useState(emptyShowtimeForm);
+  const [editingKey, setEditingKey] = useState("");
+  const [editingOriginal, setEditingOriginal] = useState(null);
+  const [editingForm, setEditingForm] = useState(emptyShowtimeForm);
   const [loading, setLoading] = useState(false);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/adminLatestShowDates`
-        );
-        const tempDateList = response.data.map((dateObj) =>
-          dateFormatter(dateObj.showtime_date)
-        );
-        setLatestShowDates(tempDateList);
-      } catch (err) {
-        console.error(err);
-        adminErrorToast();
-      }
-    };
+  const adminPayload = useMemo(
+    () => ({
+      email: signedPerson?.email,
+      password: signedPerson?.password,
+    }),
+    [signedPerson?.email, signedPerson?.password]
+  );
 
-    fetchData();
-  }, [selectedDate]);
+  const fetchOptions = useCallback(async () => {
+    if (!adminPayload.email || !adminPayload.password) return;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (selectedShowDate !== "") {
-        try {
-          const response = await axios.post(
-            `${import.meta.env.VITE_API_URL}/adminShowtimes`,
-            {
-              email: signedPerson.email,
-              password: signedPerson.password,
-              selectedShowDate,
-            }
-          );
-
-          setShowtimeData(response.data);
-        } catch (err) {
-          console.error(err);
-          adminErrorToast(err.response.data.message);
-        } finally {
-          setSelectedShowtime("");
-        }
-      }
-    };
-
-    fetchData();
-  }, [selectedShowDate, signedPerson.email, signedPerson.password]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/movieReplaceFrom`,
-          {
-            email: signedPerson.email,
-            password: signedPerson.password,
-            selectedShowtime,
-          }
-        );
-        setMovieReplaceData(response.data);
-      } catch (err) {
-        console.error(err);
-        adminErrorToast(err.response.data.message);
-      } finally {
-        setSelectedReplace("");
-      }
-    };
-
-    fetchData();
-  }, [selectedShowtime, signedPerson.email, signedPerson.password]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/movieReplaceTo`,
-          {
-            email: signedPerson.email,
-            password: signedPerson.password,
-            selectedShowtime,
-          }
-        );
-        setMovieAltData(response.data);
-      } catch (err) {
-        console.error(err);
-        adminErrorToast(err.response.data.message);
-      } finally {
-        setSelectedAlt("");
-      }
-    };
-
-    fetchData();
-  }, [
-    selectedReplace,
-    selectedShowtime,
-    signedPerson.email,
-    signedPerson.password,
-  ]);
-
-  const checkedColor = (val, checkVal) => {
-    return {
-      backgroundColor: val === checkVal ? "#ef5e78" : "",
-      border: val === checkVal ? "2px solid transparent" : "",
-    };
-  };
-
-  const handleSelectedDate = (e) => {
-    setSelectedShowDate(e.target.value);
-  };
-
-  const handleSelectedShowtime = (e) => {
-    setSelectedShowtime(parseInt(e.target.value));
-  };
-
-  const handleSelectedReplace = (e) => {
-    setSelectedReplace(parseInt(e.target.value));
-  };
-
-  const handleSelectedAlt = (e) => {
-    setSelectedAlt(parseInt(e.target.value));
-  };
-
-  const handleMovieSwap = async (e) => {
-    e.preventDefault();
     try {
-      setLoading(true);
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/movieSwap`,
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/adminShowtimeOptions`,
+        adminPayload
+      );
+      setMovies(response.data.movies || []);
+      setHalls(response.data.halls || []);
+      setShowtimeOptions(response.data.showtimes || []);
+    } catch (err) {
+      adminErrorToast(err?.response?.data?.message);
+    }
+  }, [adminPayload]);
+
+  const fetchSlots = useCallback(async () => {
+    if (!adminPayload.email || !adminPayload.password) return;
+
+    try {
+      setSlotsLoading(true);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/adminShowtimeSlots`,
         {
-          email: signedPerson.email,
-          password: signedPerson.password,
-          selectedAlt,
-          selectedShowtime,
-          selectedReplace,
+          ...adminPayload,
+          selectedShowDate,
         }
       );
-
-      if (res.status === 200) adminShowninToast();
-      console.log(res);
+      setSlots(response.data);
     } catch (err) {
-      console.log(err);
-      adminErrorToast(err.response.data.message);
+      adminErrorToast(err?.response?.data?.message);
     } finally {
-      toggleDropDown();
-      setSelectedShowDate("");
-      setSelectedShowtime("");
-      setSelectedReplace("");
-      setSelectedAlt("");
+      setSlotsLoading(false);
+    }
+  }, [adminPayload, selectedShowDate]);
+
+  useEffect(() => {
+    fetchOptions();
+  }, [fetchOptions]);
+
+  useEffect(() => {
+    fetchSlots();
+  }, [fetchSlots]);
+
+  const showDateOptions = useMemo(() => {
+    const dates = new Set(
+      showtimeOptions.map((showtime) => toDateInput(showtime.showtime_date))
+    );
+    return [...dates].filter(Boolean).sort((a, b) => b.localeCompare(a));
+  }, [showtimeOptions]);
+
+  const handleFormChange = (setter) => (e) => {
+    const { name, value } = e.target;
+    setter((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const formIsValid = (form) =>
+    Object.values(form).every((value) => String(value).trim() !== "");
+
+  const refreshAll = async () => {
+    await fetchOptions();
+    await fetchSlots();
+  };
+
+  const handleCreateShowtime = async (e) => {
+    e.preventDefault();
+    if (!formIsValid(showtimeForm)) {
+      adminErrorToast("Vui lòng nhập đầy đủ thông tin suất chiếu");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await axios.post(`${import.meta.env.VITE_API_URL}/adminShowtimeCreate`, {
+        ...adminPayload,
+        ...showtimeForm,
+      });
+      adminShowtimeToast("Thêm suất chiếu thành công");
+      setShowtimeForm(emptyShowtimeForm);
+      setShowAddForm(false);
+      await refreshAll();
+    } catch (err) {
+      adminErrorToast(err?.response?.data?.message);
+    } finally {
       setLoading(false);
     }
   };
 
-  const toggleDropDown = () => {
-    setMoviePlaylistDropDown((prevState) => !prevState);
+  const startEditSlot = (slot) => {
+    setEditingOriginal(slot);
+    setEditingKey(slotKey(slot));
+    setEditingForm(toFormFromSlot(slot));
+    setShowAddForm(false);
   };
 
-  const dateFormatter = (dateData) => {
-    const day = new Date(dateData).toLocaleString("en-us", {
-      day: "numeric",
-    });
-    const year = new Date(dateData).toLocaleString("en-us", {
-      year: "numeric",
-    });
-    const monthNumber = new Date(dateData).toLocaleString("en-us", {
-      month: "numeric",
-    });
-    const formattedDate = `${year}-${monthNumber}-${day}`;
-
-    const visualDate = new Date(dateData).toLocaleDateString("vi-VN");
-
-    return { formattedDate, visualDate };
+  const cancelEditSlot = () => {
+    setEditingOriginal(null);
+    setEditingKey("");
+    setEditingForm(emptyShowtimeForm);
   };
 
-  const latestShowDatesHtml = latestShowDates.map((dateObj, i) => (
-    <div
-      className="admin-radio-input-container"
-      key={i + 1}
-      style={checkedColor(dateObj.formattedDate, selectedShowDate)}
-    >
-      <input
-        type="radio"
-        id={i + 1}
-        name="select-showdate"
-        value={dateObj.formattedDate}
-        onChange={(e) => handleSelectedDate(e)}
-        checked={dateObj.formattedDate === selectedShowDate}
-      />
+  const handleUpdateShowtime = async (e) => {
+    e.preventDefault();
+    if (!editingOriginal || !formIsValid(editingForm)) {
+      adminErrorToast("Vui lòng nhập đầy đủ thông tin suất chiếu");
+      return;
+    }
 
-      <label
-        className="form-admin-input-detail"
-        htmlFor={dateObj.formattedDate}
-      >
-        {dateObj.visualDate}
-      </label>
-    </div>
-  ));
+    try {
+      setLoading(true);
+      await axios.post(`${import.meta.env.VITE_API_URL}/adminShowtimeUpdate`, {
+        ...adminPayload,
+        ...editingForm,
+        originalMovieId: editingOriginal.movie_id,
+        originalHallId: editingOriginal.hall_id,
+        showtimeId: editingOriginal.showtime_id,
+      });
+      adminShowninToast("Cập nhật suất chiếu thành công");
+      cancelEditSlot();
+      await refreshAll();
+    } catch (err) {
+      adminErrorToast(err?.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const latestShowtimesHtml = showtimeData.map((showtimeObj, i) => (
-    <div
-      className="admin-radio-input-container"
-      key={i + 1}
-      style={checkedColor(showtimeObj.id, selectedShowtime)}
-    >
-      <input
-        type="radio"
-        id={i + 1}
-        name="select-showtime"
-        value={showtimeObj.id}
-        onChange={(e) => handleSelectedShowtime(e)}
-        checked={showtimeObj.id === selectedShowtime}
-      />
+  const handleDeleteShowtime = async (slot) => {
+    const hasTickets = Number(slot.ticket_count || 0) > 0;
+    const shouldDelete = window.confirm(
+      hasTickets
+        ? `Huỷ/ngưng bán suất ${slot.movie_name} lúc ${slot.movie_start_time} ngày ${toVisualDate(
+            slot.showtime_date
+          )}? Vé đã đặt vẫn được giữ trong lịch sử.`
+        : `Xoá suất ${slot.movie_name} lúc ${slot.movie_start_time} ngày ${toVisualDate(
+            slot.showtime_date
+          )}?`
+    );
+    if (!shouldDelete) return;
 
-      <label className="form-admin-input-detail" htmlFor={showtimeObj.id}>
-        {`${showtimeObj.movie_start_time}-${showtimeObj.show_type}`}
-      </label>
-    </div>
-  ));
+    try {
+      setLoading(true);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/adminShowtimeDelete`, {
+        ...adminPayload,
+        movieId: slot.movie_id,
+        hallId: slot.hall_id,
+        showtimeId: slot.showtime_id,
+      });
+      adminShowninToast(
+        response.data?.cancelled
+          ? "Đã huỷ/ngưng bán suất chiếu và giữ nguyên vé đã đặt"
+          : "Xoá suất chiếu thành công"
+      );
+      await refreshAll();
+    } catch (err) {
+      adminErrorToast(err?.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const replaceOptionsHtml = movieReplaceData?.map((movieObj, i) => (
-    <div
-      className="admin-radio-input-container"
-      key={i + 1}
-      style={checkedColor(movieObj.movie_id, selectedReplace)}
-    >
-      <input
-        type="radio"
-        id={i + 1}
-        name="replace-movie"
-        value={movieObj.movie_id}
-        onChange={(e) => handleSelectedReplace(e)}
-        checked={movieObj.movie_id === selectedReplace}
-      />
+  const handleRestoreShowtime = async (slot) => {
+    try {
+      setLoading(true);
+      await axios.post(`${import.meta.env.VITE_API_URL}/adminShowtimeRestore`, {
+        ...adminPayload,
+        movieId: slot.movie_id,
+        hallId: slot.hall_id,
+        showtimeId: slot.showtime_id,
+      });
+      adminShowninToast("Đã mở bán lại suất chiếu");
+      await refreshAll();
+    } catch (err) {
+      adminErrorToast(err?.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      <label className="form-admin-input-detail" htmlFor={movieObj.movie_id}>
-        {movieObj.name}
-      </label>
-    </div>
-  ));
-
-  const newMovieOptionsHtml = movieAltData.map((movieObj, i) => (
-    <div
-      className="admin-radio-input-container"
-      key={i + 1}
-      style={checkedColor(movieObj.id, selectedAlt)}
-    >
-      <input
-        type="radio"
-        id={i + 1}
-        name="Choose New Movie"
-        value={movieObj.id}
-        onChange={(e) => handleSelectedAlt(e)}
-        checked={movieObj.id === selectedAlt}
-      />
-
-      <label className="form-admin-input-detail" htmlFor={movieObj.id}>
-        {movieObj.name}
-      </label>
-    </div>
-  ));
+  const renderShowtimeFields = (form, onChange) => (
+    <>
+      <div>
+        <label>Ngày chiếu</label>
+        <input
+          name="showtimeDate"
+          type="date"
+          value={form.showtimeDate}
+          onChange={onChange}
+        />
+      </div>
+      <div>
+        <label>Giờ bắt đầu</label>
+        <input
+          name="movieStartTime"
+          type="time"
+          value={form.movieStartTime}
+          onChange={onChange}
+        />
+      </div>
+      <div>
+        <label>Phim</label>
+        <select name="movieId" value={form.movieId} onChange={onChange}>
+          <option value="">Chọn phim</option>
+          {movies.map((movie) => (
+            <option key={movie.id} value={movie.id}>
+              {movie.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label>Phòng chiếu</label>
+        <select name="hallId" value={form.hallId} onChange={onChange}>
+          <option value="">Chọn phòng</option>
+          {halls.map((hall) => (
+            <option key={hall.id} value={hall.id}>
+              {hall.theatre_name} - {hall.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label>Định dạng</label>
+        <select name="showType" value={form.showType} onChange={onChange}>
+          <option value="2D">2D</option>
+          <option value="3D">3D</option>
+        </select>
+      </div>
+      <div>
+        <label>Loại phòng</label>
+        <select name="screenType" value={form.screenType} onChange={onChange}>
+          <option value="Tiêu chuẩn">Tiêu chuẩn</option>
+          <option value="Cao cấp">Cao cấp</option>
+          <option value="IMAX">IMAX</option>
+        </select>
+      </div>
+      <div>
+        <label>Giá vé</label>
+        <input
+          name="pricePerSeat"
+          type="number"
+          min="0"
+          step="1000"
+          value={form.pricePerSeat}
+          onChange={onChange}
+        />
+      </div>
+    </>
+  );
 
   return (
     <section className="section-admin-movie-modify">
       <div className="section-movie-playlist container">
-        <div className="form-heading-container">
-          <h2 className="form-admin-heading playlist">Cập nhật lịch chiếu phim</h2>
-          <button className="btn-admin-arrow" onClick={toggleDropDown}>
-            {!moviePlaylistDropDown ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="admin-icon"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="48"
-                  d="M112 184l144 144 144-144"
-                />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="admin-icon"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="48"
-                  d="M112 328l144-144 144 144"
-                />
-              </svg>
-            )}
-          </button>
+        <div className="admin-movie-list-header">
+          <h2 className="form-admin-heading playlist">
+            <FiClock className="admin-heading-icon" />
+            Quản lý suất chiếu
+          </h2>
+          <div className="admin-movie-toolbar-actions">
+            <select
+              className="admin-filter-select"
+              value={selectedShowDate}
+              onChange={(e) => setSelectedShowDate(e.target.value)}
+            >
+              <option value="">Tất cả ngày</option>
+              {showDateOptions.map((dateValue) => (
+                <option key={dateValue} value={dateValue}>
+                  {toVisualDate(dateValue)}
+                </option>
+              ))}
+            </select>
+            <button
+              className="btn-admin"
+              type="button"
+              onClick={() => {
+                setShowAddForm(true);
+                cancelEditSlot();
+              }}
+              disabled={showAddForm}
+            >
+              <FiPlusCircle />
+              Thêm suất chiếu
+            </button>
+            <button
+              className="btn-admin admin-movie-refresh"
+              type="button"
+              onClick={refreshAll}
+              disabled={slotsLoading}
+            >
+              {slotsLoading ? <ClipLoader color="#e6e6e8" size={16} /> : <FiRefreshCw />}
+              Tải lại
+            </button>
+          </div>
         </div>
-        {moviePlaylistDropDown && (
-          <form className="form-admin-showtime-add">
-            <div className="form-admin-radio-options">
-              {latestShowDatesHtml}
-            </div>
 
-            {selectedShowDate.length > 0 && (
-              <>
-                <h3 className="admin-heading-secondary">Chọn khung giờ</h3>
-                <div className="form-admin-radio-options">
-                  {latestShowtimesHtml}
-                </div>
-              </>
-            )}
-
-            {selectedShowtime !== "" && (
-              <>
-                <h3 className="admin-heading-secondary">Thay phim</h3>
-                <div className="form-admin-radio-options">
-                  {replaceOptionsHtml}
-                </div>
-              </>
-            )}
-
-            {selectedReplace !== "" && (
-              <>
-                <h3 className="admin-heading-secondary">Bằng phim</h3>
-                <div className="form-admin-radio-options">
-                  {newMovieOptionsHtml}
-                </div>
-              </>
-            )}
-            {selectedAlt !== "" && (
+        {showAddForm && (
+          <form className="admin-showtime-form" onSubmit={handleCreateShowtime}>
+            <div className="admin-form-panel-header">
+              <div>
+                <p className="admin-section-kicker">Suất chiếu mới</p>
+                <h3 className="form-admin-heading">Thêm suất chiếu</h3>
+              </div>
               <button
-                className="btn-admin"
-                type="submit"
-                disabled={loading}
-                onClick={handleMovieSwap}
+                className="btn-admin admin-btn-secondary"
+                type="button"
+                onClick={() => {
+                  setShowAddForm(false);
+                  setShowtimeForm(emptyShowtimeForm);
+                }}
               >
-                Xác nhận
+                <FiX />
+                Huỷ
               </button>
-            )}
+            </div>
+            {renderShowtimeFields(showtimeForm, handleFormChange(setShowtimeForm))}
+            <div className="admin-form-actions">
+              <button className="btn-admin" type="submit" disabled={loading}>
+                {loading && <ClipLoader color="#e6e6e8" size={16} />}
+                <FiSave />
+                Thêm suất chiếu
+              </button>
+            </div>
           </form>
+        )}
+
+        {slotsLoading && (
+          <div className="admin-movie-loading">
+            <ClipLoader color="#eb3656" size={26} />
+            <p>Đang tải suất chiếu...</p>
+          </div>
+        )}
+
+        {!slotsLoading && slots.length === 0 && (
+          <p className="admin-empty-state">Chưa có suất chiếu trong hệ thống.</p>
+        )}
+
+        {!slotsLoading && slots.length > 0 && (
+          <div className="admin-showtime-grid">
+            {slots.map((slot) => {
+              const currentKey = slotKey(slot);
+              const isEditing = editingKey === currentKey;
+              const isCancelled =
+                slot.slot_status === "cancelled" || slot.showtime_status === "cancelled";
+              const hasTickets = Number(slot.ticket_count || 0) > 0;
+
+              return (
+                <article className="admin-showtime-card" key={currentKey}>
+                  {isEditing ? (
+                    <form className="admin-showtime-form admin-showtime-form--inline" onSubmit={handleUpdateShowtime}>
+                      {renderShowtimeFields(editingForm, handleFormChange(setEditingForm))}
+                      <div className="admin-form-actions">
+                        <button className="btn-admin" type="submit" disabled={loading}>
+                          <FiSave />
+                          Lưu
+                        </button>
+                        <button
+                          className="btn-admin admin-btn-secondary"
+                          type="button"
+                          onClick={cancelEditSlot}
+                        >
+                          <FiX />
+                          Huỷ
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <>
+                      <div>
+                        <div className="admin-card-title-row">
+                          <p className="admin-showtime-title">{slot.movie_name}</p>
+                          <span className={`admin-status-badge ${isCancelled ? "is-cancelled" : "is-active"}`}>
+                            {isCancelled ? "Đã huỷ" : "Đang bán"}
+                          </span>
+                        </div>
+                        <p className="admin-showtime-meta">
+                          {toVisualDate(slot.showtime_date)} - {slot.movie_start_time} -{" "}
+                          {slot.show_type} - {slot.screen_type}
+                        </p>
+                        <p className="admin-showtime-meta">
+                          {slot.theatre_name}, {slot.hall_name}
+                        </p>
+                      </div>
+                      <div className="admin-showtime-stats">
+                        <span>{Number(slot.price_per_seat || 0).toLocaleString("vi-VN")}đ</span>
+                        <span>{slot.ticket_count || 0} vé</span>
+                      </div>
+                      <div className="admin-card-actions">
+                        <button
+                          className="btn-admin admin-btn-secondary"
+                          type="button"
+                          onClick={() => startEditSlot(slot)}
+                          disabled={isCancelled}
+                        >
+                          <FiEdit3 />
+                          Sửa
+                        </button>
+                        {isCancelled ? (
+                          <button
+                            className="btn-admin"
+                            type="button"
+                            onClick={() => handleRestoreShowtime(slot)}
+                            disabled={loading}
+                          >
+                            <FiRotateCcw />
+                            Mở bán lại
+                          </button>
+                        ) : (
+                          <button
+                            className="btn-admin admin-btn-danger"
+                            type="button"
+                            onClick={() => handleDeleteShowtime(slot)}
+                            disabled={loading}
+                          >
+                            <FiTrash2 />
+                            {hasTickets ? "Huỷ" : "Xoá"}
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </article>
+              );
+            })}
+          </div>
         )}
       </div>
     </section>

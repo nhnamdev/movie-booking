@@ -1,0 +1,91 @@
+@startuml
+left to right direction
+
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #FFF7E6
+  BorderColor #B23B3B
+  ArrowColor #555555
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+
+actor "Khách vãng lai" as Guest
+actor "Khách hàng" as Customer
+actor "Quản trị viên" as Admin
+actor "Dịch vụ OpenAI" as OpenAI
+
+Customer --|> Guest
+Admin --|> Guest
+
+rectangle "Website đặt vé xem phim CGV" {
+  usecase "Xem trang chủ\nvà phim mới" as UC_Home
+  usecase "Chọn rạp / khu vực" as UC_Location
+  usecase "Xem lịch chiếu\nvà bảng giá vé" as UC_Showtimes
+  usecase "Xem chi tiết phim" as UC_Detail
+  usecase "Đăng ký tài khoản" as UC_Register
+  usecase "Đăng nhập" as UC_Login
+  usecase "Chatbot hỗ trợ" as UC_Chat
+
+  usecase "Đặt vé xem phim" as UC_Book
+  usecase "Chọn ngày chiếu" as UC_SelectDate
+  usecase "Chọn phim" as UC_SelectMovie
+  usecase "Chọn suất chiếu\nvà phòng chiếu" as UC_SelectShow
+  usecase "Chọn ghế" as UC_SelectSeat
+  usecase "Chọn phương thức\nthanh toán" as UC_SelectPayment
+  usecase "Thanh toán\nvà tạo vé" as UC_Pay
+  usecase "Xem thông tin cá nhân" as UC_Profile
+  usecase "Xem lịch sử mua vé" as UC_History
+  usecase "Nhận gợi ý phim\ncá nhân hóa" as UC_Recommend
+
+  usecase "Xem tổng quan\nvé / doanh thu / khách hàng" as UC_AdminDashboard
+  usecase "Xem vé bán\ntheo từng phim" as UC_TicketsByMovie
+  usecase "Quản lý phim" as UC_MovieManage
+  usecase "Thêm phim" as UC_AddMovie
+  usecase "Cập nhật phim" as UC_UpdateMovie
+  usecase "Xóa phim" as UC_DeleteMovie
+  usecase "Thêm ngày chiếu" as UC_AddShowDate
+  usecase "Cập nhật lịch chiếu phim" as UC_ModifySchedule
+  usecase "Sinh mô tả phim bằng AI" as UC_AIDescription
+  usecase "Phân tích kinh doanh bằng AI" as UC_AIAnalytics
+}
+
+Guest --> UC_Home
+Guest --> UC_Location
+Guest --> UC_Showtimes
+Guest --> UC_Detail
+Guest --> UC_Register
+Guest --> UC_Login
+Guest --> UC_Chat
+
+Customer --> UC_Book
+Customer --> UC_Profile
+Customer --> UC_History
+Customer --> UC_Recommend
+
+Admin --> UC_AdminDashboard
+Admin --> UC_TicketsByMovie
+Admin --> UC_MovieManage
+Admin --> UC_AddShowDate
+Admin --> UC_ModifySchedule
+Admin --> UC_AIAnalytics
+
+UC_Book ..> UC_SelectDate : <<include>>
+UC_Book ..> UC_SelectMovie : <<include>>
+UC_Book ..> UC_SelectShow : <<include>>
+UC_Book ..> UC_SelectSeat : <<include>>
+UC_Book ..> UC_SelectPayment : <<include>>
+UC_Book ..> UC_Pay : <<include>>
+
+UC_MovieManage ..> UC_AddMovie : <<include>>
+UC_MovieManage ..> UC_UpdateMovie : <<include>>
+UC_MovieManage ..> UC_DeleteMovie : <<include>>
+UC_AddMovie ..> UC_AIDescription : <<extend>>
+
+OpenAI --> UC_Chat
+OpenAI --> UC_Recommend
+OpenAI --> UC_AIDescription
+OpenAI --> UC_AIAnalytics
+@enduml

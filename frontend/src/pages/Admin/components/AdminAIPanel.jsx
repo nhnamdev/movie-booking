@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FaMagic } from "react-icons/fa";
 import { getAdminAnalytics } from "../../../utils/aiClient";
 
 export const AdminAIPanel = () => {
@@ -20,15 +21,19 @@ export const AdminAIPanel = () => {
   return (
     <div className="admin-ai-panel">
       <div className="admin-ai-title">
-        ✨ Phân tích AI
+        <div>
+          <p className="admin-section-kicker">Trợ lý dữ liệu</p>
+          <h2>
+            <FaMagic aria-hidden="true" />
+            <span>Phân tích AI</span>
+          </h2>
+        </div>
         <button className="admin-ai-btn" onClick={handleAnalyze} disabled={loading}>
           {loading ? "Đang phân tích..." : "Phân tích ngay"}
         </button>
       </div>
 
-      {data?.error && (
-        <p style={{ color: "#EB3656", fontSize: "1.3rem" }}>{data.error}</p>
-      )}
+      {data?.error && <p className="admin-ai-error">{data.error}</p>}
 
       {data?.stats && (
         <div className="admin-ai-stats">
@@ -49,9 +54,7 @@ export const AdminAIPanel = () => {
         </div>
       )}
 
-      {data?.insights && (
-        <div className="admin-ai-insights">{data.insights}</div>
-      )}
+      {data?.insights && <div className="admin-ai-insights">{data.insights}</div>}
     </div>
   );
 };

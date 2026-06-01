@@ -19,7 +19,7 @@ export const PersonalRecommendations = () => {
       .then((res) => dispatch(setRecommendations(res.data.recommendations || [])))
       .catch(() => dispatch(setRecommendations([])))
       .finally(() => dispatch(setRecsLoading(false)));
-  }, [isAuthenticated, signedPerson.email]);
+  }, [dispatch, isAuthenticated, recommendations.length, signedPerson.email, signedPerson.person_type]);
 
   if (!isAuthenticated || signedPerson.person_type !== "Customer") return null;
   if (recsLoading) return null;
@@ -29,8 +29,11 @@ export const PersonalRecommendations = () => {
     <section className="section-ai-recommendations">
       <div className="home-collection-heading-container">
         <h1 className="heading-secondary heading-collection">
-          ✨ Dành Riêng Cho Bạn &rarr;
+          Dành riêng cho bạn
         </h1>
+        <p className="section-heading-copy">
+          Gợi ý dựa trên lịch sử đặt vé và sở thích xem phim của bạn.
+        </p>
       </div>
       <div className="ai-recs-grid">
         {recommendations.map(({ movieId, reason, movie }) => (

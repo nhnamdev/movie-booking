@@ -599,7 +599,8 @@ INSERT INTO `seat` (`id`, `name`) VALUES
 CREATE TABLE `shown_in` (
   `movie_id` int(11) NOT NULL,
   `showtime_id` int(11) NOT NULL,
-  `hall_id` int(11) NOT NULL
+  `hall_id` int(11) NOT NULL,
+  `status` varchar(20) DEFAULT 'active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `shown_in` (`movie_id`, `showtime_id`, `hall_id`) VALUES
@@ -706,7 +707,8 @@ CREATE TABLE `showtimes` (
   `show_type` char(2) DEFAULT NULL,
   `screen_type` varchar(30) DEFAULT 'Tiêu chuẩn',
   `showtime_date` date DEFAULT NULL,
-  `price_per_seat` int(11) DEFAULT NULL
+  `price_per_seat` int(11) DEFAULT NULL,
+  `status` varchar(20) DEFAULT 'active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `showtimes` (`id`, `movie_start_time`, `show_type`, `screen_type`, `showtime_date`, `price_per_seat`) VALUES

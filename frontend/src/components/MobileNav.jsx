@@ -1,3 +1,4 @@
+import { FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout, showLoginModal, showSignModal } from "../reducers/authSlice";
@@ -5,13 +6,12 @@ import { toggleMenuState } from "../reducers/mobileNavSlice";
 
 export const MobileNav = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { isAuthenticated, signedPerson } = useSelector(
     (store) => store.authentication
   );
   const { menuState } = useSelector((store) => store.mobileNav);
-
-  const dispatch = useDispatch();
 
   const menuStyle = {
     opacity: "1",
@@ -20,121 +20,104 @@ export const MobileNav = () => {
     transform: "translateX(0)",
   };
 
+  const closeAndNavigate = (path) => {
+    dispatch(toggleMenuState());
+    navigate(path);
+  };
+
   return (
-    <>
-      <div className="mobile-nav-menu" style={menuState ? menuStyle : {}}>
-        <button
-          className="btn-menu-close"
-          onClick={() => dispatch(toggleMenuState())}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="menu-icon"
-            viewBox="0 0 512 512"
+    <div className="mobile-nav-menu" style={menuState ? menuStyle : {}}>
+      <button
+        className="btn-menu-close"
+        onClick={() => dispatch(toggleMenuState())}
+        aria-label="Đóng menu"
+      >
+        <FaTimes className="menu-icon" aria-hidden="true" />
+      </button>
+
+      <ul className="mobile-nav-items">
+        <li className="mobile-nav-list-item">
+          <button
+            className="mobile-nav-item"
+            onClick={() => closeAndNavigate("/")}
           >
-            <path
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="32"
-              d="M368 368L144 144M368 144L144 368"
-            />
-          </svg>
-        </button>
+            Trang chủ
+          </button>
+        </li>
+        <li className="mobile-nav-list-item">
+          <button
+            className="mobile-nav-item"
+            onClick={() => closeAndNavigate("/showtimes")}
+          >
+            Lịch chiếu
+          </button>
+        </li>
+        <li className="mobile-nav-list-item">
+          <button
+            className="mobile-nav-item"
+            onClick={() => closeAndNavigate("/aboutus")}
+          >
+            Về CGV
+          </button>
+        </li>
+        {isAuthenticated && signedPerson.person_type === "Admin" && (
+          <li className="mobile-nav-list-item">
+            <button
+              className="mobile-nav-item"
+              onClick={() => closeAndNavigate("/admin")}
+            >
+              Quản trị
+            </button>
+          </li>
+        )}
 
-        <ul className="mobile-nav-items">
-          <li className="mobile-nav-list-item">
-            <button
-              className="mobile-nav-item"
-              onClick={() => {
-                dispatch(toggleMenuState());
-                navigate("/");
-              }}
-            >
-              Trang chủ
-            </button>
-          </li>
-          <li className="mobile-nav-list-item">
-            <button
-              className="mobile-nav-item"
-              onClick={() => {
-                dispatch(toggleMenuState());
-                navigate("/showtimes");
-              }}
-            >
-              Lịch chiếu
-            </button>
-          </li>
-          <li className="mobile-nav-list-item">
-            <button
-              className="mobile-nav-item"
-              onClick={() => {
-                dispatch(toggleMenuState());
-                navigate("/aboutus");
-              }}
-            >
-              Về CGV
-            </button>
-          </li>
-          {isAuthenticated && signedPerson.person_type === "Admin" && (
+        {!isAuthenticated && (
+          <>
             <li className="mobile-nav-list-item">
               <button
                 className="mobile-nav-item"
                 onClick={() => {
                   dispatch(toggleMenuState());
-                  navigate("/admin");
+                  dispatch(showSignModal());
                 }}
               >
-                Quản trị
+                Đăng ký
               </button>
             </li>
-          )}
-
-          <li className="mobile-nav-list-item">
-            <button
-              className="mobile-nav-item"
-              onClick={() => {
-                dispatch(toggleMenuState());
-                dispatch(showSignModal());
-              }}
-            >
-              Đăng ký
-            </button>
-          </li>
-          <li className="mobile-nav-list-item">
-            <button
-              className="mobile-nav-item"
-              onClick={() => {
-                dispatch(toggleMenuState());
-                dispatch(showLoginModal());
-              }}
-            >
-              Đăng nhập
-            </button>
-          </li>
-
-          {isAuthenticated && (
             <li className="mobile-nav-list-item">
               <button
                 className="mobile-nav-item"
                 onClick={() => {
-                  dispatch(logout());
                   dispatch(toggleMenuState());
+                  dispatch(showLoginModal());
                 }}
               >
-                Đăng xuất
+                Đăng nhập
               </button>
             </li>
-          )}
-        </ul>
+          </>
+        )}
 
         {isAuthenticated && (
-          <p className="mobile-nav-name">
-            Đang đăng nhập: {signedPerson.first_name}
-          </p>
+          <li className="mobile-nav-list-item">
+            <button
+              className="mobile-nav-item"
+              onClick={() => {
+                dispatch(logout());
+                dispatch(toggleMenuState());
+              }}
+            >
+              Đăng xuất
+            </button>
+          </li>
         )}
-      </div>
-    </>
+      </ul>
+
+      {isAuthenticated && (
+        <p className="mobile-nav-name">
+          Đang đăng nhập: {signedPerson.first_name}
+        </p>
+      )}
+    </div>
   );
 };

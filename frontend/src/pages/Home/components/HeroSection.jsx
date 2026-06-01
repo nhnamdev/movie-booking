@@ -16,15 +16,19 @@ export const HeroSection = () => {
     <section className="section-hero">
       <div className="container hero">
         <div className="hero-text">
-        <h1 className="heading-primary">
-  <TextEffect preset="slide">
-    Mở Cánh Cửa Đến Thế Giới Điện Ảnh Diệu Kỳ
-  </TextEffect>
-</h1>
+          <p className="hero-kicker">CGV Việt Nam</p>
+          <h1 className="heading-primary">
+            <TextEffect preset="slide">
+              Đặt vé nhanh cho những bộ phim bạn đang chờ
+            </TextEffect>
+          </h1>
 
-<p className="hero-description">
-  Đắm chìm trong sức hút kỳ diệu của điện ảnh khi bạn bước vào không gian trải nghiệm đẳng cấp tại CGV – nơi mỗi khoảnh khắc trên màn ảnh trở nên sống động và đáng nhớ hơn bao giờ hết.
-</p>
+          <p className="hero-description">
+            Chọn rạp, suất chiếu và ghế ngồi trong vài bước. Trải nghiệm lịch
+            chiếu rõ ràng, đặt vé dễ dàng và lưu lịch sử mua vé ngay trong tài
+            khoản của bạn.
+          </p>
+
           <div className="hero-btn-container">
             <button
               onClick={() => {
@@ -35,54 +39,52 @@ export const HeroSection = () => {
               }}
               className="btn btn-full"
             >
-              Mua vé
+              Đặt vé ngay
             </button>
             <HashLink to="#nowShowing" className="btn btn-outline">
-            Xem thêm &darr;
+              Xem phim đang chiếu
             </HashLink>
+          </div>
+
+          <div className="hero-proof-grid" aria-label="Điểm nổi bật">
+            <div>
+              <strong>100.000+</strong>
+              <span>vé đã bán</span>
+            </div>
+            <div>
+              <strong>2D, 3D, IMAX</strong>
+              <span>nhiều định dạng chiếu</span>
+            </div>
+            <div>
+              <strong>Combo</strong>
+              <span>bắp nước và ưu đãi</span>
+            </div>
           </div>
 
           <div className="hero-review-section">
             <div className="customers-img">
-              <img
-                src="/Images/customers/customer-1.jpg"
-                className="customer-img"
-                alt="Khách hàng CGV"
-              />
-              <img
-                src="/Images/customers/customer-2.jpg"
-                className="customer-img"
-                alt="Khách hàng CGV"
-              />
-              <img
-                src="/Images/customers/customer-3.jpg"
-                className="customer-img"
-                alt="Khách hàng CGV"
-              />
-              <img
-                src="/Images/customers/customer-4.jpg"
-                className="customer-img"
-                alt="Khách hàng CGV"
-              />
-              <img
-                src="/Images/customers/customer-5.jpg"
-                className="customer-img"
-                alt="Khách hàng CGV"
-              />
-              <img
-                src="/Images/customers/customer-6.jpg"
-                className="customer-img"
-                alt="Khách hàng CGV"
-              />
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <img
+                  key={item}
+                  src={`/Images/customers/customer-${item}.jpg`}
+                  className="customer-img"
+                  alt="Khách hàng CGV"
+                />
+              ))}
             </div>
 
             <p className="hero-review-text">
-              <span>100.000+</span> vé đã bán trong năm qua
+              <span>Khán giả quay lại mỗi tuần</span> nhờ quy trình đặt vé rõ
+              ràng
             </p>
           </div>
         </div>
 
         <div className="hero-img-box">
+          <div className="hero-img-panel">
+            <p>Đang chiếu hôm nay</p>
+            <strong>Suất tối bán chạy</strong>
+          </div>
           <img
             className="hero-img"
             src="/Images/hero-img.webp"

@@ -134,21 +134,35 @@
 
 /* ──────── Admin AI Panel ──────── */
 .admin-ai-panel {
-  background: #232636;
-  border: 1px solid #313441;
-  border-radius: 1rem;
-  padding: 2rem;
-  margin-top: 2rem;
+  background:
+    linear-gradient(180deg, rgba(230, 230, 232, 0.05), transparent),
+    #232636;
+  border: 1px solid rgba(230, 230, 232, 0.1);
+  border-radius: 1.2rem;
+  padding: 2.4rem;
+  margin-top: 0;
 }
 
 .admin-ai-title {
   color: #e6e6e8;
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6rem;
+  margin-bottom: 2rem;
+}
+
+.admin-ai-title h2 {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.admin-ai-title h2 svg {
+  color: #EB3656;
 }
 
 .admin-ai-btn {
@@ -168,11 +182,12 @@
 
 .admin-ai-insights {
   margin-top: 1.6rem;
-  padding: 1.4rem;
+  padding: 1.6rem;
   background: #1a1d2c;
-  border-radius: 0.6rem;
+  border: 1px solid rgba(230, 230, 232, 0.08);
+  border-radius: 1rem;
   color: #cccdd0;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   line-height: 1.6;
   white-space: pre-wrap;
 }
@@ -186,9 +201,10 @@
 
 .admin-ai-stat {
   background: #1a1d2c;
-  padding: 1.4rem;
-  border-radius: 0.6rem;
-  text-align: center;
+  border: 1px solid rgba(230, 230, 232, 0.08);
+  padding: 1.6rem;
+  border-radius: 1rem;
+  text-align: left;
 }
 
 .admin-ai-stat-label {
@@ -199,8 +215,15 @@
 
 .admin-ai-stat-value {
   color: #EB3656;
-  font-size: 2rem;
+  font-size: 2.4rem;
   font-weight: 700;
+}
+
+.admin-ai-error {
+  color: #EB3656;
+  font-size: 1.4rem;
+  line-height: 1.6;
+  margin-bottom: 1.6rem;
 }
 
 /* ──────── AI Search Results ──────── */
@@ -259,4 +282,8 @@
   .ai-search-container { padding: 0 1.6rem; }
   .ai-search-btn { padding: 0 1.4rem; font-size: 1.2rem; }
   .admin-ai-stats { grid-template-columns: 1fr; }
+  .admin-ai-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

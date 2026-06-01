@@ -33,7 +33,7 @@ export const CollectionCard = ({
         <img
           className="home-movie-img"
           src={image_path}
-          alt={`${name} photo`}
+          alt={`Poster phim ${name}`}
         />
       </div>
 
@@ -136,7 +136,7 @@ export const CollectionCard = ({
             : dispatch(showLoginModal());
         }}
       >
-        Get ticket
+        Đặt vé
       </button>
     </div>
   );

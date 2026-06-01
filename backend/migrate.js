@@ -294,9 +294,19 @@ async function applySchemaMigrations(connection) {
       "screen_type",
       "VARCHAR(30) DEFAULT 'Tiêu chuẩn'"
     );
+    await ensureColumn(
+      connection,
+      "showtimes",
+      "status",
+      "VARCHAR(20) DEFAULT 'active'"
+    );
     await query(
       connection,
       "UPDATE showtimes SET screen_type = COALESCE(NULLIF(screen_type, ''), 'Tiêu chuẩn')"
+    );
+    await query(
+      connection,
+      "UPDATE showtimes SET status = 'active' WHERE status IS NULL OR status = ''"
     );
     await query(
       connection,
@@ -307,6 +317,19 @@ async function applySchemaMigrations(connection) {
       "UPDATE showtimes SET screen_type = 'Cao cấp' WHERE screen_type = 'Deluxe'"
     );
     await normalizeSeedShowtimes(connection);
+  }
+
+  if (await tableExists(connection, "shown_in")) {
+    await ensureColumn(
+      connection,
+      "shown_in",
+      "status",
+      "VARCHAR(20) DEFAULT 'active'"
+    );
+    await query(
+      connection,
+      "UPDATE shown_in SET status = 'active' WHERE status IS NULL OR status = ''"
+    );
   }
 
   if (await tableExists(connection, "payment")) {

@@ -34,9 +34,10 @@ export const Features = () => {
 
   return (
     <section className="section-features container">
-      <h4 className="subheading">Bạn sẽ nhận được gì?</h4>
+      <h4 className="subheading">Trải nghiệm tại rạp</h4>
       <h2 className="section-features-heading heading-secondary">
-      Trải Nghiệm Điện Ảnh Đỉnh Cao – Khám Phá Những Điều Đặc Biệt Chỉ Có Tại CGV
+        Âm thanh, hình ảnh và không gian được thiết kế cho một buổi xem phim
+        trọn vẹn.
       </h2>
 
       {loading ? (

@@ -1,10 +1,8 @@
 import axios from "axios";
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
 import {
   FiCalendar,
-  FiChevronDown,
-  FiChevronUp,
   FiClock,
   FiEdit3,
   FiFilm,
@@ -85,24 +83,26 @@ export const AdminMovieAddSection = () => {
   const [movies, setMovies] = useState([]);
   const [editingMovieId, setEditingMovieId] = useState(null);
   const [editMovieInfo, setEditMovieInfo] = useState(emptyMovieInfo);
-  const [adminMovieDropDown, setAdminMovieDropDown] = useState(false);
+  const [showAddMovieForm, setShowAddMovieForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [moviesLoading, setMoviesLoading] = useState(false);
   const [aiDescLoading, setAiDescLoading] = useState(false);
 
+  const adminEmail = signedPerson?.email;
+  const adminPassword = signedPerson?.password;
   const adminPayload = {
-    email: signedPerson?.email,
-    password: signedPerson?.password,
+    email: adminEmail,
+    password: adminPassword,
   };
 
-  const fetchMovies = async () => {
-    if (!adminPayload.email || !adminPayload.password) return;
+  const fetchMovies = useCallback(async () => {
+    if (!adminEmail || !adminPassword) return;
 
     try {
       setMoviesLoading(true);
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/adminMovies`,
-        adminPayload
+        { email: adminEmail, password: adminPassword }
       );
       setMovies(response.data);
     } catch (err) {
@@ -110,14 +110,20 @@ export const AdminMovieAddSection = () => {
     } finally {
       setMoviesLoading(false);
     }
-  };
+  }, [adminEmail, adminPassword]);
 
   useEffect(() => {
     fetchMovies();
-  }, [signedPerson?.email, signedPerson?.password]);
+  }, [fetchMovies]);
 
-  const toggleAdminSection = () => {
-    setAdminMovieDropDown((prevState) => !prevState);
+  const openAddMovieForm = () => {
+    setEditingMovieId(null);
+    setShowAddMovieForm(true);
+  };
+
+  const closeAddMovieForm = () => {
+    setShowAddMovieForm(false);
+    setMovieInfo(emptyMovieInfo);
   };
 
   const handleAIDescription = async () => {
@@ -196,7 +202,7 @@ export const AdminMovieAddSection = () => {
         }
 
         adminMovieToast();
-        setAdminMovieDropDown(false);
+        setShowAddMovieForm(false);
         setMovieInfo(emptyMovieInfo);
         await fetchMovies();
       }
@@ -379,34 +385,59 @@ export const AdminMovieAddSection = () => {
 
   return (
     <section className="section-admin-movie-add container">
-      <div className="form-heading-container">
+      <div className="admin-movie-list-header">
         <h2 className="form-admin-heading">
-          <FiPlusCircle className="admin-heading-icon" />
-          Thêm Phim
+          <FiFilm className="admin-heading-icon" />
+          Phim đang chiếu
         </h2>
-        <button
-          className="btn-admin-arrow"
-          onClick={toggleAdminSection}
-          type="button"
-          title={adminMovieDropDown ? "Thu gọn form thêm phim" : "Mở form thêm phim"}
-        >
-          {adminMovieDropDown ? (
-            <FiChevronUp className="admin-icon" />
-          ) : (
-            <FiChevronDown className="admin-icon" />
-          )}
-        </button>
+        <div className="admin-movie-toolbar-actions">
+          <button
+            className="btn-admin"
+            onClick={openAddMovieForm}
+            type="button"
+            disabled={showAddMovieForm}
+          >
+            <FiPlusCircle />
+            Thêm phim
+          </button>
+          <button
+            className="btn-admin admin-movie-refresh"
+            onClick={fetchMovies}
+            type="button"
+          >
+            {moviesLoading ? (
+              <ClipLoader color="#e6e6e8" size={16} />
+            ) : (
+              <FiRefreshCw />
+            )}
+            Tải lại
+          </button>
+        </div>
       </div>
 
-      <AnimatePresence initial={false}>
-        {adminMovieDropDown && (
-          <motion.form
-            {...movieCardMotion}
-            className="form-movie-add"
-            onSubmit={movieAdd}
-          >
-            {renderMovieFormFields(movieInfo, handleMovieInfo(setMovieInfo))}
+      {showAddMovieForm && (
+        <form className="form-movie-add admin-movie-add-form" onSubmit={movieAdd}>
+          <div className="admin-form-panel-header">
+            <div>
+              <p className="admin-section-kicker">Phim mới</p>
+              <h3 className="form-admin-heading">
+                <FiPlusCircle className="admin-heading-icon" />
+                Thêm phim
+              </h3>
+            </div>
+            <button
+              className="btn-admin admin-btn-secondary"
+              type="button"
+              onClick={closeAddMovieForm}
+            >
+              <FiX />
+              Huỷ
+            </button>
+          </div>
 
+          {renderMovieFormFields(movieInfo, handleMovieInfo(setMovieInfo))}
+
+          <div className="admin-form-actions">
             <button
               type="button"
               className="admin-ai-btn"
@@ -423,28 +454,9 @@ export const AdminMovieAddSection = () => {
               <FiSave />
               {loading ? "Đang lưu" : "Thêm phim"}
             </button>
-          </motion.form>
-        )}
-      </AnimatePresence>
-
-      <div className="admin-movie-list-header">
-        <h2 className="form-admin-heading">
-          <FiFilm className="admin-heading-icon" />
-          Phim đang chiếu
-        </h2>
-        <button
-          className="btn-admin admin-movie-refresh"
-          onClick={fetchMovies}
-          type="button"
-        >
-          {moviesLoading ? (
-            <ClipLoader color="#e6e6e8" size={16} />
-          ) : (
-            <FiRefreshCw />
-          )}
-          Tải lại
-        </button>
-      </div>
+          </div>
+        </form>
+      )}
 
       {moviesLoading && (
         <div className="admin-movie-loading">
@@ -463,7 +475,9 @@ export const AdminMovieAddSection = () => {
             <motion.article
               layout
               {...movieCardMotion}
-              className="admin-movie-card"
+              className={`admin-movie-card ${
+                editingMovieId === movie.id ? "admin-movie-card--editing" : ""
+              }`}
               key={movie.id}
             >
               <img

@@ -76,40 +76,40 @@ export const purchaseCompletion = (tickets) => {
   });
 };
 
-export const adminMovieToast = () => {
-  toast.success("Thêm phim thành công", {
+export const adminMovieToast = (msg = "Thêm phim thành công") => {
+  toast.success(msg, {
     ...toastPrimaryCategories,
     theme: "light",
     style: toastFontStyle,
   });
 };
 
-export const adminMovieUpdateToast = () => {
-  toast.success("Cập nhật phim thành công", {
+export const adminMovieUpdateToast = (msg = "Cập nhật phim thành công") => {
+  toast.success(msg, {
     ...toastPrimaryCategories,
     theme: "light",
     style: toastFontStyle,
   });
 };
 
-export const adminMovieDeleteToast = () => {
-  toast.success("Xoá phim thành công", {
+export const adminMovieDeleteToast = (msg = "Xoá phim thành công") => {
+  toast.success(msg, {
     ...toastPrimaryCategories,
     theme: "light",
     style: toastFontStyle,
   });
 };
 
-export const adminShowtimeToast = () => {
-  toast.success("Thêm suất chiếu thành công", {
+export const adminShowtimeToast = (msg = "Thêm suất chiếu thành công") => {
+  toast.success(msg, {
     ...toastPrimaryCategories,
     theme: "light",
     style: toastFontStyle,
   });
 };
 
-export const adminShowninToast = () => {
-  toast.success("Cập nhật suất chiếu thành công", {
+export const adminShowninToast = (msg = "Cập nhật suất chiếu thành công") => {
+  toast.success(msg, {
     ...toastPrimaryCategories,
     theme: "light",
     style: toastFontStyle,

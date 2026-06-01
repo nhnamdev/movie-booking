@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import {
+  FaChartBar,
+  FaClock,
+  FaEdit,
+  FaFilm,
+  FaHome,
+  FaRobot,
+  FaSignOutAlt,
+  FaUserCircle,
+} from "react-icons/fa";
 import { logout } from "../../reducers/authSlice";
 import { AdminMovieAddSection } from "./components/AdminMovieAddSection";
 import { AdminShowtimesAddSection } from "./components/AdminShowtimesAddSection";
@@ -9,12 +19,23 @@ import { AdminDashboardPrimary } from "./components/AdminDashboardPrimary";
 import { MovieWiseTicket } from "./components/MovieWiseTicket";
 import { AdminAIPanel } from "./components/AdminAIPanel";
 
+const tabs = [
+  { id: "dashboard", label: "Tổng quan", icon: FaChartBar },
+  { id: "movies", label: "Quản lý phim", icon: FaFilm },
+  { id: "showtimes", label: "Lịch chiếu", icon: FaClock },
+  { id: "modify", label: "Chỉnh sửa suất chiếu", icon: FaEdit },
+  { id: "ai", label: "Trợ lý AI", icon: FaRobot },
+];
+
 const AdminPage = () => {
   const [selectedShowDate, setSelectedShowDate] = useState("");
   const [activeTab, setActiveTab] = useState("dashboard");
   const { signedPerson } = useSelector((store) => store.authentication);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const activeTabData = tabs.find((tab) => tab.id === activeTab) || tabs[0];
+  const ActiveIcon = activeTabData.icon;
 
   const handleSelectedDate = (e) => {
     setSelectedShowDate(e.target.value);
@@ -25,79 +46,65 @@ const AdminPage = () => {
     navigate("/");
   };
 
-  const tabs = [
-    { id: "dashboard", label: "Tổng quan", icon: "📊" },
-    { id: "movies", label: "Quản lý phim", icon: "🎬" },
-    { id: "showtimes", label: "Lịch chiếu", icon: "🕐" },
-    { id: "modify", label: "Chỉnh sửa suất chiếu", icon: "🔄" },
-    { id: "ai", label: "Trợ lý AI", icon: "✨" },
-  ];
-
   return (
     <div className="admin-layout">
-      {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="admin-sidebar-header">
           <div className="admin-logo">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="admin-logo-icon"
-              viewBox="0 0 512 512"
-            >
-              <path
-                d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z"
-                fill="none"
-                stroke="currentColor"
-                strokeMiterlimit="10"
-                strokeWidth="32"
-              />
-              <path
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="32"
-                d="M360 94.59V296M443.13 212.87L296 360M417.41 360H216M299.13 443.13l-144-144M152 416V216M68.87 299.13l144-144M94.59 152H288M212.87 68.87L360 216"
-              />
-            </svg>
+            <FaFilm className="admin-logo-icon" aria-hidden="true" />
             <h2>CGV Quản trị</h2>
           </div>
         </div>
 
-        <nav className="admin-nav">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={`admin-nav-item ${activeTab === tab.id ? "active" : ""}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <span className="admin-nav-icon">{tab.icon}</span>
-              <span className="admin-nav-label">{tab.label}</span>
-            </button>
-          ))}
+        <nav className="admin-nav" aria-label="Điều hướng quản trị">
+          {tabs.map((tab) => {
+            const TabIcon = tab.icon;
+
+            return (
+              <button
+                key={tab.id}
+                className={`admin-nav-item ${
+                  activeTab === tab.id ? "active" : ""
+                }`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <TabIcon className="admin-nav-icon" aria-hidden="true" />
+                <span className="admin-nav-label">{tab.label}</span>
+              </button>
+            );
+          })}
         </nav>
 
         <div className="admin-sidebar-footer">
           <div className="admin-user-info">
-            <span className="admin-user-avatar">👤</span>
-            <span className="admin-user-name">{signedPerson.first_name}</span>
+            <FaUserCircle className="admin-user-avatar" aria-hidden="true" />
+            <span className="admin-user-name">
+              {signedPerson.first_name || "Admin"}
+            </span>
           </div>
           <button className="admin-btn-back" onClick={() => navigate("/")}>
-            ← Về trang chủ
+            <FaHome aria-hidden="true" />
+            <span>Về trang chủ</span>
           </button>
           <button className="admin-btn-logout" onClick={handleLogout}>
-            Đăng xuất
+            <FaSignOutAlt aria-hidden="true" />
+            <span>Đăng xuất</span>
           </button>
         </div>
       </aside>
 
-      {/* Main content */}
       <main className="admin-main">
         <header className="admin-topbar">
-          <h1 className="admin-page-title">
-            {tabs.find((t) => t.id === activeTab)?.icon}{" "}
-            {tabs.find((t) => t.id === activeTab)?.label}
-          </h1>
+          <div>
+            <p className="admin-topbar-kicker">Bảng điều khiển</p>
+            <h1 className="admin-page-title">
+              <ActiveIcon aria-hidden="true" />
+              <span>{activeTabData.label}</span>
+            </h1>
+          </div>
+          <p className="admin-topbar-user">
+            Xin chào, {signedPerson.first_name || "Admin"}
+          </p>
         </header>
 
         <div className="admin-content">

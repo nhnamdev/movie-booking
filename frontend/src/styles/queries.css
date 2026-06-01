@@ -40,6 +40,70 @@
   }
 }
 
+/* Home polish responsive overrides */
+@media (max-width: 74em) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 3.2rem;
+  }
+
+  .hero-text {
+    text-align: center;
+    margin: 4.8rem 0 0;
+    padding: 0 3.2rem;
+  }
+
+  .hero-description,
+  .hero-proof-grid {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-img-box {
+    justify-content: center;
+  }
+
+  .hero-img {
+    width: min(70%, 52rem);
+  }
+}
+
+@media (max-width: 52em) {
+  .nav-auth-buttons {
+    display: none;
+  }
+
+  .hero-proof-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-collection-container::before,
+  .home-collection-container::after {
+    display: none;
+  }
+}
+
+@media (max-width: 36em) {
+  .hero-text {
+    padding: 0;
+  }
+
+  .hero-img {
+    width: 100%;
+  }
+
+  .hero-btn-container {
+    flex-direction: column;
+  }
+
+  .btn:link,
+  .btn:visited,
+  .btn-full {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 /* New public showtimes layout */
 @media (max-width: 64em) {
   .showtimes-movies-list {

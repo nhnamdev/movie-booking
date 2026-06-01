@@ -15,6 +15,15 @@ console.log("DB_NAME =", process.env.DB_NAME);
 // Khởi tạo cổng mặc định 7000
 const port = process.env.PORT || 7000;
 const registerDebugEnabled = process.env.DEBUG_REGISTER === "true";
+const defaultCorsOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+];
+const corsOrigins = (process.env.CORS_ORIGINS || defaultCorsOrigins.join(","))
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 const maskEmail = (email = "") => {
   if (!email || !email.includes("@")) return email;
@@ -36,7 +45,7 @@ const app = express();
 app.use(
   cors({
     //Chỉ định các địa chỉ frontend được phép gọi API từ backend
-    origin: ["http://localhost:5173", "http://localhost:3000"],
+    origin: corsOrigins,
     methods: ["POST", "GET", "PUT", "DELETE"],
     credentials: true
   })
@@ -183,12 +192,16 @@ app.post("/showtimes", (req, res) => {
     JOIN movie M ON SI.movie_id = M.id
     JOIN movie_genre MG ON MG.movie_id = M.id
     JOIN (
-      SELECT DISTINCT showtime_date
-      FROM showtimes
-      ORDER BY showtime_date DESC
+      SELECT DISTINCT s2.showtime_date
+      FROM showtimes s2
+      JOIN shown_in si2 ON s2.id = si2.showtime_id
+      WHERE s2.status = 'active' AND si2.status = 'active'
+      ORDER BY s2.showtime_date DESC
       LIMIT 4
     ) AS LatestDates ON S.showtime_date = LatestDates.showtime_date
     WHERE T.name = ?
+      AND S.status = 'active'
+      AND SI.status = 'active'
   `;
 
   const sql1 = `${baseSql} AND MG.genre = ? ORDER BY S.showtime_date ASC, S.movie_start_time ASC, M.name ASC`;
@@ -241,6 +254,8 @@ app.post("/showtimesDates", (req, res) => {
       JOIN shown_in ON showtimes.id = shown_in.showtime_id
       JOIN hall ON shown_in.hall_id = hall.id
       WHERE hall.theatre_id = ?
+        AND showtimes.status = 'active'
+        AND shown_in.status = 'active'
       ORDER BY showtimes.id DESC
       LIMIT 4
   ) AS subquery
@@ -258,7 +273,7 @@ app.post("/uniqueMovies", (req, res) => {
   const showtimeDate = req.body.userDate;
 
   const sql =
-    "SELECT DISTINCT M.id,M.duration, M.name AS movie_name, M.image_path FROM movie M JOIN shown_in SI ON M.id = SI.movie_id JOIN showtimes S ON SI.showtime_id = S.id JOIN hall H ON SI.hall_id = H.id WHERE H.theatre_id = ? AND S.showtime_date = ?";
+    "SELECT DISTINCT M.id,M.duration, M.name AS movie_name, M.image_path FROM movie M JOIN shown_in SI ON M.id = SI.movie_id JOIN showtimes S ON SI.showtime_id = S.id JOIN hall H ON SI.hall_id = H.id WHERE H.theatre_id = ? AND S.showtime_date = ? AND S.status = 'active' AND SI.status = 'active'";
 
   db.query(sql, [theatreId, showtimeDate], (err, data) => {
     if (err) return res.json(err);
@@ -273,7 +288,7 @@ app.post("/halls", (req, res) => {
   const movieId = req.body.userMovieId;
 
   const sql =
-    "SELECT H.id AS hall_id, H.name AS hall_name, SI.showtime_id, S.show_type, S.screen_type, S.movie_start_time, S.price_per_seat FROM hall H JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id WHERE H.theatre_id = ? AND S.showtime_date = ? AND SI.movie_id = ?";
+    "SELECT H.id AS hall_id, H.name AS hall_name, SI.showtime_id, S.show_type, S.screen_type, S.movie_start_time, S.price_per_seat FROM hall H JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id WHERE H.theatre_id = ? AND S.showtime_date = ? AND SI.movie_id = ? AND S.status = 'active' AND SI.status = 'active'";
   db.query(sql, [theatreId, showtimeDate, movieId], (err, data) => {
     if (err) return res.json(err);
 
@@ -294,6 +309,7 @@ FROM
   seat AS S
   JOIN hallwise_seat AS HS ON S.id = HS.seat_id
   JOIN shown_in AS SI ON HS.hall_id = SI.hall_id
+  JOIN showtimes AS STIME ON SI.showtime_id = STIME.id
   LEFT JOIN ticket AS T ON
       T.seat_id = S.id AND
       T.showtimes_id = SI.showtime_id AND
@@ -302,7 +318,9 @@ FROM
 WHERE
   SI.showtime_id = ? AND
   SI.hall_id = ? AND
-  SI.movie_id = ?
+  SI.movie_id = ? AND
+  SI.status = 'active' AND
+  STIME.status = 'active'
 ORDER BY S.id`;
 
   db.query(sql, [showtime_id, hall_id, movie_id], (err, data) => {
@@ -341,14 +359,51 @@ app.post("/purchaseTicket", (req, res) => {
   const movie_id = req.body.userMovieId;
   const showtime_id = req.body.userShowtimeId;
 
-  const sql =
-    "INSERT INTO ticket (price,purchase_date,payment_id,seat_id,hall_id,movie_id,showtimes_id) VALUES (?,?,?,?,?,?,?)";
+  const sql = `
+    INSERT INTO ticket (price,purchase_date,payment_id,seat_id,hall_id,movie_id,showtimes_id)
+    SELECT ?, ?, ?, ?, ?, ?, ?
+    FROM shown_in si
+    JOIN showtimes s ON si.showtime_id = s.id
+    WHERE si.movie_id = ?
+      AND si.hall_id = ?
+      AND si.showtime_id = ?
+      AND si.status = 'active'
+      AND s.status = 'active'
+      AND NOT EXISTS (
+        SELECT 1
+        FROM ticket t
+        WHERE t.seat_id = ?
+          AND t.hall_id = ?
+          AND t.movie_id = ?
+          AND t.showtimes_id = ?
+      )
+    LIMIT 1`;
 
   db.query(
     sql,
-    [price, date, payment_id, seat_id, hall_id, movie_id, showtime_id],
+    [
+      price,
+      date,
+      payment_id,
+      seat_id,
+      hall_id,
+      movie_id,
+      showtime_id,
+      movie_id,
+      hall_id,
+      showtime_id,
+      seat_id,
+      hall_id,
+      movie_id,
+      showtime_id,
+    ],
     (err, data) => {
       if (err) return res.json(err);
+      if (data.affectedRows === 0) {
+        return res.status(409).json({
+          message: "Suất chiếu đã ngưng bán hoặc ghế đã được đặt",
+        });
+      }
 
       return res.json(data);
     }
@@ -493,7 +548,7 @@ app.post("/movieWiseShowtime", (req, res) => {
   const movieId = req.body.movieDetailsId;
   const theatreId = req.body.theatreId;
 
-  const sql = `SELECT S.id AS showtime_id, H.id AS hall_id, M.id AS movie_id, S.showtime_date, S.movie_start_time, S.show_type, S.price_per_seat FROM theatre T JOIN hall H ON T.id = H.theatre_id JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id JOIN movie M ON SI.movie_id = M.id JOIN ( SELECT DISTINCT showtime_date FROM showtimes ORDER BY showtime_date DESC LIMIT 4 ) AS LatestDates ON S.showtime_date = LatestDates.showtime_date WHERE T.id = ? AND M.id = ? ORDER BY S.showtime_date ASC`;
+  const sql = `SELECT S.id AS showtime_id, H.id AS hall_id, M.id AS movie_id, S.showtime_date, S.movie_start_time, S.show_type, S.price_per_seat FROM theatre T JOIN hall H ON T.id = H.theatre_id JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id JOIN movie M ON SI.movie_id = M.id JOIN ( SELECT DISTINCT s2.showtime_date FROM showtimes s2 JOIN shown_in si2 ON s2.id = si2.showtime_id WHERE s2.status = 'active' AND si2.status = 'active' ORDER BY s2.showtime_date DESC LIMIT 4 ) AS LatestDates ON S.showtime_date = LatestDates.showtime_date WHERE T.id = ? AND M.id = ? AND S.status = 'active' AND SI.status = 'active' ORDER BY S.showtime_date ASC`;
 
   db.query(sql, [theatreId, movieId], (err, data) => {
     if (err) return res.json(err);
@@ -596,6 +651,14 @@ const queryDb = (sql, params = []) =>
     db.query(sql, params, (err, data) => {
       if (err) reject(err);
       else resolve(data);
+    });
+  });
+
+const requireAdmin = (email, password) =>
+  new Promise((resolve, reject) => {
+    verifyAdmin(email, password, (err, isAdmin) => {
+      if (err) return reject(err);
+      return resolve(isAdmin);
     });
   });
 
@@ -1106,10 +1169,12 @@ app.get("/adminLatestShowDates", (req, res) => {
   JOIN (
       SELECT DISTINCT showtime_date
       FROM showtimes
+      WHERE status = 'active'
       ORDER BY showtime_date DESC
       LIMIT 4
   ) latest_dates
   ON s.showtime_date = latest_dates.showtime_date
+  WHERE s.status = 'active'
   ORDER BY s.showtime_date ASC
   `;
 
@@ -1127,7 +1192,7 @@ app.post("/adminShowtimes", (req, res) => {
 
   const showdate = req.body.selectedShowDate;
 
-  const sql = `SELECT id,movie_start_time,show_type FROM showtimes WHERE showtime_date=?`;
+  const sql = `SELECT id,movie_start_time,show_type FROM showtimes WHERE showtime_date=? AND status = 'active'`;
 
   db.query(sql0, [email, password, "Admin"], (err, data) => {
     if (err) return res.json(err);
@@ -1217,6 +1282,515 @@ app.post("/movieSwap", (req, res) => {
     });
   });
 });
+app.post("/adminScheduleDates", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    const data = await queryDb(`
+      SELECT
+        s.showtime_date,
+        COUNT(DISTINCT s.id) AS showtime_count,
+        COUNT(DISTINCT CASE WHEN s.status = 'active' THEN s.id END) AS active_showtime_count,
+        COUNT(DISTINCT CASE WHEN s.status = 'cancelled' THEN s.id END) AS cancelled_showtime_count,
+        COUNT(si.showtime_id) AS slot_count,
+        SUM(CASE WHEN si.status = 'active' THEN 1 ELSE 0 END) AS active_slot_count,
+        SUM(CASE WHEN si.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_slot_count,
+        COUNT(DISTINCT t.id) AS ticket_count
+      FROM showtimes s
+      LEFT JOIN shown_in si ON s.id = si.showtime_id
+      LEFT JOIN ticket t ON s.id = t.showtimes_id
+      GROUP BY s.showtime_date
+      ORDER BY s.showtime_date DESC
+    `);
+
+    return res.json(data);
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/adminScheduleDateAdd", async (req, res) => {
+  const { email, password, showtimeDate } = req.body;
+
+  if (!showtimeDate) {
+    return res.status(400).json({ message: "Vui lòng chọn ngày chiếu" });
+  }
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    const existing = await queryDb(
+      "SELECT COUNT(*) AS dateCount FROM showtimes WHERE showtime_date = ?",
+      [showtimeDate]
+    );
+    if (existing[0]?.dateCount > 0) {
+      return res.status(400).json({ message: "Ngày chiếu này đã tồn tại" });
+    }
+
+    await queryDb(
+      `INSERT INTO showtimes (movie_start_time, show_type, screen_type, showtime_date, price_per_seat)
+       VALUES
+       ('09:30', '2D', 'Tiêu chuẩn', ?, 120000),
+       ('14:00', '2D', 'Tiêu chuẩn', ?, 120000),
+       ('19:30', '3D', 'Cao cấp', ?, 180000)`,
+      [showtimeDate, showtimeDate, showtimeDate]
+    );
+
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/adminScheduleDateUpdate", async (req, res) => {
+  const { email, password, currentDate, nextDate } = req.body;
+
+  if (!currentDate || !nextDate) {
+    return res.status(400).json({ message: "Vui lòng chọn ngày chiếu" });
+  }
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    const existing = await queryDb(
+      "SELECT COUNT(*) AS dateCount FROM showtimes WHERE showtime_date = ? AND showtime_date <> ?",
+      [nextDate, currentDate]
+    );
+    if (existing[0]?.dateCount > 0) {
+      return res.status(400).json({ message: "Ngày chiếu mới đã tồn tại" });
+    }
+
+    const ticketRows = await queryDb(
+      `SELECT COUNT(*) AS ticketCount
+       FROM ticket t
+       JOIN showtimes s ON t.showtimes_id = s.id
+       WHERE s.showtime_date = ?`,
+      [currentDate]
+    );
+    if (ticketRows[0]?.ticketCount > 0) {
+      return res.status(409).json({
+        message: "Không thể đổi ngày lịch chiếu đã có vé. Hãy huỷ/ngưng bán lịch này và tạo lịch mới.",
+      });
+    }
+
+    await queryDb("UPDATE showtimes SET showtime_date = ? WHERE showtime_date = ?", [
+      nextDate,
+      currentDate,
+    ]);
+
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/adminScheduleDateDelete", async (req, res) => {
+  const { email, password, showtimeDate } = req.body;
+
+  if (!showtimeDate) {
+    return res.status(400).json({ message: "Vui lòng chọn ngày chiếu" });
+  }
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    const ticketRows = await queryDb(
+      `SELECT COUNT(*) AS ticketCount
+       FROM ticket t
+       JOIN showtimes s ON t.showtimes_id = s.id
+       WHERE s.showtime_date = ?`,
+      [showtimeDate]
+    );
+    await queryDb("START TRANSACTION");
+    if (ticketRows[0]?.ticketCount > 0) {
+      await queryDb(
+        `UPDATE shown_in si
+         JOIN showtimes s ON si.showtime_id = s.id
+         SET si.status = 'cancelled'
+         WHERE s.showtime_date = ?`,
+        [showtimeDate]
+      );
+      await queryDb("UPDATE showtimes SET status = 'cancelled' WHERE showtime_date = ?", [
+        showtimeDate,
+      ]);
+      await queryDb("COMMIT");
+      return res.json({ success: true, cancelled: true });
+    }
+
+    await queryDb("DELETE FROM showtimes WHERE showtime_date = ?", [showtimeDate]);
+    await queryDb("COMMIT");
+    return res.json({ success: true, deleted: true });
+  } catch (err) {
+    await queryDb("ROLLBACK").catch(() => {});
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/adminScheduleDateRestore", async (req, res) => {
+  const { email, password, showtimeDate } = req.body;
+
+  if (!showtimeDate) {
+    return res.status(400).json({ message: "Vui lòng chọn ngày chiếu" });
+  }
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    await queryDb("START TRANSACTION");
+    await queryDb("UPDATE showtimes SET status = 'active' WHERE showtime_date = ?", [
+      showtimeDate,
+    ]);
+    await queryDb(
+      `UPDATE shown_in si
+       JOIN showtimes s ON si.showtime_id = s.id
+       SET si.status = 'active'
+       WHERE s.showtime_date = ?`,
+      [showtimeDate]
+    );
+    await queryDb("COMMIT");
+
+    return res.json({ success: true, restored: true });
+  } catch (err) {
+    await queryDb("ROLLBACK").catch(() => {});
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/adminShowtimeOptions", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    const [movies, halls, showtimes] = await Promise.all([
+      queryDb("SELECT id, name FROM movie ORDER BY name ASC"),
+      queryDb(`
+        SELECT h.id, h.name, h.theatre_id, t.name AS theatre_name
+        FROM hall h
+        JOIN theatre t ON h.theatre_id = t.id
+        ORDER BY t.name ASC, h.id ASC
+      `),
+      queryDb(`
+        SELECT id, movie_start_time, show_type, screen_type, showtime_date, price_per_seat, status
+        FROM showtimes
+        ORDER BY showtime_date DESC, movie_start_time ASC
+      `),
+    ]);
+
+    return res.json({ movies, halls, showtimes });
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/adminShowtimeSlots", async (req, res) => {
+  const { email, password, selectedShowDate } = req.body;
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    const params = [];
+    let whereSql = "";
+    if (selectedShowDate) {
+      whereSql = "WHERE s.showtime_date = ?";
+      params.push(selectedShowDate);
+    }
+
+    const data = await queryDb(
+      `
+        SELECT
+          si.movie_id,
+          si.showtime_id,
+          si.hall_id,
+          m.name AS movie_name,
+          h.name AS hall_name,
+          th.name AS theatre_name,
+          s.movie_start_time,
+          s.show_type,
+          s.screen_type,
+          s.showtime_date,
+          s.price_per_seat,
+          s.status AS showtime_status,
+          si.status AS slot_status,
+          COUNT(t.id) AS ticket_count
+        FROM shown_in si
+        JOIN movie m ON si.movie_id = m.id
+        JOIN hall h ON si.hall_id = h.id
+        JOIN theatre th ON h.theatre_id = th.id
+        JOIN showtimes s ON si.showtime_id = s.id
+        LEFT JOIN ticket t
+          ON t.movie_id = si.movie_id
+          AND t.hall_id = si.hall_id
+          AND t.showtimes_id = si.showtime_id
+        ${whereSql}
+        GROUP BY
+          si.movie_id,
+          si.showtime_id,
+          si.hall_id,
+          m.name,
+          h.name,
+          th.name,
+          s.movie_start_time,
+          s.show_type,
+          s.screen_type,
+          s.showtime_date,
+          s.price_per_seat,
+          s.status,
+          si.status
+        ORDER BY s.showtime_date DESC, s.movie_start_time ASC, th.name ASC, h.id ASC
+      `,
+      params
+    );
+
+    return res.json(data);
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/adminShowtimeCreate", async (req, res) => {
+  const {
+    email,
+    password,
+    movieId,
+    hallId,
+    showtimeDate,
+    movieStartTime,
+    showType,
+    screenType,
+    pricePerSeat,
+  } = req.body;
+
+  if (
+    !movieId ||
+    !hallId ||
+    !showtimeDate ||
+    !movieStartTime ||
+    !showType ||
+    !screenType ||
+    !pricePerSeat
+  ) {
+    return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin suất chiếu" });
+  }
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    await queryDb("START TRANSACTION");
+    const insertResult = await queryDb(
+      `INSERT INTO showtimes (movie_start_time, show_type, screen_type, showtime_date, price_per_seat, status)
+       VALUES (?, ?, ?, ?, ?, 'active')`,
+      [movieStartTime, showType, screenType, showtimeDate, pricePerSeat]
+    );
+    const showtimeId = insertResult.insertId;
+    await queryDb(
+      "INSERT INTO shown_in (movie_id, showtime_id, hall_id, status) VALUES (?, ?, ?, 'active')",
+      [movieId, showtimeId, hallId]
+    );
+    await queryDb("COMMIT");
+
+    return res.json({ success: true, showtimeId });
+  } catch (err) {
+    await queryDb("ROLLBACK").catch(() => {});
+    if (err?.code === "ER_DUP_ENTRY") {
+      return res.status(400).json({ message: "Suất chiếu này đã tồn tại" });
+    }
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/adminShowtimeUpdate", async (req, res) => {
+  const {
+    email,
+    password,
+    originalMovieId,
+    originalHallId,
+    showtimeId,
+    movieId,
+    hallId,
+    showtimeDate,
+    movieStartTime,
+    showType,
+    screenType,
+    pricePerSeat,
+  } = req.body;
+
+  if (
+    !originalMovieId ||
+    !originalHallId ||
+    !showtimeId ||
+    !movieId ||
+    !hallId ||
+    !showtimeDate ||
+    !movieStartTime ||
+    !showType ||
+    !screenType ||
+    !pricePerSeat
+  ) {
+    return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin suất chiếu" });
+  }
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    const ticketRows = await queryDb(
+      `SELECT COUNT(*) AS ticketCount
+       FROM ticket
+       WHERE movie_id = ? AND hall_id = ? AND showtimes_id = ?`,
+      [originalMovieId, originalHallId, showtimeId]
+    );
+    const changesSeatOwner =
+      Number(originalMovieId) !== Number(movieId) ||
+      Number(originalHallId) !== Number(hallId);
+    const currentRows = await queryDb(
+      "SELECT DATE_FORMAT(showtime_date, '%Y-%m-%d') AS showtime_date, movie_start_time, show_type, screen_type FROM showtimes WHERE id = ?",
+      [showtimeId]
+    );
+    const currentShowtime = currentRows[0];
+    const changesSoldSchedule =
+      currentShowtime &&
+      (String(currentShowtime.showtime_date).slice(0, 10) !== String(showtimeDate).slice(0, 10) ||
+        String(currentShowtime.movie_start_time) !== String(movieStartTime) ||
+        String(currentShowtime.show_type) !== String(showType) ||
+        String(currentShowtime.screen_type) !== String(screenType));
+
+    if (ticketRows[0]?.ticketCount > 0 && changesSeatOwner) {
+      return res.status(400).json({
+        message: "Không thể đổi phim hoặc phòng của suất chiếu đã có vé",
+      });
+    }
+    if (ticketRows[0]?.ticketCount > 0 && changesSoldSchedule) {
+      return res.status(409).json({
+        message: "Không thể đổi ngày, giờ hoặc định dạng của suất đã có vé. Hãy huỷ/ngưng bán suất này và tạo suất mới.",
+      });
+    }
+
+    await queryDb("START TRANSACTION");
+    await queryDb(
+      `UPDATE showtimes
+       SET movie_start_time = ?, show_type = ?, screen_type = ?, showtime_date = ?, price_per_seat = ?
+       WHERE id = ?`,
+      [movieStartTime, showType, screenType, showtimeDate, pricePerSeat, showtimeId]
+    );
+    await queryDb(
+      `UPDATE shown_in
+       SET movie_id = ?, hall_id = ?
+       WHERE movie_id = ? AND hall_id = ? AND showtime_id = ?`,
+      [movieId, hallId, originalMovieId, originalHallId, showtimeId]
+    );
+    await queryDb("COMMIT");
+
+    return res.json({ success: true });
+  } catch (err) {
+    await queryDb("ROLLBACK").catch(() => {});
+    if (err?.code === "ER_DUP_ENTRY") {
+      return res.status(400).json({ message: "Suất chiếu này đã tồn tại" });
+    }
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/adminShowtimeDelete", async (req, res) => {
+  const { email, password, movieId, hallId, showtimeId } = req.body;
+
+  if (!movieId || !hallId || !showtimeId) {
+    return res.status(400).json({ message: "Thiếu thông tin suất chiếu" });
+  }
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    const ticketRows = await queryDb(
+      `SELECT COUNT(*) AS ticketCount
+       FROM ticket
+       WHERE movie_id = ? AND hall_id = ? AND showtimes_id = ?`,
+      [movieId, hallId, showtimeId]
+    );
+
+    await queryDb("START TRANSACTION");
+    if (ticketRows[0]?.ticketCount > 0) {
+      await queryDb(
+        "UPDATE shown_in SET status = 'cancelled' WHERE movie_id = ? AND hall_id = ? AND showtime_id = ?",
+        [movieId, hallId, showtimeId]
+      );
+      const activeSlots = await queryDb(
+        "SELECT COUNT(*) AS slotCount FROM shown_in WHERE showtime_id = ? AND status = 'active'",
+        [showtimeId]
+      );
+      if (activeSlots[0]?.slotCount === 0) {
+        await queryDb("UPDATE showtimes SET status = 'cancelled' WHERE id = ?", [
+          showtimeId,
+        ]);
+      }
+      await queryDb("COMMIT");
+      return res.json({ success: true, cancelled: true });
+    }
+
+    await queryDb(
+      "DELETE FROM shown_in WHERE movie_id = ? AND hall_id = ? AND showtime_id = ?",
+      [movieId, hallId, showtimeId]
+    );
+
+    const remainingSlots = await queryDb(
+      "SELECT COUNT(*) AS slotCount FROM shown_in WHERE showtime_id = ?",
+      [showtimeId]
+    );
+    const remainingTickets = await queryDb(
+      "SELECT COUNT(*) AS ticketCount FROM ticket WHERE showtimes_id = ?",
+      [showtimeId]
+    );
+    if (remainingSlots[0]?.slotCount === 0 && remainingTickets[0]?.ticketCount === 0) {
+      await queryDb("DELETE FROM showtimes WHERE id = ?", [showtimeId]);
+    }
+    await queryDb("COMMIT");
+
+    return res.json({ success: true });
+  } catch (err) {
+    await queryDb("ROLLBACK").catch(() => {});
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/adminShowtimeRestore", async (req, res) => {
+  const { email, password, movieId, hallId, showtimeId } = req.body;
+
+  if (!movieId || !hallId || !showtimeId) {
+    return res.status(400).json({ message: "Thiếu thông tin suất chiếu" });
+  }
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    await queryDb("START TRANSACTION");
+    await queryDb("UPDATE showtimes SET status = 'active' WHERE id = ?", [
+      showtimeId,
+    ]);
+    await queryDb(
+      "UPDATE shown_in SET status = 'active' WHERE movie_id = ? AND hall_id = ? AND showtime_id = ?",
+      [movieId, hallId, showtimeId]
+    );
+    await queryDb("COMMIT");
+
+    return res.json({ success: true, restored: true });
+  } catch (err) {
+    await queryDb("ROLLBACK").catch(() => {});
+    return res.status(500).json(err);
+  }
+});
+
 // API huỷ vé theo ticket ID
 app.post("/cancelOneTicket", (req, res) => {
   const ticketId = req.body.ticketId;
