@@ -50,8 +50,10 @@ export const signupFailedToast = (msg) => {
   });
 };
 
-export const ticketPurchaseError = () => {
-  toast.error("Xin lỗi, không thể hoàn tất việc mua vé", {
+export const ticketPurchaseError = (
+  message = "Xin lỗi, không thể hoàn tất việc mua vé"
+) => {
+  toast.error(message, {
     ...toastPrimaryCategories,
     theme: "colored",
     style: toastFontStyle,

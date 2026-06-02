@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { DateSelector } from "./DateSelector";
 import { MovieSelector } from "./MovieSelector";
@@ -10,18 +10,13 @@ import BarLoader from "react-spinners/BarLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { purchaseCompletion, ticketPurchaseError } from "../../../toasts/toast";
 import { resetCart } from "../../../reducers/cartSlice";
-import { useNavigate } from "react-router-dom";
-
-const currentDate = () => {
-  const date = new Date();
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  return `${year}-${month}-${day}`;
-};
+import { useLocation, useNavigate } from "react-router-dom";
+import { formatDateKey } from "../../../utils/dateUtils";
 
 export const PurchaseSection = () => {
   const navigate = useNavigate();
+  const currentPage = useLocation();
+  const handledPayOSOrderRef = useRef("");
   const [hallData, setHallData] = useState([]);
   const [movieData, setMovieData] = useState([]);
   const [seatsData, setSeatsData] = useState([]);
@@ -46,7 +41,7 @@ export const PurchaseSection = () => {
 
   const formattedDate =
     userDate !== "" &&
-    new Date(userDate).toLocaleDateString("vi-VN");
+    formatDateKey(userDate, "vi-VN");
 
   const currentMovie =
     userMovieId !== "" &&
@@ -67,49 +62,28 @@ export const PurchaseSection = () => {
     try {
       setBtnDisabled(true);
       setLoading(true);
-      let paymentID;
 
-      // Make the payment request
-      const paymentResponse = await axios.post(
-        `${import.meta.env.VITE_API_URL}/payment`,
+      const payOSResponse = await axios.post(
+        `${import.meta.env.VITE_API_URL}/payos/create-payment-link`,
         {
-          amount: userSeatPrice * userSeats.length,
-          userPayMethod,
           email: signedPerson.email,
-        }
-      );
-
-      paymentID = paymentResponse.data && paymentResponse.data[0].last_id;
-
-      // Purchase tickets for each seat
-      for (const seatId of userSeatList) {
-        await axios.post(`${import.meta.env.VITE_API_URL}/purchaseTicket`, {
-          price: userSeatPrice,
-          purchase_date: currentDate(),
-          paymentID,
-          seatId,
+          seatIds: userSeatList,
           userHallId,
           userMovieId,
           userShowtimeId,
-        });
-      }
-
-      // Get recent purchase data
-      const recentPurchaseResponse = await axios.post(
-        `${import.meta.env.VITE_API_URL}/recentPurchase`,
-        {
-          paymentID,
         }
       );
 
-      setTicketIds(recentPurchaseResponse.data);
+      if (!payOSResponse.data?.checkoutUrl) {
+        throw new Error("PayOS checkout URL is missing");
+      }
 
-      // Clear user selection
-      dispatch(resetCart());
+      window.location.href = payOSResponse.data.checkoutUrl;
     } catch (err) {
       console.error(err);
-      ticketPurchaseError();
-    } finally {
+      ticketPurchaseError(
+        err?.response?.data?.message || "Không thể tạo thanh toán PayOS"
+      );
       setLoading(false);
     }
   };
@@ -117,6 +91,45 @@ export const PurchaseSection = () => {
   useEffect(() => {
     userPayMethod.length > 0 ? setBtnDisabled(false) : setBtnDisabled(true);
   }, [userPayMethod]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(currentPage.search);
+    const orderCode = params.get("payosOrderCode") || params.get("orderCode");
+    const isCancel =
+      params.get("payosCancel") === "1" || params.get("cancel") === "true";
+
+    if (!orderCode || handledPayOSOrderRef.current === orderCode) return;
+    handledPayOSOrderRef.current = orderCode;
+
+    const confirmPayOSPayment = async () => {
+      if (isCancel) {
+        ticketPurchaseError("Bạn đã huỷ thanh toán PayOS");
+        navigate("/purchase", { replace: true });
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/payos/confirm-return`,
+          { orderCode }
+        );
+
+        setTicketIds(response.data.tickets || []);
+        dispatch(resetCart());
+      } catch (err) {
+        console.error(err);
+        ticketPurchaseError(
+          err?.response?.data?.message || "Không thể xác nhận thanh toán PayOS"
+        );
+        navigate("/purchase", { replace: true });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    confirmPayOSPayment();
+  }, [currentPage.search, dispatch, navigate]);
 
   useEffect(() => {
     const tickets = [];

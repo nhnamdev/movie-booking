@@ -3,6 +3,7 @@
 const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
+const { PayOS } = require("@payos/node");
 // Import module dotenv để sử dụng biến môi trường
 require("dotenv").config();
 
@@ -15,6 +16,10 @@ console.log("DB_NAME =", process.env.DB_NAME);
 // Khởi tạo cổng mặc định 7000
 const port = process.env.PORT || 7000;
 const registerDebugEnabled = process.env.DEBUG_REGISTER === "true";
+const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173").replace(
+  /\/+$/,
+  ""
+);
 const defaultCorsOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
@@ -93,6 +98,167 @@ function handleDisconnect() {
 }
 // Gọi hàm kết nối đến cơ sở dữ liệu
 handleDisconnect();
+
+const queryDbAsync = (sql, params = []) =>
+  new Promise((resolve, reject) => {
+    db.query(sql, params, (err, data) => {
+      if (err) reject(err);
+      else resolve(data);
+    });
+  });
+
+const getPayOSClient = () => {
+  if (
+    !process.env.PAYOS_CLIENT_ID ||
+    !process.env.PAYOS_API_KEY ||
+    !process.env.PAYOS_CHECKSUM_KEY
+  ) {
+    throw new Error("PayOS configuration is missing.");
+  }
+
+  return new PayOS({
+    clientId: process.env.PAYOS_CLIENT_ID,
+    apiKey: process.env.PAYOS_API_KEY,
+    checksumKey: process.env.PAYOS_CHECKSUM_KEY,
+  });
+};
+
+const getTodayDateKey = () => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const parsePayOSOrderPayload = (payloadJson) => {
+  try {
+    return JSON.parse(payloadJson);
+  } catch {
+    return null;
+  }
+};
+
+const generatePayOSOrderCode = () =>
+  Math.floor(Date.now() / 1000) * 1000 + Math.floor(Math.random() * 1000);
+
+const ticketInsertSql = `
+  INSERT INTO ticket (price,purchase_date,payment_id,seat_id,hall_id,movie_id,showtimes_id)
+  SELECT ?, ?, ?, ?, ?, ?, ?
+  FROM shown_in si
+  JOIN showtimes s ON si.showtime_id = s.id
+  WHERE si.movie_id = ?
+    AND si.hall_id = ?
+    AND si.showtime_id = ?
+    AND si.status = 'active'
+    AND s.status = 'active'
+    AND NOT EXISTS (
+      SELECT 1
+      FROM ticket t
+      WHERE t.seat_id = ?
+        AND t.hall_id = ?
+        AND t.movie_id = ?
+        AND t.showtimes_id = ?
+    )
+  LIMIT 1`;
+
+const finalizePaidPayOSOrder = async (orderCode) => {
+  const orderRows = await queryDbAsync(
+    "SELECT * FROM payos_orders WHERE order_code = ?",
+    [orderCode]
+  );
+
+  if (orderRows.length === 0) {
+    const err = new Error("Không tìm thấy đơn PayOS");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (orderRows[0].status === "PAID" && orderRows[0].ticket_ids_json) {
+    const ticketIds = parsePayOSOrderPayload(orderRows[0].ticket_ids_json) || [];
+    return ticketIds.map((id) => ({ id }));
+  }
+
+  let transactionStarted = false;
+
+  try {
+    await queryDbAsync("START TRANSACTION");
+    transactionStarted = true;
+
+    const lockedRows = await queryDbAsync(
+      "SELECT * FROM payos_orders WHERE order_code = ? FOR UPDATE",
+      [orderCode]
+    );
+    const lockedOrder = lockedRows[0];
+
+    if (lockedOrder.status === "PAID" && lockedOrder.ticket_ids_json) {
+      await queryDbAsync("COMMIT");
+      transactionStarted = false;
+      const ticketIds = parsePayOSOrderPayload(lockedOrder.ticket_ids_json) || [];
+      return ticketIds.map((id) => ({ id }));
+    }
+
+    const payload = parsePayOSOrderPayload(lockedOrder.payload_json);
+    if (!payload || !Array.isArray(payload.seatIds) || payload.seatIds.length === 0) {
+      throw new Error("Dữ liệu đơn PayOS không hợp lệ");
+    }
+
+    const paymentResult = await queryDbAsync(
+      "INSERT INTO payment(amount,method,customer_email) VALUES(?,?,?)",
+      [payload.amount, "PayOS", payload.email]
+    );
+    const paymentId = paymentResult.insertId;
+    const ticketIds = [];
+
+    for (const seatId of payload.seatIds) {
+      const ticketResult = await queryDbAsync(ticketInsertSql, [
+        payload.seatPrice,
+        getTodayDateKey(),
+        paymentId,
+        seatId,
+        payload.userHallId,
+        payload.userMovieId,
+        payload.userShowtimeId,
+        payload.userMovieId,
+        payload.userHallId,
+        payload.userShowtimeId,
+        seatId,
+        payload.userHallId,
+        payload.userMovieId,
+        payload.userShowtimeId,
+      ]);
+
+      if (ticketResult.affectedRows === 0) {
+        throw new Error("Suất chiếu đã ngưng bán hoặc ghế đã được đặt");
+      }
+
+      ticketIds.push(ticketResult.insertId);
+    }
+
+    await queryDbAsync(
+      `UPDATE payos_orders
+       SET status = 'PAID', payment_id = ?, ticket_ids_json = ?, error_message = NULL
+       WHERE order_code = ?`,
+      [paymentId, JSON.stringify(ticketIds), orderCode]
+    );
+
+    await queryDbAsync("COMMIT");
+    transactionStarted = false;
+
+    return ticketIds.map((id) => ({ id }));
+  } catch (err) {
+    if (transactionStarted) {
+      await queryDbAsync("ROLLBACK").catch(() => {});
+    }
+
+    await queryDbAsync(
+      "UPDATE payos_orders SET status = 'FAILED', error_message = ? WHERE order_code = ? AND status <> 'PAID'",
+      [err.desc || err.message, orderCode]
+    ).catch(() => {});
+
+    throw err;
+  }
+};
 
 // ─── AI ROUTES ──────────────────────────────────────────────────────────────
 // Mount các endpoint AI dưới prefix /ai (chatbot, recommendations, search, admin)
@@ -179,7 +345,7 @@ app.post("/showtimes", (req, res) => {
       S.id AS showtime_id,
       H.id AS hall_id,
       H.name AS hall_name,
-      S.showtime_date,
+      DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date,
       S.movie_start_time,
       S.show_type,
       S.screen_type,
@@ -192,10 +358,11 @@ app.post("/showtimes", (req, res) => {
     JOIN movie M ON SI.movie_id = M.id
     JOIN movie_genre MG ON MG.movie_id = M.id
     JOIN (
-      SELECT DISTINCT s2.showtime_date
+      SELECT s2.showtime_date
       FROM showtimes s2
       JOIN shown_in si2 ON s2.id = si2.showtime_id
       WHERE s2.status = 'active' AND si2.status = 'active'
+      GROUP BY s2.showtime_date
       ORDER BY s2.showtime_date DESC
       LIMIT 4
     ) AS LatestDates ON S.showtime_date = LatestDates.showtime_date
@@ -247,22 +414,23 @@ app.get("/genres", (req, res) => {
 app.post("/showtimesDates", (req, res) => {
   const theatreId = req.body.theatreId;
 
-  const sql = `SELECT subquery.showtime_date
+  const sql = `SELECT DATE_FORMAT(subquery.showtime_date, '%Y-%m-%d') AS showtime_date
   FROM (
-      SELECT DISTINCT showtimes.showtime_date
+      SELECT showtimes.showtime_date, MAX(showtimes.id) AS latest_showtime_id
       FROM showtimes
       JOIN shown_in ON showtimes.id = shown_in.showtime_id
       JOIN hall ON shown_in.hall_id = hall.id
       WHERE hall.theatre_id = ?
         AND showtimes.status = 'active'
         AND shown_in.status = 'active'
-      ORDER BY showtimes.id DESC
+      GROUP BY showtimes.showtime_date
+      ORDER BY latest_showtime_id DESC
       LIMIT 4
   ) AS subquery
   ORDER BY subquery.showtime_date ASC`;
 
   db.query(sql, [theatreId], (err, data) => {
-    if (err) return res.json(err);
+    if (err) return res.status(500).json({ message: "Could not load showtime dates" });
 
     return res.json(data);
   });
@@ -421,6 +589,197 @@ app.post("/recentPurchase", (req, res) => {
   });
 });
 
+app.post("/payos/create-payment-link", async (req, res) => {
+  const { email, seatIds, userHallId, userMovieId, userShowtimeId } = req.body;
+
+  const normalizedSeatIds = Array.isArray(seatIds)
+    ? [...new Set(seatIds.map((seatId) => Number(seatId)).filter(Number.isInteger))]
+    : [];
+  const hallId = Number(userHallId);
+  const movieId = Number(userMovieId);
+  const showtimeId = Number(userShowtimeId);
+
+  if (!email || normalizedSeatIds.length === 0 || !hallId || !movieId || !showtimeId) {
+    return res.status(400).json({ message: "Dữ liệu thanh toán không hợp lệ" });
+  }
+
+  try {
+    const showRows = await queryDbAsync(
+      `SELECT
+        S.price_per_seat,
+        S.movie_start_time,
+        DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date,
+        H.name AS hall_name,
+        M.name AS movie_name
+       FROM shown_in SI
+       JOIN showtimes S ON SI.showtime_id = S.id
+       JOIN hall H ON SI.hall_id = H.id
+       JOIN movie M ON SI.movie_id = M.id
+       WHERE SI.movie_id = ?
+         AND SI.hall_id = ?
+         AND SI.showtime_id = ?
+         AND SI.status = 'active'
+         AND S.status = 'active'
+       LIMIT 1`,
+      [movieId, hallId, showtimeId]
+    );
+
+    if (showRows.length === 0) {
+      return res.status(409).json({ message: "Suất chiếu đã ngưng bán" });
+    }
+
+    const availableSeats = await queryDbAsync(
+      `SELECT S.id
+       FROM seat S
+       JOIN hallwise_seat HS ON S.id = HS.seat_id
+       WHERE HS.hall_id = ?
+         AND S.id IN (?)
+         AND NOT EXISTS (
+           SELECT 1
+           FROM ticket T
+           WHERE T.seat_id = S.id
+             AND T.hall_id = ?
+             AND T.movie_id = ?
+             AND T.showtimes_id = ?
+         )`,
+      [hallId, normalizedSeatIds, hallId, movieId, showtimeId]
+    );
+
+    if (availableSeats.length !== normalizedSeatIds.length) {
+      return res.status(409).json({ message: "Một hoặc nhiều ghế đã được đặt" });
+    }
+
+    const payOS = getPayOSClient();
+    const seatPrice = Number(showRows[0].price_per_seat);
+    const amount = seatPrice * normalizedSeatIds.length;
+    const orderCode = generatePayOSOrderCode();
+    const description = `CGV ${orderCode}`;
+    const returnUrl = `${frontendUrl}/purchase?payosOrderCode=${orderCode}`;
+    const cancelUrl = `${frontendUrl}/purchase?payosCancel=1&payosOrderCode=${orderCode}`;
+    const payload = {
+      email,
+      seatIds: normalizedSeatIds,
+      userHallId: hallId,
+      userMovieId: movieId,
+      userShowtimeId: showtimeId,
+      seatPrice,
+      amount,
+    };
+
+    await queryDbAsync(
+      `INSERT INTO payos_orders
+        (order_code, status, amount, customer_email, payload_json)
+       VALUES (?, 'PENDING', ?, ?, ?)`,
+      [orderCode, amount, email, JSON.stringify(payload)]
+    );
+
+    try {
+      const paymentLink = await payOS.paymentRequests.create({
+        orderCode,
+        amount,
+        description,
+        buyerEmail: email,
+        items: [
+          {
+            name: `Ve ${showRows[0].movie_name}`.slice(0, 80),
+            quantity: normalizedSeatIds.length,
+            price: seatPrice,
+          },
+        ],
+        cancelUrl,
+        returnUrl,
+        expiredAt: Math.floor(Date.now() / 1000) + 15 * 60,
+      });
+
+      await queryDbAsync(
+        `UPDATE payos_orders
+         SET payment_link_id = ?, checkout_url = ?, status = ?
+         WHERE order_code = ?`,
+        [
+          paymentLink.paymentLinkId,
+          paymentLink.checkoutUrl,
+          paymentLink.status || "PENDING",
+          orderCode,
+        ]
+      );
+
+      return res.json({ orderCode, checkoutUrl: paymentLink.checkoutUrl });
+    } catch (err) {
+      await queryDbAsync(
+        "UPDATE payos_orders SET status = 'FAILED', error_message = ? WHERE order_code = ?",
+        [err.desc || err.message, orderCode]
+      ).catch(() => {});
+      throw err;
+    }
+  } catch (err) {
+    console.error("PayOS create payment link error:", err);
+    return res.status(502).json({
+      message:
+        err.desc ||
+        err.message ||
+        "Không thể tạo link thanh toán PayOS",
+      payosCode: err.code,
+    });
+  }
+});
+
+app.post("/payos/confirm-return", async (req, res) => {
+  const orderCode = Number(req.body.orderCode);
+
+  if (!orderCode) {
+    return res.status(400).json({ message: "Thiếu mã đơn PayOS" });
+  }
+
+  try {
+    const payOS = getPayOSClient();
+    const paymentLink = await payOS.paymentRequests.get(orderCode);
+
+    await queryDbAsync(
+      "UPDATE payos_orders SET status = ? WHERE order_code = ? AND status <> 'PAID'",
+      [paymentLink.status, orderCode]
+    );
+
+    if (paymentLink.status !== "PAID") {
+      return res.status(409).json({
+        message: "Thanh toán PayOS chưa hoàn tất",
+        status: paymentLink.status,
+      });
+    }
+
+    const tickets = await finalizePaidPayOSOrder(orderCode);
+    return res.json({ tickets });
+  } catch (err) {
+    console.error("PayOS confirm return error:", err);
+    return res.status(err.statusCode || 500).json({
+      message: err.message || "Không thể xác nhận thanh toán PayOS",
+    });
+  }
+});
+
+app.post("/payos/webhook", async (req, res) => {
+  try {
+    const payOS = getPayOSClient();
+    const webhookData = await payOS.webhooks.verify(req.body);
+    const orderCode = Number(webhookData.orderCode);
+
+    if (!orderCode) return res.status(200).json({ ok: true });
+
+    if (webhookData.code === "00") {
+      await finalizePaidPayOSOrder(orderCode);
+    } else {
+      await queryDbAsync(
+        "UPDATE payos_orders SET status = 'FAILED', error_message = ? WHERE order_code = ? AND status <> 'PAID'",
+        [webhookData.desc || "PayOS webhook failed", orderCode]
+      );
+    }
+
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error("PayOS webhook error:", err);
+    return res.status(400).json({ message: "Invalid PayOS webhook" });
+  }
+});
+
 
 // ////////
 // SIGN UP
@@ -548,7 +907,7 @@ app.post("/movieWiseShowtime", (req, res) => {
   const movieId = req.body.movieDetailsId;
   const theatreId = req.body.theatreId;
 
-  const sql = `SELECT S.id AS showtime_id, H.id AS hall_id, M.id AS movie_id, S.showtime_date, S.movie_start_time, S.show_type, S.price_per_seat FROM theatre T JOIN hall H ON T.id = H.theatre_id JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id JOIN movie M ON SI.movie_id = M.id JOIN ( SELECT DISTINCT s2.showtime_date FROM showtimes s2 JOIN shown_in si2 ON s2.id = si2.showtime_id WHERE s2.status = 'active' AND si2.status = 'active' ORDER BY s2.showtime_date DESC LIMIT 4 ) AS LatestDates ON S.showtime_date = LatestDates.showtime_date WHERE T.id = ? AND M.id = ? AND S.status = 'active' AND SI.status = 'active' ORDER BY S.showtime_date ASC`;
+  const sql = `SELECT S.id AS showtime_id, H.id AS hall_id, M.id AS movie_id, DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date, S.movie_start_time, S.show_type, S.price_per_seat FROM theatre T JOIN hall H ON T.id = H.theatre_id JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id JOIN movie M ON SI.movie_id = M.id JOIN ( SELECT s2.showtime_date FROM showtimes s2 JOIN shown_in si2 ON s2.id = si2.showtime_id WHERE s2.status = 'active' AND si2.status = 'active' GROUP BY s2.showtime_date ORDER BY s2.showtime_date DESC LIMIT 4 ) AS LatestDates ON S.showtime_date = LatestDates.showtime_date WHERE T.id = ? AND M.id = ? AND S.status = 'active' AND SI.status = 'active' ORDER BY S.showtime_date ASC`;
 
   db.query(sql, [theatreId, movieId], (err, data) => {
     if (err) return res.json(err);

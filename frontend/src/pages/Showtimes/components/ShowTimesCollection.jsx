@@ -4,18 +4,13 @@ import HashLoader from "react-spinners/HashLoader";
 import { useSelector } from "react-redux";
 
 import { ShowtimesCard } from "./ShowtimesCard";
+import { toDateKey } from "../../../utils/dateUtils";
 
 const tabs = [
   { id: "now", label: "PHIM ĐANG CHIẾU" },
   { id: "upcoming", label: "Phim sắp chiếu" },
   { id: "prices", label: "BẢNG GIÁ VÉ" },
 ];
-
-const toDateKey = (value) => {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value).slice(0, 10);
-  return date.toISOString().slice(0, 10);
-};
 
 const buildMovieSchedule = (rows) => {
   const moviesById = new Map();

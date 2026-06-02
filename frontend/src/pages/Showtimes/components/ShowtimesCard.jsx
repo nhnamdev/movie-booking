@@ -15,9 +15,10 @@ import {
   setShowDate,
   setShowDetail,
 } from "../../../reducers/cartSlice";
+import { formatDateKey, toDateKey } from "../../../utils/dateUtils";
 
 const formatDate = (value) =>
-  new Date(value).toLocaleDateString("vi-VN", {
+  formatDateKey(value, "vi-VN", {
     weekday: "long",
     day: "2-digit",
     month: "2-digit",
@@ -42,10 +43,12 @@ export const ShowtimesCard = ({
   const dispatch = useDispatch();
 
   const handleSelectShowtime = (date, time) => {
+    const showtimeDate = toDateKey(date);
+
     dispatch(resetCart());
 
     if (isAuthenticated && signedPerson.person_type === "Customer") {
-      dispatch(setShowDate(date));
+      dispatch(setShowDate(showtimeDate));
       dispatch(setMovie(id));
       dispatch(setShowDetail(`${time.showtimeId},${time.hallId},${time.price}`));
       navigate("/purchase");

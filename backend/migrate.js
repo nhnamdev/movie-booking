@@ -266,6 +266,31 @@ async function normalizeSeedShowtimes(connection) {
 }
 
 async function applySchemaMigrations(connection) {
+  if (!(await tableExists(connection, "payos_orders"))) {
+    await query(
+      connection,
+      `CREATE TABLE payos_orders (
+        id INT NOT NULL AUTO_INCREMENT,
+        order_code BIGINT NOT NULL,
+        payment_link_id VARCHAR(100) DEFAULT NULL,
+        checkout_url TEXT DEFAULT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+        amount INT NOT NULL,
+        customer_email VARCHAR(100) NOT NULL,
+        payload_json LONGTEXT NOT NULL,
+        payment_id INT DEFAULT NULL,
+        ticket_ids_json LONGTEXT DEFAULT NULL,
+        error_message TEXT DEFAULT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY payos_orders_order_code_unique (order_code),
+        KEY payos_orders_status_idx (status),
+        KEY payos_orders_customer_email_idx (customer_email)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
+    );
+  }
+
   if (await tableExists(connection, "movie")) {
     await ensureColumn(
       connection,

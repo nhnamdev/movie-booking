@@ -1,9 +1,14 @@
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPaymentMethod } from "../../../reducers/cartSlice";
 
 export const PayMethodSelector = ({ paymentOngoing }) => {
   const { payment_method: userPayMethod } = useSelector((store) => store.cart);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!userPayMethod) dispatch(setPaymentMethod("PayOS"));
+  }, [dispatch, userPayMethod]);
 
   const checkedColor = (val) => {
     return {
@@ -15,33 +20,30 @@ export const PayMethodSelector = ({ paymentOngoing }) => {
   return (
     <div>
       <form>
-        <div className="form-item-heading">Chọn Phương Thức Thanh Toán</div>
+        <div className="form-item-heading">Chọn phương thức thanh toán</div>
         <div className="form-pay-options">
-          {[
-            { id: 1, label: "MoMo", value: "MoMo" },
-            { id: 2, label: "ZaloPay", value: "ZaloPay" },
-            { id: 3, label: "Thẻ ATM", value: "ATM" },
-            { id: 4, label: "Tiền mặt", value: "Tiền mặt" },
-          ].map(({ id, label, value }) => (
-            <div
-              className="pay-input-container"
-              key={value}
-              style={checkedColor(value)}
-            >
-              <input
-                disabled={paymentOngoing}
-                type="radio"
-                id={id}
-                name="select-payment"
-                value={value}
-                onChange={(e) => dispatch(setPaymentMethod(e.target.value))}
-                checked={value === userPayMethod}
-              />
-              <label className="form-pay-detail" htmlFor={id}>
-                {label}
-              </label>
-            </div>
-          ))}
+          {[{ id: 1, label: "PayOS", value: "PayOS" }].map(
+            ({ id, label, value }) => (
+              <div
+                className="pay-input-container"
+                key={value}
+                style={checkedColor(value)}
+              >
+                <input
+                  disabled={paymentOngoing}
+                  type="radio"
+                  id={id}
+                  name="select-payment"
+                  value={value}
+                  onChange={(e) => dispatch(setPaymentMethod(e.target.value))}
+                  checked={value === userPayMethod}
+                />
+                <label className="form-pay-detail" htmlFor={id}>
+                  {label}
+                </label>
+              </div>
+            )
+          )}
         </div>
       </form>
     </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
 import HashLoader from "react-spinners/HashLoader";
@@ -9,9 +9,14 @@ import { resetCart } from "../reducers/cartSlice";
 export const LocationSelector = ({ paymentOngoing }) => {
   const [locationData, setLocationData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const selectedLocationIdRef = useRef("");
 
   const userLocation = useSelector((store) => store.currentLocation);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    selectedLocationIdRef.current = userLocation.id;
+  }, [userLocation.id]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,7 +27,9 @@ export const LocationSelector = ({ paymentOngoing }) => {
         );
 
         setLocationData(response.data);
-        dispatch(selectLocation(response.data[0]));
+        if (!selectedLocationIdRef.current && response.data.length > 0) {
+          dispatch(selectLocation(response.data[0]));
+        }
       } catch (err) {
         console.log(err);
       } finally {
@@ -32,10 +39,6 @@ export const LocationSelector = ({ paymentOngoing }) => {
 
     fetchData();
   }, [dispatch]);
-
-  useEffect(() => {
-    dispatch(resetCart());
-  }, [userLocation.id, dispatch]);
 
   const locationOptions = locationData?.map((location, idx) => {
     return (
@@ -49,6 +52,12 @@ export const LocationSelector = ({ paymentOngoing }) => {
     const selectedLocationObj = locationData.find(
       (locationObj) => locationObj.id === Number(e.target.value)
     );
+
+    if (!selectedLocationObj) return;
+
+    if (selectedLocationObj.id !== userLocation.id) {
+      dispatch(resetCart());
+    }
 
     dispatch(selectLocation(selectedLocationObj));
   };
