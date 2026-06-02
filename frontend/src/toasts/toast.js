@@ -78,6 +78,18 @@ export const purchaseCompletion = (tickets) => {
   });
 };
 
+export const counterOrderCreated = (orderCode) => {
+  toast.success(`Đã tạo vé thanh toán tại rạp. Mã đơn: ${orderCode}`, {
+    position: "top-right",
+    autoClose: 8000,
+    closeOnClick: true,
+    pauseOnHover: false,
+    draggable: true,
+    theme: "light",
+    style: toastFontStyle,
+  });
+};
+
 export const adminMovieToast = (msg = "Thêm phim thành công") => {
   toast.success(msg, {
     ...toastPrimaryCategories,

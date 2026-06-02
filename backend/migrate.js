@@ -277,6 +277,7 @@ async function applySchemaMigrations(connection) {
         status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
         amount INT NOT NULL,
         customer_email VARCHAR(100) NOT NULL,
+        payment_method VARCHAR(30) NOT NULL DEFAULT 'PayOS',
         payload_json LONGTEXT NOT NULL,
         payment_id INT DEFAULT NULL,
         ticket_ids_json LONGTEXT DEFAULT NULL,
@@ -288,6 +289,23 @@ async function applySchemaMigrations(connection) {
         KEY payos_orders_status_idx (status),
         KEY payos_orders_customer_email_idx (customer_email)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
+    );
+  }
+
+  if (await tableExists(connection, "payos_orders")) {
+    await ensureColumn(
+      connection,
+      "payos_orders",
+      "payment_method",
+      "VARCHAR(30) NOT NULL DEFAULT 'PayOS'"
+    );
+    await query(
+      connection,
+      "UPDATE payos_orders SET payment_method = 'PayOS' WHERE payment_method IS NULL OR payment_method = ''"
+    );
+    await query(
+      connection,
+      "UPDATE payos_orders SET payment_method = 'Thanh toán tại rạp' WHERE payment_method = 'Tại quầy'"
     );
   }
 
@@ -358,9 +376,19 @@ async function applySchemaMigrations(connection) {
   }
 
   if (await tableExists(connection, "payment")) {
+    await ensureColumn(
+      connection,
+      "payment",
+      "payment_status",
+      "VARCHAR(20) NOT NULL DEFAULT 'PAID'"
+    );
     await query(
       connection,
-      "UPDATE payment SET method = 'Tiền mặt' WHERE method = 'Cash'"
+      "UPDATE payment SET payment_status = 'PAID' WHERE payment_status IS NULL OR payment_status = ''"
+    );
+    await query(
+      connection,
+      "UPDATE payment SET method = 'Thanh toán tại rạp' WHERE method IN ('Cash', 'Tiền mặt', 'Tại quầy')"
     );
   }
 

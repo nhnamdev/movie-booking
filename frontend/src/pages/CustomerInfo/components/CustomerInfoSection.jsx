@@ -13,6 +13,11 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import HashLoader from "react-spinners/HashLoader";
 
+const paymentStatusLabels = {
+  UNPAID: "Chưa thanh toán",
+  PAID: "Đã thanh toán",
+};
+
 export const CustomerInfoSection = () => {
   const [cusProData, setCusProData] = useState({});
   const [cusTicketData, setCusTicketData] = useState([]);
@@ -50,7 +55,8 @@ export const CustomerInfoSection = () => {
             email: signedPerson.email,
           }
         );
-        const formattedData = response.data.map((dataObj) => {
+        const purchases = Array.isArray(response.data) ? response.data : [];
+        const formattedData = purchases.map((dataObj) => {
           const purDate = new Date(dataObj.purchase_date).toLocaleDateString(
             "vi-VN"
           );
@@ -98,6 +104,8 @@ const cancelTicket = async (ticketId) => {
 
 
   const purchaseHtml = cusTicketData.map((cusTicket, id) => {
+    const paymentStatus = String(cusTicket.payment_status || "PAID").toUpperCase();
+
     return (
       <Link
         key={id}
@@ -149,6 +157,14 @@ const cancelTicket = async (ticketId) => {
             <div className="purchase-tags">
               <HiOutlineCurrencyBangladeshi size={18} />
               <strong>{cusTicket.ticket_price}</strong>
+            </div>
+            <div className="purchase-tags">
+              <span
+                className={`purchase-payment-status is-${paymentStatus.toLowerCase()}`}
+              >
+                {paymentStatusLabels[paymentStatus] || paymentStatus}
+              </span>
+              <strong>{cusTicket.payment_method || "PayOS"}</strong>
             </div>
             <div className="purchase-tags">
               <p>

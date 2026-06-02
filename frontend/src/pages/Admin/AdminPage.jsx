@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   FaChartBar,
   FaClock,
+  FaClipboardList,
   FaEdit,
   FaFilm,
   FaHome,
@@ -18,9 +19,11 @@ import { AdminShownInModifySection } from "./components/AdminShownInModifySectio
 import { AdminDashboardPrimary } from "./components/AdminDashboardPrimary";
 import { MovieWiseTicket } from "./components/MovieWiseTicket";
 import { AdminAIPanel } from "./components/AdminAIPanel";
+import { AdminOrdersSection } from "./components/AdminOrdersSection";
 
 const tabs = [
   { id: "dashboard", label: "Tổng quan", icon: FaChartBar },
+  { id: "orders", label: "Đơn hàng", icon: FaClipboardList },
   { id: "movies", label: "Quản lý phim", icon: FaFilm },
   { id: "showtimes", label: "Lịch chiếu", icon: FaClock },
   { id: "modify", label: "Chỉnh sửa suất chiếu", icon: FaEdit },
@@ -116,6 +119,8 @@ const AdminPage = () => {
           )}
 
           {activeTab === "movies" && <AdminMovieAddSection />}
+
+          {activeTab === "orders" && <AdminOrdersSection />}
 
           {activeTab === "showtimes" && (
             <AdminShowtimesAddSection

@@ -22,7 +22,10 @@ export const PayMethodSelector = ({ paymentOngoing }) => {
       <form>
         <div className="form-item-heading">Chọn phương thức thanh toán</div>
         <div className="form-pay-options">
-          {[{ id: 1, label: "PayOS", value: "PayOS" }].map(
+          {[
+            { id: 1, label: "PayOS", value: "PayOS" },
+            { id: 2, label: "Thanh toán tại rạp", value: "Thanh toán tại rạp" },
+          ].map(
             ({ id, label, value }) => (
               <div
                 className="pay-input-container"

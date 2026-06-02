@@ -8,7 +8,11 @@ import { LocationSelector } from "../../../components/LocationSelector";
 import { PayMethodSelector } from "./PayMethodSelector";
 import BarLoader from "react-spinners/BarLoader";
 import { useDispatch, useSelector } from "react-redux";
-import { purchaseCompletion, ticketPurchaseError } from "../../../toasts/toast";
+import {
+  counterOrderCreated,
+  purchaseCompletion,
+  ticketPurchaseError,
+} from "../../../toasts/toast";
 import { resetCart } from "../../../reducers/cartSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 import { formatDateKey } from "../../../utils/dateUtils";
@@ -63,6 +67,25 @@ export const PurchaseSection = () => {
       setBtnDisabled(true);
       setLoading(true);
 
+      if (userPayMethod === "Thanh toán tại rạp") {
+        const counterResponse = await axios.post(
+          `${import.meta.env.VITE_API_URL}/counter-orders/create`,
+          {
+            email: signedPerson.email,
+            seatIds: userSeatList,
+            userHallId,
+            userMovieId,
+            userShowtimeId,
+          }
+        );
+
+        counterOrderCreated(counterResponse.data.orderCode);
+        dispatch(resetCart());
+        navigate("/purchase", { replace: true });
+        setLoading(false);
+        return;
+      }
+
       const payOSResponse = await axios.post(
         `${import.meta.env.VITE_API_URL}/payos/create-payment-link`,
         {
@@ -82,7 +105,10 @@ export const PurchaseSection = () => {
     } catch (err) {
       console.error(err);
       ticketPurchaseError(
-        err?.response?.data?.message || "Không thể tạo thanh toán PayOS"
+        err?.response?.data?.message ||
+          (userPayMethod === "Thanh toán tại rạp"
+            ? "Không thể tạo vé thanh toán tại rạp"
+            : "Không thể tạo thanh toán PayOS")
       );
       setLoading(false);
     }
@@ -479,7 +505,13 @@ export const PurchaseSection = () => {
               onClick={handleTicketPurchase}
               disabled={btnDisabled}
             >
-              {loading ? <BarLoader color="#e6e6e8" /> : "Mua vé"}
+              {loading ? (
+                <BarLoader color="#e6e6e8" />
+              ) : userPayMethod === "Thanh toán tại rạp" ? (
+                "Tạo vé tại rạp"
+              ) : (
+                "Mua vé"
+              )}
             </button>
           </div>
         </div>

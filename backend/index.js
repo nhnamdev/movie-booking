@@ -142,6 +142,148 @@ const parsePayOSOrderPayload = (payloadJson) => {
 const generatePayOSOrderCode = () =>
   Math.floor(Date.now() / 1000) * 1000 + Math.floor(Math.random() * 1000);
 
+const normalizeSeatIds = (seatIds) =>
+  Array.isArray(seatIds)
+    ? [...new Set(seatIds.map((seatId) => Number(seatId)).filter(Number.isInteger))]
+    : [];
+
+const getHeldOrderSeatIds = async ({ hallId, movieId, showtimeId }) => {
+  const rows = await queryDbAsync(
+    `SELECT order_code, status, payment_method, payload_json, created_at
+     FROM payos_orders
+     WHERE status IN ('UNPAID', 'PENDING')
+       AND payment_id IS NULL`
+  );
+  const heldSeatIds = new Set();
+  const now = Date.now();
+
+  rows.forEach((row) => {
+    const payload = parsePayOSOrderPayload(row.payload_json);
+    if (
+      !payload ||
+      Number(payload.userHallId) !== Number(hallId) ||
+      Number(payload.userMovieId) !== Number(movieId) ||
+      Number(payload.userShowtimeId) !== Number(showtimeId)
+    ) {
+      return;
+    }
+
+    const status = String(row.status || "").toUpperCase();
+    const method = row.payment_method || "PayOS";
+    const createdAt = new Date(row.created_at).getTime();
+    const payOSStillHolding =
+      method === "PayOS" &&
+      status === "PENDING" &&
+      Number.isFinite(createdAt) &&
+      now - createdAt <= 20 * 60 * 1000;
+
+    if (status !== "UNPAID" && !payOSStillHolding) return;
+
+    normalizeSeatIds(payload.seatIds).forEach((seatId) => heldSeatIds.add(seatId));
+  });
+
+  return heldSeatIds;
+};
+
+const buildPaymentOrderPayload = async ({
+  email,
+  seatIds,
+  userHallId,
+  userMovieId,
+  userShowtimeId,
+  paymentMethod,
+}) => {
+  const normalizedSeatIds = normalizeSeatIds(seatIds);
+  const hallId = Number(userHallId);
+  const movieId = Number(userMovieId);
+  const showtimeId = Number(userShowtimeId);
+
+  if (!email || normalizedSeatIds.length === 0 || !hallId || !movieId || !showtimeId) {
+    const err = new Error("Dữ liệu thanh toán không hợp lệ");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const showRows = await queryDbAsync(
+    `SELECT
+      S.price_per_seat,
+      S.movie_start_time,
+      DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date,
+      H.name AS hall_name,
+      M.name AS movie_name
+     FROM shown_in SI
+     JOIN showtimes S ON SI.showtime_id = S.id
+     JOIN hall H ON SI.hall_id = H.id
+     JOIN movie M ON SI.movie_id = M.id
+     WHERE SI.movie_id = ?
+       AND SI.hall_id = ?
+       AND SI.showtime_id = ?
+       AND SI.status = 'active'
+       AND S.status = 'active'
+     LIMIT 1`,
+    [movieId, hallId, showtimeId]
+  );
+
+  if (showRows.length === 0) {
+    const err = new Error("Suất chiếu đã ngưng bán");
+    err.statusCode = 409;
+    throw err;
+  }
+
+  const availableSeats = await queryDbAsync(
+    `SELECT S.id
+     FROM seat S
+     JOIN hallwise_seat HS ON S.id = HS.seat_id
+     WHERE HS.hall_id = ?
+       AND S.id IN (?)
+       AND NOT EXISTS (
+         SELECT 1
+         FROM ticket T
+         WHERE T.seat_id = S.id
+           AND T.hall_id = ?
+           AND T.movie_id = ?
+           AND T.showtimes_id = ?
+       )`,
+    [hallId, normalizedSeatIds, hallId, movieId, showtimeId]
+  );
+
+  const heldSeatIds = await getHeldOrderSeatIds({ hallId, movieId, showtimeId });
+  const selectedHeldSeatIds = normalizedSeatIds.filter((seatId) => heldSeatIds.has(seatId));
+
+  if (
+    availableSeats.length !== normalizedSeatIds.length ||
+    selectedHeldSeatIds.length > 0
+  ) {
+    const err = new Error("Một hoặc nhiều ghế đã được đặt");
+    err.statusCode = 409;
+    throw err;
+  }
+
+  const seatPrice = Number(showRows[0].price_per_seat);
+  const amount = seatPrice * normalizedSeatIds.length;
+
+  return {
+    amount,
+    normalizedSeatIds,
+    seatPrice,
+    show: showRows[0],
+    payload: {
+      email,
+      seatIds: normalizedSeatIds,
+      userHallId: hallId,
+      userMovieId: movieId,
+      userShowtimeId: showtimeId,
+      seatPrice,
+      amount,
+      paymentMethod,
+      movieName: showRows[0].movie_name,
+      hallName: showRows[0].hall_name,
+      showtimeDate: showRows[0].showtime_date,
+      movieStartTime: showRows[0].movie_start_time,
+    },
+  };
+};
+
 const ticketInsertSql = `
   INSERT INTO ticket (price,purchase_date,payment_id,seat_id,hall_id,movie_id,showtimes_id)
   SELECT ?, ?, ?, ?, ?, ?, ?
@@ -162,20 +304,31 @@ const ticketInsertSql = `
     )
   LIMIT 1`;
 
-const finalizePaidPayOSOrder = async (orderCode) => {
+const finalizePaymentOrderTickets = async (
+  orderCode,
+  { orderStatus = "PAID", paymentStatus = "PAID" } = {}
+) => {
   const orderRows = await queryDbAsync(
     "SELECT * FROM payos_orders WHERE order_code = ?",
     [orderCode]
   );
 
   if (orderRows.length === 0) {
-    const err = new Error("Không tìm thấy đơn PayOS");
+    const err = new Error("Không tìm thấy đơn thanh toán");
     err.statusCode = 404;
     throw err;
   }
 
-  if (orderRows[0].status === "PAID" && orderRows[0].ticket_ids_json) {
+  if (orderRows[0].payment_id && orderRows[0].ticket_ids_json) {
     const ticketIds = parsePayOSOrderPayload(orderRows[0].ticket_ids_json) || [];
+    await queryDbAsync(
+      "UPDATE payment SET payment_status = ? WHERE id = ?",
+      [paymentStatus, orderRows[0].payment_id]
+    );
+    await queryDbAsync(
+      "UPDATE payos_orders SET status = ?, error_message = NULL WHERE order_code = ?",
+      [orderStatus, orderCode]
+    );
     return ticketIds.map((id) => ({ id }));
   }
 
@@ -191,21 +344,30 @@ const finalizePaidPayOSOrder = async (orderCode) => {
     );
     const lockedOrder = lockedRows[0];
 
-    if (lockedOrder.status === "PAID" && lockedOrder.ticket_ids_json) {
+    if (lockedOrder.payment_id && lockedOrder.ticket_ids_json) {
+      const ticketIds = parsePayOSOrderPayload(lockedOrder.ticket_ids_json) || [];
+      await queryDbAsync(
+        "UPDATE payment SET payment_status = ? WHERE id = ?",
+        [paymentStatus, lockedOrder.payment_id]
+      );
+      await queryDbAsync(
+        "UPDATE payos_orders SET status = ?, error_message = NULL WHERE order_code = ?",
+        [orderStatus, orderCode]
+      );
       await queryDbAsync("COMMIT");
       transactionStarted = false;
-      const ticketIds = parsePayOSOrderPayload(lockedOrder.ticket_ids_json) || [];
       return ticketIds.map((id) => ({ id }));
     }
 
     const payload = parsePayOSOrderPayload(lockedOrder.payload_json);
     if (!payload || !Array.isArray(payload.seatIds) || payload.seatIds.length === 0) {
-      throw new Error("Dữ liệu đơn PayOS không hợp lệ");
+      throw new Error("Dữ liệu đơn thanh toán không hợp lệ");
     }
 
+    const paymentMethod = lockedOrder.payment_method || payload.paymentMethod || "PayOS";
     const paymentResult = await queryDbAsync(
-      "INSERT INTO payment(amount,method,customer_email) VALUES(?,?,?)",
-      [payload.amount, "PayOS", payload.email]
+      "INSERT INTO payment(amount,method,customer_email,payment_status) VALUES(?,?,?,?)",
+      [payload.amount, paymentMethod, payload.email, paymentStatus]
     );
     const paymentId = paymentResult.insertId;
     const ticketIds = [];
@@ -237,9 +399,9 @@ const finalizePaidPayOSOrder = async (orderCode) => {
 
     await queryDbAsync(
       `UPDATE payos_orders
-       SET status = 'PAID', payment_id = ?, ticket_ids_json = ?, error_message = NULL
+       SET status = ?, payment_id = ?, ticket_ids_json = ?, error_message = NULL
        WHERE order_code = ?`,
-      [paymentId, JSON.stringify(ticketIds), orderCode]
+      [orderStatus, paymentId, JSON.stringify(ticketIds), orderCode]
     );
 
     await queryDbAsync("COMMIT");
@@ -464,10 +626,10 @@ app.post("/halls", (req, res) => {
   });
 });
 
-app.post("/seats", (req, res) => {
-  const showtime_id = req.body.userShowtimeId;
-  const hall_id = req.body.userHallId;
-  const movie_id = req.body.userMovieId;
+app.post("/seats", async (req, res) => {
+  const showtime_id = Number(req.body.userShowtimeId);
+  const hall_id = Number(req.body.userHallId);
+  const movie_id = Number(req.body.userMovieId);
 
   const sql = `SELECT
   S.id AS seat_id,
@@ -491,11 +653,23 @@ WHERE
   STIME.status = 'active'
 ORDER BY S.id`;
 
-  db.query(sql, [showtime_id, hall_id, movie_id], (err, data) => {
-    if (err) return res.json(err);
+  try {
+    const data = await queryDbAsync(sql, [showtime_id, hall_id, movie_id]);
+    const heldSeatIds = await getHeldOrderSeatIds({
+      hallId: hall_id,
+      movieId: movie_id,
+      showtimeId: showtime_id,
+    });
+    const seats = data.map((seat) => ({
+      ...seat,
+      booked_status: heldSeatIds.has(Number(seat.seat_id)) ? 0 : seat.booked_status,
+    }));
 
-    return res.json(data);
-  });
+    return res.json(seats);
+  } catch (err) {
+    console.error("Seats load error:", err);
+    return res.status(500).json({ message: "Không thể tải danh sách ghế" });
+  }
 });
 
 app.post("/payment", (req, res) => {
@@ -592,98 +766,39 @@ app.post("/recentPurchase", (req, res) => {
 app.post("/payos/create-payment-link", async (req, res) => {
   const { email, seatIds, userHallId, userMovieId, userShowtimeId } = req.body;
 
-  const normalizedSeatIds = Array.isArray(seatIds)
-    ? [...new Set(seatIds.map((seatId) => Number(seatId)).filter(Number.isInteger))]
-    : [];
-  const hallId = Number(userHallId);
-  const movieId = Number(userMovieId);
-  const showtimeId = Number(userShowtimeId);
-
-  if (!email || normalizedSeatIds.length === 0 || !hallId || !movieId || !showtimeId) {
-    return res.status(400).json({ message: "Dữ liệu thanh toán không hợp lệ" });
-  }
-
   try {
-    const showRows = await queryDbAsync(
-      `SELECT
-        S.price_per_seat,
-        S.movie_start_time,
-        DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date,
-        H.name AS hall_name,
-        M.name AS movie_name
-       FROM shown_in SI
-       JOIN showtimes S ON SI.showtime_id = S.id
-       JOIN hall H ON SI.hall_id = H.id
-       JOIN movie M ON SI.movie_id = M.id
-       WHERE SI.movie_id = ?
-         AND SI.hall_id = ?
-         AND SI.showtime_id = ?
-         AND SI.status = 'active'
-         AND S.status = 'active'
-       LIMIT 1`,
-      [movieId, hallId, showtimeId]
-    );
-
-    if (showRows.length === 0) {
-      return res.status(409).json({ message: "Suất chiếu đã ngưng bán" });
-    }
-
-    const availableSeats = await queryDbAsync(
-      `SELECT S.id
-       FROM seat S
-       JOIN hallwise_seat HS ON S.id = HS.seat_id
-       WHERE HS.hall_id = ?
-         AND S.id IN (?)
-         AND NOT EXISTS (
-           SELECT 1
-           FROM ticket T
-           WHERE T.seat_id = S.id
-             AND T.hall_id = ?
-             AND T.movie_id = ?
-             AND T.showtimes_id = ?
-         )`,
-      [hallId, normalizedSeatIds, hallId, movieId, showtimeId]
-    );
-
-    if (availableSeats.length !== normalizedSeatIds.length) {
-      return res.status(409).json({ message: "Một hoặc nhiều ghế đã được đặt" });
-    }
-
+    const orderData = await buildPaymentOrderPayload({
+      email,
+      seatIds,
+      userHallId,
+      userMovieId,
+      userShowtimeId,
+      paymentMethod: "PayOS",
+    });
     const payOS = getPayOSClient();
-    const seatPrice = Number(showRows[0].price_per_seat);
-    const amount = seatPrice * normalizedSeatIds.length;
     const orderCode = generatePayOSOrderCode();
     const description = `CGV ${orderCode}`;
     const returnUrl = `${frontendUrl}/purchase?payosOrderCode=${orderCode}`;
     const cancelUrl = `${frontendUrl}/purchase?payosCancel=1&payosOrderCode=${orderCode}`;
-    const payload = {
-      email,
-      seatIds: normalizedSeatIds,
-      userHallId: hallId,
-      userMovieId: movieId,
-      userShowtimeId: showtimeId,
-      seatPrice,
-      amount,
-    };
 
     await queryDbAsync(
       `INSERT INTO payos_orders
-        (order_code, status, amount, customer_email, payload_json)
-       VALUES (?, 'PENDING', ?, ?, ?)`,
-      [orderCode, amount, email, JSON.stringify(payload)]
+        (order_code, status, amount, customer_email, payload_json, payment_method)
+       VALUES (?, 'PENDING', ?, ?, ?, 'PayOS')`,
+      [orderCode, orderData.amount, email, JSON.stringify(orderData.payload)]
     );
 
     try {
       const paymentLink = await payOS.paymentRequests.create({
         orderCode,
-        amount,
+        amount: orderData.amount,
         description,
         buyerEmail: email,
         items: [
           {
-            name: `Ve ${showRows[0].movie_name}`.slice(0, 80),
-            quantity: normalizedSeatIds.length,
-            price: seatPrice,
+            name: `Ve ${orderData.show.movie_name}`.slice(0, 80),
+            quantity: orderData.normalizedSeatIds.length,
+            price: orderData.seatPrice,
           },
         ],
         cancelUrl,
@@ -713,12 +828,52 @@ app.post("/payos/create-payment-link", async (req, res) => {
     }
   } catch (err) {
     console.error("PayOS create payment link error:", err);
-    return res.status(502).json({
+    return res.status(err.statusCode || 502).json({
       message:
         err.desc ||
         err.message ||
         "Không thể tạo link thanh toán PayOS",
       payosCode: err.code,
+    });
+  }
+});
+
+app.post("/counter-orders/create", async (req, res) => {
+  const { email, seatIds, userHallId, userMovieId, userShowtimeId } = req.body;
+
+  try {
+    const orderData = await buildPaymentOrderPayload({
+      email,
+      seatIds,
+      userHallId,
+      userMovieId,
+      userShowtimeId,
+      paymentMethod: "Thanh toán tại rạp",
+    });
+    const orderCode = generatePayOSOrderCode();
+
+    await queryDbAsync(
+      `INSERT INTO payos_orders
+        (order_code, status, amount, customer_email, payload_json, payment_method)
+       VALUES (?, 'UNPAID', ?, ?, ?, 'Thanh toán tại rạp')`,
+      [orderCode, orderData.amount, email, JSON.stringify(orderData.payload)]
+    );
+
+    const tickets = await finalizePaymentOrderTickets(orderCode, {
+      orderStatus: "UNPAID",
+      paymentStatus: "UNPAID",
+    });
+
+    return res.status(201).json({
+      orderCode,
+      status: "UNPAID",
+      tickets,
+      message: "Đã tạo vé thanh toán tại rạp",
+    });
+  } catch (err) {
+    console.error("Counter order create error:", err);
+    return res.status(err.statusCode || 500).json({
+      message: err.message || "Không thể tạo vé thanh toán tại rạp",
     });
   }
 });
@@ -746,7 +901,7 @@ app.post("/payos/confirm-return", async (req, res) => {
       });
     }
 
-    const tickets = await finalizePaidPayOSOrder(orderCode);
+    const tickets = await finalizePaymentOrderTickets(orderCode);
     return res.json({ tickets });
   } catch (err) {
     console.error("PayOS confirm return error:", err);
@@ -765,7 +920,7 @@ app.post("/payos/webhook", async (req, res) => {
     if (!orderCode) return res.status(200).json({ ok: true });
 
     if (webhookData.code === "00") {
-      await finalizePaidPayOSOrder(orderCode);
+      await finalizePaymentOrderTickets(orderCode);
     } else {
       await queryDbAsync(
         "UPDATE payos_orders SET status = 'FAILED', error_message = ? WHERE order_code = ? AND status <> 'PAID'",
@@ -955,8 +1110,10 @@ app.post("/customerPurchases", (req, res) => {
   const sql = `SELECT
   P.email AS customer_email,
   PA.id AS payment_id,
-  GROUP_CONCAT(T.id SEPARATOR ', ') AS ticket_ids,
-  GROUP_CONCAT(ST.name SEPARATOR ', ') AS seat_numbers,
+  PA.method AS payment_method,
+  PA.payment_status AS payment_status,
+  GROUP_CONCAT(T.id ORDER BY T.id SEPARATOR ', ') AS ticket_ids,
+  GROUP_CONCAT(ST.name ORDER BY ST.id SEPARATOR ', ') AS seat_numbers,
   TH.name AS theatre_name,
   H.name AS hall_name,
   M.name AS movie_name,
@@ -966,7 +1123,7 @@ app.post("/customerPurchases", (req, res) => {
   S.show_type AS show_type,
   S.showtime_date AS showtime_date,
   PA.amount AS ticket_price,
-  T.purchase_date AS purchase_date
+  MIN(T.purchase_date) AS purchase_date
   FROM person P
   JOIN payment PA ON P.email = PA.customer_email
   JOIN ticket T ON PA.id = T.payment_id
@@ -976,11 +1133,27 @@ app.post("/customerPurchases", (req, res) => {
   JOIN theatre TH ON H.theatre_id = TH.id
   JOIN seat ST ON T.seat_id = ST.id
   WHERE P.email = ?
-  GROUP BY PA.id 
+  GROUP BY
+    P.email,
+    PA.id,
+    PA.method,
+    PA.payment_status,
+    TH.name,
+    H.name,
+    M.name,
+    T.movie_id,
+    M.image_path,
+    S.movie_start_time,
+    S.show_type,
+    S.showtime_date,
+    PA.amount
   ORDER BY payment_id DESC`;
 
   db.query(sql, [email], (err, data) => {
-    if (err) return res.json(err);
+    if (err) {
+      console.error("Customer purchases load error:", err);
+      return res.status(500).json({ message: "Không thể tải lịch sử mua vé" });
+    }
 
     return res.json(data);
   });
@@ -1028,6 +1201,129 @@ const normalizeAdminList = (value) => {
     .map((item) => item.trim())
     .filter(Boolean);
 };
+
+const toAdminOrder = (order) => {
+  const payload = parsePayOSOrderPayload(order.payload_json) || {};
+  const ticketIds = parsePayOSOrderPayload(order.ticket_ids_json) || [];
+
+  return {
+    id: order.id,
+    order_code: order.order_code,
+    status: order.status,
+    amount: order.amount,
+    customer_email: order.customer_email,
+    payment_method: order.payment_method || payload.paymentMethod || "PayOS",
+    payment_status: order.payment_status || order.status,
+    payment_id: order.payment_id,
+    ticket_ids: ticketIds,
+    seats: normalizeSeatIds(payload.seatIds),
+    movie_name: payload.movieName || "",
+    hall_name: payload.hallName || "",
+    showtime_date: payload.showtimeDate || "",
+    movie_start_time: payload.movieStartTime || "",
+    error_message: order.error_message,
+    checkout_url: order.checkout_url,
+    created_at: order.created_at,
+    updated_at: order.updated_at,
+  };
+};
+
+app.post("/adminOrders", async (req, res) => {
+  const { email, password } = req.body;
+  const statusFilter = String(req.body.status || "ALL").toUpperCase();
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    const allowedStatuses = ["UNPAID", "PAID", "PENDING", "FAILED"];
+    const whereSql = allowedStatuses.includes(statusFilter)
+      ? "WHERE PO.status = ?"
+      : "";
+    const params = whereSql ? [statusFilter] : [];
+    const rows = await queryDb(
+      `SELECT
+        PO.id,
+        PO.order_code,
+        PO.status,
+        PO.amount,
+        PO.customer_email,
+        PO.payment_method,
+        PA.payment_status,
+        PO.payment_id,
+        PO.ticket_ids_json,
+        PO.payload_json,
+        PO.error_message,
+        PO.checkout_url,
+        PO.created_at,
+        PO.updated_at
+       FROM payos_orders PO
+       LEFT JOIN payment PA ON PO.payment_id = PA.id
+       ${whereSql}
+       ORDER BY PO.created_at DESC
+       LIMIT 200`,
+      params
+    );
+
+    return res.json(rows.map(toAdminOrder));
+  } catch (err) {
+    console.error("Admin orders load error:", err);
+    return res.status(500).json({ message: "Không thể tải danh sách đơn hàng" });
+  }
+});
+
+app.post("/adminOrderStatusUpdate", async (req, res) => {
+  const { email, password } = req.body;
+  const orderCode = Number(req.body.orderCode);
+  const status = String(req.body.status || "").toUpperCase();
+
+  if (!orderCode || !["UNPAID", "PAID"].includes(status)) {
+    return res.status(400).json({ message: "Dữ liệu trạng thái đơn hàng không hợp lệ" });
+  }
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+
+    const orderRows = await queryDb(
+      "SELECT * FROM payos_orders WHERE order_code = ?",
+      [orderCode]
+    );
+
+    if (orderRows.length === 0) {
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+    }
+
+    const order = orderRows[0];
+
+    if (status === "UNPAID") {
+      if (order.payment_id) {
+        await queryDb(
+          "UPDATE payment SET payment_status = 'UNPAID' WHERE id = ?",
+          [order.payment_id]
+        );
+      }
+      await queryDb(
+        "UPDATE payos_orders SET status = 'UNPAID', error_message = NULL WHERE order_code = ?",
+        [orderCode]
+      );
+      const ticketIds = parsePayOSOrderPayload(order.ticket_ids_json) || [];
+      return res.json({
+        orderCode,
+        status: "UNPAID",
+        tickets: ticketIds.map((id) => ({ id })),
+      });
+    }
+
+    const tickets = await finalizePaymentOrderTickets(orderCode);
+    return res.json({ orderCode, status: "PAID", tickets });
+  } catch (err) {
+    console.error("Admin order status update error:", err);
+    return res.status(err.statusCode || 500).json({
+      message: err.message || "Không thể cập nhật trạng thái đơn hàng",
+    });
+  }
+});
 
 app.post("/adminMovies", (req, res) => {
   const { email, password } = req.body;
