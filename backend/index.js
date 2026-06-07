@@ -672,7 +672,20 @@ ORDER BY S.id`;
   }
 });
 
-app.post("/payment", (req, res) => {
+// ─── DEPRECATED LEGACY ENDPOINTS ─────────────────────────────────────────────
+// Các endpoint cũ từ flow thanh toán gốc. Không còn được frontend gọi.
+// Được thay thế bởi PayOS flow (/payos/*) và counter-orders flow.
+// Giữ lại để không breaking nếu có integration cũ, nhưng yêu cầu admin auth.
+const legacyEndpointGuard = (req, res, next) => {
+  const { email, password } = req.body;
+  verifyAdmin(email, password, (authErr, isAdmin) => {
+    if (authErr) return res.status(500).json(authErr);
+    if (!isAdmin) return adminAuthFailed(res);
+    next();
+  });
+};
+
+app.post("/payment", legacyEndpointGuard, (req, res) => {
   const amount = req.body.amount;
   const email = req.body.email;
   const paymentType = req.body.userPayMethod;
@@ -692,7 +705,7 @@ app.post("/payment", (req, res) => {
   });
 });
 
-app.post("/purchaseTicket", (req, res) => {
+app.post("/purchaseTicket", legacyEndpointGuard, (req, res) => {
   const price = req.body.price;
   const date = req.body.purchase_date;
   const payment_id = req.body.paymentID;
@@ -752,7 +765,7 @@ app.post("/purchaseTicket", (req, res) => {
   );
 });
 
-app.post("/recentPurchase", (req, res) => {
+app.post("/recentPurchase", legacyEndpointGuard, (req, res) => {
   const payment_id = req.body.paymentID;
   const sql = `SELECT id FROM ticket WHERE payment_id=?`;
 
@@ -970,37 +983,51 @@ app.post("/registration", (req, res) => {
     });
   }
 
-  const sql = `INSERT INTO person (email, first_name, last_name, password, phone_number, person_type) VALUES (?, ?, ?, ?, ?, 'Customer')`;
-
-  logRegisterDebug("Executing SQL", {
-    sql,
-    paramsPreview: [maskEmail(email), firstName, lastName, "***", phoneNumber],
-  });
-
-  db.query(
-    sql,
-    [email, firstName, lastName, password, phoneNumber],
-    (err, data) => {
-      if (err) {
-        logRegisterDebug("Insert failed", {
-          message: err.message,
-          code: err.code,
-          errno: err.errno,
-          sqlState: err.sqlState,
-        });
-        return res.status(500).json({ message: "Sorry, Please try again!" });
-      }
-
-      logRegisterDebug("Insert success", {
-        affectedRows: data?.affectedRows,
-        insertId: data?.insertId,
-      });
-
-      return res
-        .status(200)
-        .json({ message: "Chúc mừng! Tạo tài khoản thành công" });
+  const checkSql = "SELECT email FROM person WHERE email = ?";
+  db.query(checkSql, [email], (checkErr, checkData) => {
+    if (checkErr) {
+      logRegisterDebug("Check email failed", checkErr);
+      return res.status(500).json({ message: "Sorry, Please try again!" });
     }
-  );
+
+    if (checkData.length > 0) {
+      return res.status(409).json({
+        message: "Email này đã được đăng ký. Vui lòng sử dụng email khác hoặc đăng nhập.",
+      });
+    }
+
+    const sql = `INSERT INTO person (email, first_name, last_name, password, phone_number, person_type) VALUES (?, ?, ?, ?, ?, 'Customer')`;
+
+    logRegisterDebug("Executing SQL", {
+      sql,
+      paramsPreview: [maskEmail(email), firstName, lastName, "***", phoneNumber],
+    });
+
+    db.query(
+      sql,
+      [email, firstName, lastName, password, phoneNumber],
+      (err, data) => {
+        if (err) {
+          logRegisterDebug("Insert failed", {
+            message: err.message,
+            code: err.code,
+            errno: err.errno,
+            sqlState: err.sqlState,
+          });
+          return res.status(500).json({ message: "Sorry, Please try again!" });
+        }
+
+        logRegisterDebug("Insert success", {
+          affectedRows: data?.affectedRows,
+          insertId: data?.insertId,
+        });
+
+        return res
+          .status(200)
+          .json({ message: "Chúc mừng! Tạo tài khoản thành công" });
+      }
+    );
+  });
 });
 
 
@@ -1492,43 +1519,63 @@ app.post("/adminMovieAdd", (req, res) => {
   });
 });
 
-app.get("/totalTickets", (req, res) => {
-  const sql = `SELECT COUNT(*) AS total_tickets FROM ticket`;
+app.post("/totalTickets", (req, res) => {
+  const { email, password } = req.body;
 
-  db.query(sql, (err, data) => {
-    if (err) return res.json(err);
+  verifyAdmin(email, password, (authErr, isAdmin) => {
+    if (authErr) return res.status(500).json(authErr);
+    if (!isAdmin) return adminAuthFailed(res);
 
-    return res.json(data);
+    const sql = `SELECT COUNT(*) AS total_tickets FROM ticket`;
+    db.query(sql, (err, data) => {
+      if (err) return res.json(err);
+      return res.json(data);
+    });
   });
 });
 
-app.get("/totalPayment", (req, res) => {
-  const sql = `SELECT sum(amount) AS total_amount FROM payment`;
+app.post("/totalPayment", (req, res) => {
+  const { email, password } = req.body;
 
-  db.query(sql, (err, data) => {
-    if (err) return res.json(err);
+  verifyAdmin(email, password, (authErr, isAdmin) => {
+    if (authErr) return res.status(500).json(authErr);
+    if (!isAdmin) return adminAuthFailed(res);
 
-    return res.json(data);
+    const sql = `SELECT COALESCE(SUM(amount), 0) AS total_amount FROM payment`;
+    db.query(sql, (err, data) => {
+      if (err) return res.json(err);
+      return res.json(data);
+    });
   });
 });
 
-app.get("/totalCustomers", (req, res) => {
-  const sql = `SELECT COUNT(*) AS total_customers FROM person WHERE person_type='Customer'`;
+app.post("/totalCustomers", (req, res) => {
+  const { email, password } = req.body;
 
-  db.query(sql, (err, data) => {
-    if (err) return res.json(err);
+  verifyAdmin(email, password, (authErr, isAdmin) => {
+    if (authErr) return res.status(500).json(authErr);
+    if (!isAdmin) return adminAuthFailed(res);
 
-    return res.json(data);
+    const sql = `SELECT COUNT(*) AS total_customers FROM person WHERE person_type='Customer'`;
+    db.query(sql, (err, data) => {
+      if (err) return res.json(err);
+      return res.json(data);
+    });
   });
 });
 
-app.get("/totalTicketPerMovie", (req, res) => {
-  const sql = `SELECT M.name,T.movie_id,COUNT(*) AS tickets_per_movie From ticket T JOIN movie M on T.movie_id = M.id GROUP BY movie_id`;
+app.post("/totalTicketPerMovie", (req, res) => {
+  const { email, password } = req.body;
 
-  db.query(sql, (err, data) => {
-    if (err) return res.json(err);
+  verifyAdmin(email, password, (authErr, isAdmin) => {
+    if (authErr) return res.status(500).json(authErr);
+    if (!isAdmin) return adminAuthFailed(res);
 
-    return res.json(data);
+    const sql = `SELECT M.name,T.movie_id,COUNT(*) AS tickets_per_movie From ticket T JOIN movie M on T.movie_id = M.id GROUP BY movie_id`;
+    db.query(sql, (err, data) => {
+      if (err) return res.json(err);
+      return res.json(data);
+    });
   });
 });
 
@@ -1630,155 +1677,7 @@ app.post("/showdateAdd", (req, res) => {
   });
 });
 
-app.post("/adminMovieAdd1", (req, res) => {
-  //admin revalidation
-  const email = req.body.email;
-  const password = req.body.password;
-  const sql0 = `SELECT * from person WHERE email = ? and password = ? and person_type = ?`;
 
-  const name = req.body.name;
-  const image_path = req.body.image_path;
-  const language = req.body.language;
-  const synopsis = req.body.synopsis;
-  const rating = req.body.rating;
-  const duration = req.body.duration;
-  const top_cast = req.body.top_cast;
-  const release_date = req.body.release_date;
-
-  const sql1 = `Insert into movie (name,image_path,language,synopsis,rating,duration,top_cast,release_date)
-  values
-  (?,?,?,?,?,?,?,?)`;
-  const sql2 = "SELECT LAST_INSERT_ID() as last_id";
-
-  db.query(sql0, [email, password, "Admin"], (err, data) => {
-    if (err) return res.json(err);
-
-    if (data.length === 0) {
-      return res.status(404).json({ message: "Xin lỗi, bạn không phải là Admin!" });
-    }
-
-    db.query(
-      sql1,
-      [
-        name,
-        image_path,
-        language,
-        synopsis,
-        rating,
-        duration,
-        top_cast,
-        release_date,
-      ],
-      (err1, data1) => {
-        if (err1) return res.json(err1);
-
-        db.query(sql2, (err2, data2) => {
-          if (err2) return res.json(err2);
-
-          return res.json(data2);
-        });
-      }
-    );
-  });
-});
-
-app.post("/genreInsert1", (req, res) => {
-  //admin revalidation
-  const email = req.body.email;
-  const password = req.body.password;
-  const sql0 = `SELECT * from person WHERE email = ? and password = ? and person_type = ?`;
-
-  const movieId = req.body.movieId;
-  const genre = req.body.genre;
-
-  const sql = `Insert into movie_genre(movie_id,genre)
-  values
-  (?,?)`;
-
-  db.query(sql0, [email, password, "Admin"], (err, data) => {
-    if (err) return res.json(err);
-
-    if (data.length === 0) {
-      return res.status(404).json({ message: "Xin lỗi, bạn không phải là Admin!" });
-    }
-
-    db.query(sql, [movieId, genre], (err, data) => {
-      if (err) return res.json(err);
-
-      return res.json(data);
-    });
-  });
-});
-
-app.post("/directorInsert1", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const sql0 = `SELECT * from person WHERE email = ? and password = ? and person_type = ?`;
-
-  const movieId = req.body.movieId;
-  const director = req.body.director;
-
-  const sql = `Insert into movie_directors(movie_id,director)
-  values
-  (?,?)`;
-
-  db.query(sql0, [email, password, "Admin"], (err, data) => {
-    if (err) return res.json(err);
-
-    if (data.length === 0) {
-      return res.status(404).json({ message: "Xin lỗi, bạn không phải là Admin!" });
-    }
-
-    db.query(sql, [movieId, director], (err, data) => {
-      if (err) return res.json(err);
-
-      return res.json(data);
-    });
-  });
-});
-
-app.get("/lastShowDate1", (req, res) => {
-  const sql = `SELECT max(showtime_date) as lastDate FROM showtimes`;
-
-  db.query(sql, (err, data) => {
-    if (err) return res.json(err);
-
-    return res.json(data);
-  });
-});
-
-app.post("/showdateAdd1", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const sql0 = `SELECT * from person WHERE email = ? and password = ? and person_type = ?`;
-
-  const showDate = req.body.selectedShowDate;
-  const sql1 = `Insert into showtimes (movie_start_time,show_type,showtime_date,price_per_seat)
-  values
-  ('11:00 am','2D',?,350),
-  ('2:30 pm','3D',?,450),
-  ('6:00 pm','3D',?,450)`;
-
-  const sql2 = "SELECT LAST_INSERT_ID() as last_id";
-
-  db.query(sql0, [email, password, "Admin"], (err, data) => {
-    if (err) return res.json(err);
-
-    if (data.length === 0) {
-      return res.status(404).json({ message: "Xin lỗi, bạn không phải là Admin!" });
-    }
-
-    db.query(sql1, [showDate, showDate, showDate], (err1, data1) => {
-      if (err1) return res.json(err1);
-
-      db.query(sql2, (err2, data2) => {
-        if (err2) return res.json(err2);
-
-        return res.json(data2);
-      });
-    });
-  });
-});
 
 app.post("/shownInUpdate", (req, res) => {
   const email = req.body.email;
@@ -2457,45 +2356,8 @@ app.post("/cancelOneTicket", (req, res) => {
 });
 
 
-// Registration endpoint
-app.post('/api/register', (req, res) => {
-    const { username, email, password, full_name, phone_number } = req.body;
-
-    // Validate input
-    if (!username || !email || !password) {
-        return res.status(400).json({ error: 'Username, email và password là bắt buộc' });
-    }
-
-    // Check if user already exists
-    const checkUserQuery = 'SELECT * FROM users WHERE username = ? OR email = ?';
-    db.query(checkUserQuery, [username, email], (err, results) => {
-        if (err) {
-            console.error('Database error:', err);
-            return res.status(500).json({ error: 'Database error' });
-        }
-
-        if (results.length > 0) {
-            return res.status(400).json({ error: 'Username hoặc email đã tồn tại' });
-        }
-
-        // Hash password (you should use bcrypt in production)
-        const hashedPassword = password; // In production, use bcrypt.hash()
-
-        // Insert new user
-        const insertUserQuery = 'INSERT INTO users (username, email, password, full_name, phone_number) VALUES (?, ?, ?, ?, ?)';
-        db.query(insertUserQuery, [username, email, hashedPassword, full_name, phone_number], (err, result) => {
-            if (err) {
-                console.error('Database error:', err);
-                return res.status(500).json({ error: 'Tạo tài khoản thất bại' });
-            }
-
-            res.status(201).json({
-                message: 'Đăng kí tài khoản thành công',
-                userId: result.insertId
-            });
-        });
-    });
-});
+// Registration endpoint (deprecated - table `users` does not exist)
+// app.post('/api/register', ...) removed to prevent 500 errors
 
 // For local usage
 app.listen(port, () => {

@@ -85,7 +85,7 @@ const cancelTicket = async (ticketId) => {
   if (!confirmCancel) return;
 
   try {
-    const res = await axios.post(`${import.meta.env.VITE_API_URL}/cancelTicket`, {
+    const res = await axios.post(`${import.meta.env.VITE_API_URL}/cancelOneTicket`, {
       ticketId: ticketId,
     });
 

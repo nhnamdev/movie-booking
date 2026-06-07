@@ -1,14 +1,20 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 export const MovieWiseTicket = () => {
+  const { signedPerson } = useSelector((store) => store.authentication);
+  const adminPayload = { email: signedPerson?.email, password: signedPerson?.password };
   const [ticketData, setTicketData] = useState([]);
 
   useEffect(() => {
+    if (!adminPayload.email || !adminPayload.password) return;
+
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/totalTicketPerMovie`
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/totalTicketPerMovie`,
+          adminPayload
         );
         setTicketData(response.data);
       } catch (err) {
@@ -17,7 +23,7 @@ export const MovieWiseTicket = () => {
     };
 
     fetchData();
-  }, []);
+  }, [adminPayload.email, adminPayload.password]);
 
   const ticketDataHtml = ticketData.map((ticket, idx) => {
     return (

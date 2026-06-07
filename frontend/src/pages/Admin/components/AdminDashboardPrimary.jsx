@@ -1,9 +1,12 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { FaMoneyBillWave, FaTicketAlt, FaUsers } from "react-icons/fa";
+import { useSelector } from "react-redux";
 import HashLoader from "react-spinners/HashLoader";
 
 export const AdminDashboardPrimary = () => {
+  const { signedPerson } = useSelector((store) => store.authentication);
+  const adminPayload = { email: signedPerson?.email, password: signedPerson?.password };
   const [ticketData, setTicketData] = useState([]);
   const [paymentData, setPaymentData] = useState([]);
   const [customerData, setCustomerData] = useState([]);
@@ -12,10 +15,13 @@ export const AdminDashboardPrimary = () => {
   const [loading3, setLoading3] = useState(true);
 
   useEffect(() => {
+    if (!adminPayload.email || !adminPayload.password) return;
+
     const fetchData = async () => {
       try {
-        const response1 = await axios.get(
-          `${import.meta.env.VITE_API_URL}/totalTickets`
+        const response1 = await axios.post(
+          `${import.meta.env.VITE_API_URL}/totalTickets`,
+          adminPayload
         );
         setTicketData(response1.data);
       } catch (err) {
@@ -25,8 +31,9 @@ export const AdminDashboardPrimary = () => {
       }
 
       try {
-        const response2 = await axios.get(
-          `${import.meta.env.VITE_API_URL}/totalPayment`
+        const response2 = await axios.post(
+          `${import.meta.env.VITE_API_URL}/totalPayment`,
+          adminPayload
         );
         setPaymentData(response2.data);
       } catch (err) {
@@ -36,8 +43,9 @@ export const AdminDashboardPrimary = () => {
       }
 
       try {
-        const response3 = await axios.get(
-          `${import.meta.env.VITE_API_URL}/totalCustomers`
+        const response3 = await axios.post(
+          `${import.meta.env.VITE_API_URL}/totalCustomers`,
+          adminPayload
         );
         setCustomerData(response3.data);
       } catch (err) {
@@ -48,7 +56,7 @@ export const AdminDashboardPrimary = () => {
     };
 
     fetchData();
-  }, []);
+  }, [adminPayload.email, adminPayload.password]);
 
   const revenueValue = Number(paymentData[0]?.total_amount || 0);
 
