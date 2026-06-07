@@ -17,7 +17,6 @@ import { AdminMovieAddSection } from "./components/AdminMovieAddSection";
 import { AdminShowtimesAddSection } from "./components/AdminShowtimesAddSection";
 import { AdminShownInModifySection } from "./components/AdminShownInModifySection";
 import { AdminDashboardPrimary } from "./components/AdminDashboardPrimary";
-import { MovieWiseTicket } from "./components/MovieWiseTicket";
 import { AdminAIPanel } from "./components/AdminAIPanel";
 import { AdminOrdersSection } from "./components/AdminOrdersSection";
 
@@ -111,12 +110,7 @@ const AdminPage = () => {
         </header>
 
         <div className="admin-content">
-          {activeTab === "dashboard" && (
-            <>
-              <AdminDashboardPrimary />
-              <MovieWiseTicket />
-            </>
-          )}
+          {activeTab === "dashboard" && <AdminDashboardPrimary />}
 
           {activeTab === "movies" && <AdminMovieAddSection />}
 

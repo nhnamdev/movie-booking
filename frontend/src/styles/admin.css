@@ -978,6 +978,48 @@
   border: none;
 }
 
+/* Image upload */
+.admin-image-upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 14rem;
+  border: 2px dashed rgba(230, 230, 232, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  color: #babbc0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  padding: 1.6rem;
+  background-color: rgba(230, 230, 232, 0.03);
+}
+
+.admin-image-upload-area:hover {
+  border-color: #eb3656;
+  background-color: rgba(235, 54, 86, 0.06);
+}
+
+.admin-image-upload-area svg {
+  color: #eb3656;
+}
+
+.admin-image-preview {
+  max-width: 100%;
+  max-height: 18rem;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.admin-image-upload-area:has(.admin-image-preview) {
+  border-style: solid;
+  border-color: rgba(230, 230, 232, 0.12);
+  background-color: rgba(230, 230, 232, 0.05);
+  padding: 0.8rem;
+}
+
 @media (max-width: 768px) {
   .admin-movie-edit-form {
     grid-template-columns: 1fr;
@@ -991,5 +1033,242 @@
 
   .admin-filter-select {
     width: 100%;
+  }
+}
+
+/* ==================== */
+/* DASHBOARD STAT CARDS  */
+/* ==================== */
+
+.admin-stats-section {
+  margin-bottom: 3.2rem;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.6rem;
+}
+
+/* ==================== */
+/* DASHBOARD CHARTS     */
+/* ==================== */
+
+.admin-chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.6rem;
+  margin-bottom: 3.2rem;
+}
+
+.admin-chart-card {
+  background:
+    linear-gradient(180deg, rgba(230, 230, 232, 0.05), transparent),
+    #252938;
+  border: 1px solid rgba(230, 230, 232, 0.08);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1.6rem 4rem rgba(8, 10, 18, 0.16);
+}
+
+.admin-chart-title {
+  color: #e6e6e8;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin-bottom: 1.6rem;
+}
+
+.admin-chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20rem;
+  color: #babbc0;
+  font-size: 1.4rem;
+}
+
+/* ==================== */
+/* DATA TABLES SECTION  */
+/* ==================== */
+
+.admin-data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.6rem;
+  margin-bottom: 3.2rem;
+}
+
+.admin-table-section {
+  background:
+    linear-gradient(180deg, rgba(230, 230, 232, 0.03), transparent),
+    #252938;
+  border: 1px solid rgba(230, 230, 232, 0.08);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1.6rem 4rem rgba(8, 10, 18, 0.16);
+}
+
+.admin-table-section .admin-section-heading {
+  margin-bottom: 1.6rem;
+}
+
+.admin-table-section .form-admin-heading {
+  font-size: 1.6rem;
+}
+
+/* Top Movies Table */
+
+.admin-top-movies-table {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.admin-top-movies-header {
+  display: grid;
+  grid-template-columns: 4rem 1fr 10rem 10rem;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.2rem;
+  color: #f59eae;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background-color: rgba(230, 230, 232, 0.06);
+  border-radius: 8px;
+}
+
+.admin-top-movies-row {
+  display: grid;
+  grid-template-columns: 4rem 1fr 10rem 10rem;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.2rem;
+  background-color: rgba(230, 230, 232, 0.03);
+  border: 1px solid rgba(230, 230, 232, 0.06);
+  border-radius: 8px;
+  color: #e6e6e8;
+  font-size: 1.4rem;
+  transition: background-color 0.15s;
+}
+
+.admin-top-movies-row:hover {
+  background-color: rgba(230, 230, 232, 0.06);
+}
+
+.admin-top-movies-rank {
+  font-weight: 800;
+  color: #eb3656;
+  font-size: 1.6rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-top-movies-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-top-movies-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #f59e0b;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-top-movies-rating svg {
+  font-size: 1.2rem;
+}
+
+.admin-top-movies-tickets {
+  text-align: right;
+  font-weight: 700;
+  color: #93c5fd;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-table-section .admin-order-table {
+  max-height: 42rem;
+  overflow-y: auto;
+}
+
+.admin-table-section .admin-order-row {
+  grid-template-columns: 1fr 1.2fr 0.8fr 0.8fr 1fr;
+}
+
+.admin-table-section .admin-order-row--head {
+  grid-template-columns: 1fr 1.2fr 0.8fr 0.8fr 1fr;
+}
+
+/* ==================== */
+/* DASHBOARD RESPONSIVE */
+/* ==================== */
+
+@media (max-width: 1024px) {
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-data-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-chart-card {
+    padding: 1.6rem;
+  }
+
+  .admin-data-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-top-movies-header {
+    display: none;
+  }
+
+  .admin-top-movies-row {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+    padding: 1.2rem;
+  }
+
+  .admin-top-movies-row > span {
+    display: grid;
+    grid-template-columns: 10rem 1fr;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .admin-table-section .admin-order-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-table-section .admin-order-row--head {
+    display: none;
+  }
+
+  .admin-table-section .admin-order-row > div {
+    display: grid;
+    grid-template-columns: 10rem 1fr;
+    gap: 1rem;
+    align-items: start;
   }
 }

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   FiCalendar,
   FiClock,
@@ -12,6 +12,7 @@ import {
   FiStar,
   FiTag,
   FiTrash2,
+  FiUpload,
   FiUsers,
   FiX,
 } from "react-icons/fi";
@@ -87,6 +88,11 @@ export const AdminMovieAddSection = () => {
   const [loading, setLoading] = useState(false);
   const [moviesLoading, setMoviesLoading] = useState(false);
   const [aiDescLoading, setAiDescLoading] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [editImageFile, setEditImageFile] = useState(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const fileInputRef = useRef(null);
+  const editFileInputRef = useRef(null);
 
   const adminEmail = signedPerson?.email;
   const adminPassword = signedPerson?.password;
@@ -124,6 +130,28 @@ export const AdminMovieAddSection = () => {
   const closeAddMovieForm = () => {
     setShowAddMovieForm(false);
     setMovieInfo(emptyMovieInfo);
+    setImageFile(null);
+  };
+
+  const uploadMovieImage = async (file) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("email", adminEmail);
+    formData.append("password", adminPassword);
+
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}/adminUploadImage`,
+      formData
+    );
+    return res.data.url;
+  };
+
+  const handleFileSelect = (e, setFile, setFormInfo) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setFormInfo((prev) => ({ ...prev, imagePath: previewUrl }));
   };
 
   const handleAIDescription = async () => {
@@ -177,7 +205,15 @@ export const AdminMovieAddSection = () => {
 
     try {
       setLoading(true);
-      const payload = getMoviePayload(movieInfo);
+      let imagePath = movieInfo.imagePath;
+
+      if (imageFile) {
+        setImageUploading(true);
+        imagePath = await uploadMovieImage(imageFile);
+        setImageUploading(false);
+      }
+
+      const payload = { ...getMoviePayload(movieInfo), image_path: imagePath };
       const movieResponse = await axios.post(
         `${import.meta.env.VITE_API_URL}/adminMovieAdd`,
         payload
@@ -204,11 +240,13 @@ export const AdminMovieAddSection = () => {
         adminMovieToast();
         setShowAddMovieForm(false);
         setMovieInfo(emptyMovieInfo);
+        setImageFile(null);
         await fetchMovies();
       }
     } catch (err) {
       adminErrorToast(err?.response?.data?.message);
     } finally {
+      setImageUploading(false);
       setLoading(false);
     }
   };
@@ -221,6 +259,7 @@ export const AdminMovieAddSection = () => {
   const cancelEdit = () => {
     setEditingMovieId(null);
     setEditMovieInfo(emptyMovieInfo);
+    setEditImageFile(null);
   };
 
   const movieUpdate = async (e) => {
@@ -233,16 +272,27 @@ export const AdminMovieAddSection = () => {
 
     try {
       setLoading(true);
+      let imagePath = editMovieInfo.imagePath;
+
+      if (editImageFile) {
+        setImageUploading(true);
+        imagePath = await uploadMovieImage(editImageFile);
+        setImageUploading(false);
+      }
+
       await axios.post(`${import.meta.env.VITE_API_URL}/adminMovieUpdate`, {
         ...getMoviePayload(editMovieInfo),
+        image_path: imagePath,
         movieId: editingMovieId,
       });
       adminMovieUpdateToast();
       cancelEdit();
+      setEditImageFile(null);
       await fetchMovies();
     } catch (err) {
       adminErrorToast(err?.response?.data?.message);
     } finally {
+      setImageUploading(false);
       setLoading(false);
     }
   };
@@ -268,7 +318,7 @@ export const AdminMovieAddSection = () => {
     }
   };
 
-  const renderMovieFormFields = (formInfo, onChange) => (
+  const renderMovieFormFields = (formInfo, onChange, fileRef, setFile, setFormInfo) => (
     <>
       <div>
         <p>Tên phim:</p>
@@ -282,14 +332,24 @@ export const AdminMovieAddSection = () => {
       </div>
 
       <div>
-        <p>Đường dẫn ảnh phim:</p>
+        <p>Ảnh phim:</p>
         <input
-          name="imagePath"
-          onChange={onChange}
-          type="text"
-          value={formInfo.imagePath}
-          placeholder="Nhập đường dẫn ảnh"
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={(e) => handleFileSelect(e, setFile, setFormInfo)}
         />
+        <div className="admin-image-upload-area" onClick={() => fileRef.current?.click()}>
+          {formInfo.imagePath ? (
+            <img src={formInfo.imagePath} alt="Preview" className="admin-image-preview" />
+          ) : (
+            <>
+              <FiUpload size={24} />
+              <span>Nhấn để chọn ảnh từ máy</span>
+            </>
+          )}
+        </div>
       </div>
 
       <div>
@@ -435,7 +495,7 @@ export const AdminMovieAddSection = () => {
             </button>
           </div>
 
-          {renderMovieFormFields(movieInfo, handleMovieInfo(setMovieInfo))}
+          {renderMovieFormFields(movieInfo, handleMovieInfo(setMovieInfo), fileInputRef, setImageFile, setMovieInfo)}
 
           <div className="admin-form-actions">
             <button
@@ -449,10 +509,10 @@ export const AdminMovieAddSection = () => {
               {aiDescLoading ? "Đang sinh..." : "AI sinh mô tả"}
             </button>
 
-            <button type="submit" className="btn-admin" disabled={loading}>
-              {loading && <ClipLoader color="#e6e6e8" size={16} />}
+            <button type="submit" className="btn-admin" disabled={loading || imageUploading}>
+              {(loading || imageUploading) && <ClipLoader color="#e6e6e8" size={16} />}
               <FiSave />
-              {loading ? "Đang lưu" : "Thêm phim"}
+              {imageUploading ? "Đang tải ảnh..." : loading ? "Đang lưu" : "Thêm phim"}
             </button>
           </div>
         </form>
@@ -494,12 +554,16 @@ export const AdminMovieAddSection = () => {
                 >
                   {renderMovieFormFields(
                     editMovieInfo,
-                    handleMovieInfo(setEditMovieInfo)
+                    handleMovieInfo(setEditMovieInfo),
+                    editFileInputRef,
+                    setEditImageFile,
+                    setEditMovieInfo
                   )}
                   <div className="admin-movie-actions">
-                    <button className="btn-admin" type="submit" disabled={loading}>
+                    <button className="btn-admin" type="submit" disabled={loading || imageUploading}>
+                      {(loading || imageUploading) && <ClipLoader color="#e6e6e8" size={16} />}
                       <FiSave />
-                      Lưu
+                      {imageUploading ? "Đang tải ảnh..." : "Lưu"}
                     </button>
                     <button
                       className="btn-admin admin-btn-secondary"
