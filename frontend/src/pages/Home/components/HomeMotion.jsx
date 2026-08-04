@@ -174,7 +174,7 @@ export const HomeMotion = () => {
 
     const bindDynamicCards = () => {
       const cards = gsap.utils.toArray(
-        ".home-movie-card:not([data-gsap-home-card]), .ai-rec-card:not([data-gsap-home-card])"
+        ".home-movie-card:not([data-gsap-home-card])"
       );
 
       cards.forEach((card, index) => {
@@ -203,7 +203,7 @@ export const HomeMotion = () => {
 
     const bindHoverPhysics = () => {
       const hoverTargets = gsap.utils.toArray(
-        ".btn-full, .btn-outline, .home-movie-card, .ai-rec-card, .social-link"
+        ".btn-full, .btn-outline, .home-movie-card, .social-link"
       );
 
       hoverTargets.forEach((target) => {

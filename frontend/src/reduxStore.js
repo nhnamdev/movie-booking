@@ -3,7 +3,6 @@ import locationReducer from "./reducers/locationSlice";
 import authSlice from "./reducers/authSlice";
 import mobileNavSlice from "./reducers/mobileNavSlice";
 import cartSlice from "./reducers/cartSlice";
-import aiSlice from "./reducers/aiSlice";
 
 const reduxStore = configureStore({
   reducer: {
@@ -11,7 +10,6 @@ const reduxStore = configureStore({
     authentication: authSlice,
     mobileNav: mobileNavSlice,
     cart: cartSlice,
-    ai: aiSlice,
   },
 });
 

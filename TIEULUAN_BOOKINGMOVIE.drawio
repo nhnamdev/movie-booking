@@ -40,9 +40,6 @@
         <mxCell id="actor-payos" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=14;" value="Cổng thanh toán PayOS" vertex="1">
           <mxGeometry height="130" width="105" x="45" y="1260" as="geometry" />
         </mxCell>
-        <mxCell id="actor-openai" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=14;" value="Dịch vụ OpenAI" vertex="1">
-          <mxGeometry height="130" width="100" x="2485" y="1280" as="geometry" />
-        </mxCell>
         <mxCell id="uc-home" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontFamily=Arial;fontSize=14;" value="Xem trang chủ&lt;br&gt;và phim mới" vertex="1">
           <mxGeometry height="65" width="185" x="270" y="235" as="geometry" />
         </mxCell>
@@ -60,9 +57,6 @@
         </mxCell>
         <mxCell id="uc-login" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontFamily=Arial;fontSize=14;" value="Đăng nhập" vertex="1">
           <mxGeometry height="65" width="185" x="480" y="455" as="geometry" />
-        </mxCell>
-        <mxCell id="uc-chat" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=14;" value="Chatbot hỗ trợ" vertex="1">
-          <mxGeometry height="65" width="185" x="375" y="565" as="geometry" />
         </mxCell>
         <mxCell id="uc-book" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontFamily=Arial;fontSize=15;fontStyle=1;" value="ĐẶT VÉ XEM PHIM" vertex="1">
           <mxGeometry height="72" width="205" x="965" y="215" as="geometry" />
@@ -109,9 +103,6 @@
         <mxCell id="uc-history" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Xem lịch sử mua vé" vertex="1">
           <mxGeometry height="62" width="185" x="1205" y="760" as="geometry" />
         </mxCell>
-        <mxCell id="uc-recommend" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Nhận gợi ý phim&lt;br&gt;cá nhân hóa" vertex="1">
-          <mxGeometry height="62" width="205" x="825" y="865" as="geometry" />
-        </mxCell>
         <mxCell id="uc-logout-customer" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Đăng xuất" vertex="1">
           <mxGeometry height="62" width="185" x="1105" y="865" as="geometry" />
         </mxCell>
@@ -123,9 +114,6 @@
         </mxCell>
         <mxCell id="uc-stats" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Thống kê vé, doanh thu&lt;br&gt;và khách hàng" vertex="1">
           <mxGeometry height="58" width="205" x="1465" y="325" as="geometry" />
-        </mxCell>
-        <mxCell id="uc-ai-analysis" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=12;" value="Phân tích kinh doanh&lt;br&gt;bằng AI" vertex="1">
-          <mxGeometry height="58" width="205" x="1465" y="425" as="geometry" />
         </mxCell>
         <mxCell id="uc-manage-movies" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontFamily=Arial;fontSize=13;fontStyle=1;" value="Quản lý phim" vertex="1">
           <mxGeometry height="62" width="205" x="1775" y="225" as="geometry" />
@@ -141,9 +129,6 @@
         </mxCell>
         <mxCell id="uc-manage-trailer" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Quản lý trailer" vertex="1">
           <mxGeometry height="58" width="205" x="1775" y="425" as="geometry" />
-        </mxCell>
-        <mxCell id="uc-ai-description" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=12;" value="Sinh mô tả phim bằng AI" vertex="1">
-          <mxGeometry height="58" width="205" x="1995" y="425" as="geometry" />
         </mxCell>
         <mxCell id="uc-manage-showtimes" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontFamily=Arial;fontSize=13;fontStyle=1;" value="Quản lý lịch chiếu" vertex="1">
           <mxGeometry height="62" width="200" x="2180" y="225" as="geometry" />
@@ -232,9 +217,6 @@
         <mxCell id="e-guest-login" edge="1" parent="1" source="actor-guest" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-login">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-guest-chat" edge="1" parent="1" source="actor-guest" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-chat">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
         <mxCell id="e-customer-inherits" edge="1" parent="1" source="actor-customer" style="endArrow=block;endFill=0;endSize=14;html=1;rounded=0;" target="actor-guest">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -248,9 +230,6 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e-customer-history" edge="1" parent="1" source="actor-customer" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-history">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-customer-recommend" edge="1" parent="1" source="actor-customer" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-recommend">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e-customer-logout" edge="1" parent="1" source="actor-customer" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-logout-customer">
@@ -349,9 +328,6 @@
         <mxCell id="e-dashboard-stats" edge="1" parent="1" source="uc-dashboard" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-stats" value="&lt;&lt;include&gt;&gt;">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-ai-dashboard" edge="1" parent="1" source="uc-ai-analysis" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-dashboard" value="&lt;&lt;extend&gt;&gt;">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
         <mxCell id="e-movie-add" edge="1" parent="1" source="uc-manage-movies" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-add-movie" value="&lt;&lt;include&gt;&gt;">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -362,9 +338,6 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e-movie-trailer" edge="1" parent="1" source="uc-manage-movies" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-manage-trailer" value="&lt;&lt;include&gt;&gt;">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-ai-add" edge="1" parent="1" source="uc-ai-description" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-add-movie" value="&lt;&lt;extend&gt;&gt;">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e-schedule-date" edge="1" parent="1" source="uc-manage-showtimes" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-show-date" value="&lt;&lt;include&gt;&gt;">
@@ -398,23 +371,6 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e-members-points" edge="1" parent="1" source="uc-members" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-point-policy" value="&lt;&lt;include&gt;&gt;">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-openai-chat" edge="1" parent="1" source="actor-openai" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;html=1;rounded=0;dashed=1;strokeColor=#6c8ebf;" target="uc-chat">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-openai-recommend" edge="1" parent="1" source="actor-openai" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;html=1;rounded=0;dashed=1;strokeColor=#6c8ebf;" target="uc-recommend">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-openai-analysis" edge="1" parent="1" source="actor-openai" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;html=1;rounded=0;dashed=1;strokeColor=#6c8ebf;" target="uc-ai-analysis">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="_l9weO8cx3mjfAKcFc7F-1" connectable="0" parent="e-openai-analysis" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Text" vertex="1">
-          <mxGeometry relative="1" x="0.935" y="-1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e-openai-description" edge="1" parent="1" source="actor-openai" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;html=1;rounded=0;dashed=1;strokeColor=#6c8ebf;" target="uc-ai-description">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>

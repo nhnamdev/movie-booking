@@ -109,8 +109,6 @@ function handleDisconnect() {
       throw err;
     }
   });
-  // Cập nhật db reference trong app context (cho AI routes truy cập)
-  app.set("db", db);
 }
 // Gọi hàm kết nối đến cơ sở dữ liệu
 handleDisconnect();
@@ -437,16 +435,6 @@ const finalizePaymentOrderTickets = async (
     throw err;
   }
 };
-
-// ─── AI ROUTES ──────────────────────────────────────────────────────────────
-// Mount các endpoint AI dưới prefix /ai (chatbot, recommendations, search, admin)
-try {
-  const aiRoutes = require("./ai/routes");
-  app.use("/ai", aiRoutes);
-  console.log("AI routes loaded at /ai");
-} catch (err) {
-  console.warn("AI routes not loaded:", err.message);
-}
 
 app.get("/", (req, res) => {
   return res.json("Hello Backend Side");

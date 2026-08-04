@@ -8,7 +8,6 @@ import {
   FaEdit,
   FaFilm,
   FaHome,
-  FaRobot,
   FaSignOutAlt,
   FaUserCircle,
 } from "react-icons/fa";
@@ -17,7 +16,6 @@ import { AdminMovieAddSection } from "./components/AdminMovieAddSection";
 import { AdminShowtimesAddSection } from "./components/AdminShowtimesAddSection";
 import { AdminShownInModifySection } from "./components/AdminShownInModifySection";
 import { AdminDashboardPrimary } from "./components/AdminDashboardPrimary";
-import { AdminAIPanel } from "./components/AdminAIPanel";
 import { AdminOrdersSection } from "./components/AdminOrdersSection";
 
 const tabs = [
@@ -26,7 +24,6 @@ const tabs = [
   { id: "movies", label: "Quản lý phim", icon: FaFilm },
   { id: "showtimes", label: "Lịch chiếu", icon: FaClock },
   { id: "modify", label: "Chỉnh sửa suất chiếu", icon: FaEdit },
-  { id: "ai", label: "Trợ lý AI", icon: FaRobot },
 ];
 
 const AdminPage = () => {
@@ -127,8 +124,6 @@ const AdminPage = () => {
           {activeTab === "modify" && (
             <AdminShownInModifySection selectedDate={selectedShowDate} />
           )}
-
-          {activeTab === "ai" && <AdminAIPanel />}
         </div>
       </main>
     </div>

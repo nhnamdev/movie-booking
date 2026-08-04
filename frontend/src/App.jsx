@@ -8,7 +8,6 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import "./styles/styles.css";
 import "./styles/queries.css";
 import "./styles/admin.css";
-import "./styles/ai.css";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -18,7 +17,6 @@ import { LoginModal } from "./modals/LoginModal";
 import { MobileNav } from "./components/MobileNav";
 import { PageLoader } from "./components/PageLoader";
 import { ScrollToTop } from "./components/ScrollToTop";
-import { ChatbotWidget } from "./components/ChatbotWidget";
 
 import HomePage from "./pages/Home/HomePage";
 
@@ -101,7 +99,6 @@ function App() {
       {signModalState && <SignupModal />}
       {loginModalState && <LoginModal />}
       <MobileNav />
-      <ChatbotWidget />
       <SpeedInsights />
     </>
   );

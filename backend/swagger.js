@@ -12,7 +12,6 @@ const fieldSchemas = {
   userHallId: { type: "integer", example: 1 },
   userShowtimeId: { type: "integer", example: 1 },
   ticketId: { type: "integer", example: 1 },
-  personId: { type: "integer", example: 1 },
   movieDetailsId: { type: "integer", example: 1 },
   seatIds: { type: "array", items: { type: "integer" }, example: [1, 2] },
   amount: { type: "number", example: 240000 },
@@ -52,7 +51,6 @@ const fieldSchemas = {
   pricePerSeat: { type: "number", example: 120000 },
   originalMovieId: { type: "integer", example: 1 },
   originalHallId: { type: "integer", example: 1 },
-  query: { type: "string", example: "Phim hành động phù hợp xem cuối tuần" },
 };
 
 const jsonBody = (fields, optional = []) => ({
@@ -143,10 +141,6 @@ const endpoints = [
   ["post", "/adminBookingTimeStats", "Admin - Analytics", "Thống kê khung giờ đặt vé", adminCredentials],
   ["post", "/adminRecentOrders", "Admin - Analytics", "Lấy các đơn gần đây", adminCredentials],
   ["post", "/adminTopMovies", "Admin - Analytics", "Lấy các phim bán chạy", adminCredentials],
-  ["post", "/ai/recommendations", "AI", "Gợi ý phim cá nhân hoá", ["email", "personId"], ["personId"]],
-  ["post", "/ai/search", "AI", "Tìm phim bằng ngôn ngữ tự nhiên", ["query"]],
-  ["post", "/ai/admin/generateDescription", "AI", "Sinh mô tả phim", ["name", "genres", "director", "duration", "rating"], ["genres", "director", "duration", "rating"]],
-  ["get", "/ai/admin/analytics", "AI", "Tạo nhận xét kinh doanh bằng AI"],
 ];
 
 const swaggerDocument = {
@@ -169,7 +163,6 @@ const swaggerDocument = {
     "Admin - Movies",
     "Admin - Schedule",
     "Admin - Analytics",
-    "AI",
     "Legacy",
   ].map((name) => ({ name })),
   paths: {},
@@ -189,14 +182,6 @@ const swaggerDocument = {
           { type: "array", items: {} },
           { type: "string" },
         ],
-      },
-      ChatMessage: {
-        type: "object",
-        required: ["role", "content"],
-        properties: {
-          role: { type: "string", enum: ["user", "assistant"], example: "user" },
-          content: { type: "string", example: "Cuối tuần này có phim gì hay?" },
-        },
       },
     },
   },
@@ -246,33 +231,6 @@ for (const [method, path, tag, summary, fields, optional = [], customSchema] of 
   swaggerDocument.paths[path] = swaggerDocument.paths[path] || {};
   swaggerDocument.paths[path][method] = operation;
 }
-
-swaggerDocument.paths["/ai/chat"] = {
-  post: {
-    tags: ["AI"],
-    summary: "Trò chuyện với trợ lý phim",
-    operationId: "post_ai_chat",
-    requestBody: {
-      required: true,
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            required: ["messages"],
-            properties: {
-              messages: {
-                type: "array",
-                minItems: 1,
-                items: { $ref: "#/components/schemas/ChatMessage" },
-              },
-            },
-          },
-        },
-      },
-    },
-    responses: defaultResponses,
-  },
-};
 
 swaggerDocument.paths["/payment"].post.deprecated = true;
 swaggerDocument.paths["/payment"].post.tags = ["Legacy"];

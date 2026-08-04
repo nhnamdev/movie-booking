@@ -24,7 +24,6 @@ import {
   adminMovieToast,
   adminMovieUpdateToast,
 } from "../../../toasts/toast";
-import { generateMovieDescription } from "../../../utils/aiClient";
 
 const emptyMovieInfo = {
   movieName: "",
@@ -87,7 +86,6 @@ export const AdminMovieAddSection = () => {
   const [showAddMovieForm, setShowAddMovieForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [moviesLoading, setMoviesLoading] = useState(false);
-  const [aiDescLoading, setAiDescLoading] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [editImageFile, setEditImageFile] = useState(null);
   const [imageUploading, setImageUploading] = useState(false);
@@ -152,25 +150,6 @@ export const AdminMovieAddSection = () => {
     setFile(file);
     const previewUrl = URL.createObjectURL(file);
     setFormInfo((prev) => ({ ...prev, imagePath: previewUrl }));
-  };
-
-  const handleAIDescription = async () => {
-    if (!movieInfo.movieName) return;
-    setAiDescLoading(true);
-    try {
-      const res = await generateMovieDescription({
-        name: movieInfo.movieName,
-        genres: movieInfo.genres,
-        director: movieInfo.directors,
-        duration: movieInfo.duration,
-        rating: movieInfo.rating,
-      });
-      setMovieInfo((prev) => ({ ...prev, description: res.data.description }));
-    } catch {
-      // AI helper is optional for this form.
-    } finally {
-      setAiDescLoading(false);
-    }
   };
 
   const handleMovieInfo = (setter) => (e) => {
@@ -498,17 +477,6 @@ export const AdminMovieAddSection = () => {
           {renderMovieFormFields(movieInfo, handleMovieInfo(setMovieInfo), fileInputRef, setImageFile, setMovieInfo)}
 
           <div className="admin-form-actions">
-            <button
-              type="button"
-              className="admin-ai-btn"
-              onClick={handleAIDescription}
-              disabled={aiDescLoading || !movieInfo.movieName}
-            >
-              {aiDescLoading && <ClipLoader color="#e6e6e8" size={16} />}
-              <FiFilm />
-              {aiDescLoading ? "Đang sinh..." : "AI sinh mô tả"}
-            </button>
-
             <button type="submit" className="btn-admin" disabled={loading || imageUploading}>
               {(loading || imageUploading) && <ClipLoader color="#e6e6e8" size={16} />}
               <FiSave />
