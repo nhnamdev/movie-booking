@@ -26,8 +26,7 @@ const uploadToR2 = async ({ buffer, fileName, mimeType }) => {
     })
   );
 
-  const publicUrl = `${R2_PUBLIC_URL}/${R2_BUCKET}/${Key}`;
-  return publicUrl;
+  return `${R2_PUBLIC_URL}/${R2_BUCKET}/${Key}`;
 };
 
 const generateFileName = (originalName) => {

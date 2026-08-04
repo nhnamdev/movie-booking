@@ -35,6 +35,19 @@ Sau khi backend chạy, mở tài liệu API tại:
 
 - Swagger UI: `http://localhost:7000/api-docs`
 - OpenAPI JSON: `http://localhost:7000/api-docs.json`
+
+## Cấu trúc backend
+
+```text
+backend/
+├── controllers/   # Nhận request và trả response
+├── middleware/    # Upload ảnh và bảo vệ endpoint cũ
+├── routes/        # Khai báo URL, HTTP method và middleware
+├── services/      # MySQL, PayOS, admin, logging và Cloudflare R2
+├── app.js         # Tạo Express app và mount các route
+├── index.js       # Khởi tạo service và chạy HTTP server
+└── swagger.js     # OpenAPI specification
+```
 ---
 ## 🇻🇳 Về CGV Việt Nam
 > **CÔNG TY TNHH CJ CGV VIỆT NAM**  
