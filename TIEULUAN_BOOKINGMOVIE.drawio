@@ -1,0 +1,423 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="booking-cgv-usecase" name="Use Case tổng thể">
+    <mxGraphModel dx="2357" dy="1308" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2800" pageHeight="1800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="system" parent="1" style="swimlane;horizontal=1;startSize=55;html=1;rounded=1;arcSize=1;fillColor=#ffffff;swimlaneFillColor=none;strokeColor=#4d101b;strokeWidth=3;fontColor=#ffffff;fontFamily=Arial;fontSize=22;fontStyle=1;" value="HỆ THỐNG WEBSITE ĐẶT VÉ XEM PHIM CGV" vertex="1">
+          <mxGeometry height="1540" width="2200" x="220" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="public-panel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8f8;strokeColor=#e6b8bd;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="1425" width="455" x="240" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="customer-panel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f9ff;strokeColor=#b8cce8;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="1425" width="700" x="715" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="admin-panel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbf4;strokeColor=#c4d6b0;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="1425" width="965" x="1435" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="public-header" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontColor=#7a1f2d;fontFamily=Arial;fontSize=15;fontStyle=1;" value="CHỨC NĂNG CÔNG KHAI" vertex="1">
+          <mxGeometry height="38" width="265" x="335" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="customer-header" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#244062;fontFamily=Arial;fontSize=15;fontStyle=1;" value="CHỨC NĂNG KHÁCH HÀNG" vertex="1">
+          <mxGeometry height="38" width="300" x="915" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="admin-header" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#375623;fontFamily=Arial;fontSize=15;fontStyle=1;" value="CHỨC NĂNG QUẢN TRỊ &amp; NHÂN VIÊN" vertex="1">
+          <mxGeometry height="38" width="375" x="1730" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="actor-guest" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=15;fontStyle=1;" value="Khách vãng lai" vertex="1">
+          <mxGeometry height="125" width="85" x="55" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="actor-customer" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=15;fontStyle=1;" value="Khách hàng" vertex="1">
+          <mxGeometry height="125" width="85" x="55" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="actor-admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=15;fontStyle=1;" value="Quản trị viên" vertex="1">
+          <mxGeometry height="130" width="90" x="2490" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="actor-staff" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=15;fontStyle=1;fontColor=#7f6000;" value="Nhân viên" vertex="1">
+          <mxGeometry height="130" width="90" x="2490" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="actor-payos" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=14;" value="Cổng thanh toán PayOS" vertex="1">
+          <mxGeometry height="130" width="105" x="45" y="1260" as="geometry" />
+        </mxCell>
+        <mxCell id="actor-openai" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=14;" value="Dịch vụ OpenAI" vertex="1">
+          <mxGeometry height="130" width="100" x="2485" y="1280" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-home" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontFamily=Arial;fontSize=14;" value="Xem trang chủ&lt;br&gt;và phim mới" vertex="1">
+          <mxGeometry height="65" width="185" x="270" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-location" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontFamily=Arial;fontSize=14;" value="Chọn rạp / khu vực" vertex="1">
+          <mxGeometry height="65" width="185" x="480" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-showtimes" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontFamily=Arial;fontSize=14;" value="Xem lịch chiếu&lt;br&gt;và giá vé" vertex="1">
+          <mxGeometry height="65" width="185" x="270" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-detail" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontFamily=Arial;fontSize=14;" value="Xem chi tiết phim&lt;br&gt;và trailer" vertex="1">
+          <mxGeometry height="65" width="185" x="480" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-register" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontFamily=Arial;fontSize=14;" value="Đăng ký tài khoản" vertex="1">
+          <mxGeometry height="65" width="185" x="270" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-login" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontFamily=Arial;fontSize=14;" value="Đăng nhập" vertex="1">
+          <mxGeometry height="65" width="185" x="480" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-chat" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=14;" value="Chatbot hỗ trợ" vertex="1">
+          <mxGeometry height="65" width="185" x="375" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-book" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontFamily=Arial;fontSize=15;fontStyle=1;" value="ĐẶT VÉ XEM PHIM" vertex="1">
+          <mxGeometry height="72" width="205" x="965" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-select-date" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Chọn ngày chiếu" vertex="1">
+          <mxGeometry height="58" width="185" x="745" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-select-movie" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Chọn phim" vertex="1">
+          <mxGeometry height="58" width="185" x="975" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-select-show" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Chọn suất chiếu&lt;br&gt;và phòng chiếu" vertex="1">
+          <mxGeometry height="58" width="185" x="1205" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-select-seat" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Chọn ghế&lt;br&gt;(thường / VIP)" vertex="1">
+          <mxGeometry height="58" width="185" x="745" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-food" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Arial;fontSize=13;" value="Mua bắp, nước" vertex="1">
+          <mxGeometry height="58" width="185" x="975" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-payment-method" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Chọn phương thức&lt;br&gt;thanh toán" vertex="1">
+          <mxGeometry height="58" width="185" x="1205" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-combo-discount" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Arial;fontSize=13;" value="Áp dụng giá ưu đãi&lt;br&gt;cho combo" vertex="1">
+          <mxGeometry height="58" width="185" x="745" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-payos" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Arial;fontSize=13;" value="Thanh toán qua PayOS" vertex="1">
+          <mxGeometry height="58" width="185" x="975" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-at-counter" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Arial;fontSize=13;" value="Thanh toán tại rạp" vertex="1">
+          <mxGeometry height="58" width="185" x="1205" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-issue-ticket" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontFamily=Arial;fontSize=13;fontStyle=1;" value="Thanh toán và phát hành vé" vertex="1">
+          <mxGeometry height="62" width="205" x="860" y="625" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-earn-points" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Arial;fontSize=13;" value="Tích điểm thành viên" vertex="1">
+          <mxGeometry height="62" width="205" x="1130" y="625" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-reminder" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Đăng ký nhắc lịch chiếu" vertex="1">
+          <mxGeometry height="62" width="195" x="745" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-profile" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Xem thông tin cá nhân" vertex="1">
+          <mxGeometry height="62" width="195" x="975" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-history" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Xem lịch sử mua vé" vertex="1">
+          <mxGeometry height="62" width="185" x="1205" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-recommend" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Nhận gợi ý phim&lt;br&gt;cá nhân hóa" vertex="1">
+          <mxGeometry height="62" width="205" x="825" y="865" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-logout-customer" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=13;" value="Đăng xuất" vertex="1">
+          <mxGeometry height="62" width="185" x="1105" y="865" as="geometry" />
+        </mxCell>
+        <mxCell id="ticket-policy" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=18;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#7f6000;fontFamily=Arial;fontSize=14;align=left;spacingLeft=14;" value="RÀNG BUỘC NGHIỆP VỤ&lt;br&gt;&lt;b&gt;Vé đã mua không được đổi hoặc hoàn trả.&lt;/b&gt;" vertex="1">
+          <mxGeometry height="105" width="520" x="805" y="1015" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-dashboard" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontFamily=Arial;fontSize=13;fontStyle=1;" value="Xem tổng quan quản trị" vertex="1">
+          <mxGeometry height="62" width="205" x="1465" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-stats" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Thống kê vé, doanh thu&lt;br&gt;và khách hàng" vertex="1">
+          <mxGeometry height="58" width="205" x="1465" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-ai-analysis" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=12;" value="Phân tích kinh doanh&lt;br&gt;bằng AI" vertex="1">
+          <mxGeometry height="58" width="205" x="1465" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-manage-movies" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontFamily=Arial;fontSize=13;fontStyle=1;" value="Quản lý phim" vertex="1">
+          <mxGeometry height="62" width="205" x="1775" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-add-movie" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Thêm phim" vertex="1">
+          <mxGeometry height="55" width="155" x="1685" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-update-movie" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Cập nhật phim" vertex="1">
+          <mxGeometry height="55" width="155" x="1860" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-delete-movie" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Xóa phim" vertex="1">
+          <mxGeometry height="55" width="155" x="2035" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-manage-trailer" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Quản lý trailer" vertex="1">
+          <mxGeometry height="58" width="205" x="1775" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-ai-description" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=12;" value="Sinh mô tả phim bằng AI" vertex="1">
+          <mxGeometry height="58" width="205" x="1995" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-manage-showtimes" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontFamily=Arial;fontSize=13;fontStyle=1;" value="Quản lý lịch chiếu" vertex="1">
+          <mxGeometry height="62" width="200" x="2180" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-show-date" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Quản lý ngày chiếu" vertex="1">
+          <mxGeometry height="55" width="165" x="2210" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-show-session" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Quản lý suất chiếu" vertex="1">
+          <mxGeometry height="55" width="165" x="2210" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-time-pricing" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Arial;fontSize=12;" value="Thiết lập giá vé&lt;br&gt;theo khung giờ" vertex="1">
+          <mxGeometry height="58" width="185" x="2200" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-manage-orders" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontFamily=Arial;fontSize=13;fontStyle=1;" value="Quản lý đơn hàng" vertex="1">
+          <mxGeometry height="62" width="205" x="1465" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-update-order" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Cập nhật trạng thái đơn" vertex="1">
+          <mxGeometry height="58" width="205" x="1465" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-manage-products" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontFamily=Arial;fontSize=13;fontStyle=1;" value="Quản lý sản phẩm&lt;br&gt;và combo" vertex="1">
+          <mxGeometry height="62" width="205" x="1775" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-product" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Quản lý bắp, nước" vertex="1">
+          <mxGeometry height="58" width="175" x="1690" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-combo" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Quản lý combo" vertex="1">
+          <mxGeometry height="58" width="175" x="1880" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-combo-pricing" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Arial;fontSize=12;" value="Thiết lập giảm giá combo" vertex="1">
+          <mxGeometry height="58" width="205" x="1780" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-cinema-system" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontFamily=Arial;fontSize=13;fontStyle=1;" value="Quản lý hệ thống nhiều rạp" vertex="1">
+          <mxGeometry height="62" width="225" x="2155" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-cinema-branches" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Quản lý các chi nhánh rạp" vertex="1">
+          <mxGeometry height="58" width="205" x="2170" y="750" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-rooms" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Quản lý phòng chiếu" vertex="1">
+          <mxGeometry height="58" width="205" x="2170" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-seats" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" value="Quản lý sơ đồ ghế&lt;br&gt;và ghế VIP" vertex="1">
+          <mxGeometry height="58" width="205" x="2170" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-members" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontFamily=Arial;fontSize=13;fontStyle=1;" value="Quản lý thành viên&lt;br&gt;và điểm thưởng" vertex="1">
+          <mxGeometry height="62" width="220" x="1490" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-point-policy" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Arial;fontSize=12;" value="Thiết lập chính sách tích điểm" vertex="1">
+          <mxGeometry height="58" width="220" x="1490" y="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-admin-logout" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=13;" value="Đăng xuất" vertex="1">
+          <mxGeometry height="58" width="185" x="1490" y="1110" as="geometry" />
+        </mxCell>
+        <mxCell id="staff-header" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#7f6000;fontFamily=Arial;fontSize=14;fontStyle=1;" value="NGHIỆP VỤ NHÂN VIÊN TẠI RẠP" vertex="1">
+          <mxGeometry height="38" width="410" x="1810" y="1048.5" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-counter-sale" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontFamily=Arial;fontSize=13;fontStyle=1;" value="Bán vé tại quầy" vertex="1">
+          <mxGeometry height="60" width="195" x="1690" y="1165" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-check-ticket" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Arial;fontSize=13;" value="Soát vé vào phòng chiếu" vertex="1">
+          <mxGeometry height="60" width="215" x="1915" y="1165" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-process-food" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Arial;fontSize=13;" value="Xử lý đơn bắp, nước" vertex="1">
+          <mxGeometry height="60" width="195" x="1690" y="1280" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-staff-seat-lookup" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Arial;fontSize=13;" value="Tra cứu lịch chiếu&lt;br&gt;và ghế trống" vertex="1">
+          <mxGeometry height="60" width="215" x="1915" y="1280" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Arial;fontSize=13;align=center;" value="CHÚ THÍCH: &lt;b&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/b&gt; = luôn thực hiện · &lt;b&gt;&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;&lt;/b&gt; = tùy chọn / phát sinh theo điều kiện" vertex="1">
+          <mxGeometry height="55" width="760" x="1540" y="1455" as="geometry" />
+        </mxCell>
+        <mxCell id="e-guest-home" edge="1" parent="1" source="actor-guest" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-home">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-guest-location" edge="1" parent="1" source="actor-guest" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-location">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-guest-showtimes" edge="1" parent="1" source="actor-guest" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-showtimes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-guest-detail" edge="1" parent="1" source="actor-guest" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-detail">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-guest-register" edge="1" parent="1" source="actor-guest" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-register">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-guest-login" edge="1" parent="1" source="actor-guest" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-login">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-guest-chat" edge="1" parent="1" source="actor-guest" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-chat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-customer-inherits" edge="1" parent="1" source="actor-customer" style="endArrow=block;endFill=0;endSize=14;html=1;rounded=0;" target="actor-guest">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-customer-book" edge="1" parent="1" source="actor-customer" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-book">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-customer-reminder" edge="1" parent="1" source="actor-customer" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-reminder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-customer-profile" edge="1" parent="1" source="actor-customer" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-profile">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-customer-history" edge="1" parent="1" source="actor-customer" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-history">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-customer-recommend" edge="1" parent="1" source="actor-customer" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-recommend">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-customer-logout" edge="1" parent="1" source="actor-customer" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-logout-customer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-book-date" edge="1" parent="1" source="uc-book" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-select-date" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-book-movie" edge="1" parent="1" source="uc-book" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-select-movie" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-book-show" edge="1" parent="1" source="uc-book" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-select-show" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-book-seat" edge="1" parent="1" source="uc-book" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-select-seat" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-food-book" edge="1" parent="1" source="uc-food" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-book" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-food-discount" edge="1" parent="1" source="uc-food" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-combo-discount" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-book-payment-method" edge="1" parent="1" source="uc-book" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-payment-method" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-payos-method" edge="1" parent="1" source="uc-payos" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-payment-method" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-counter-method" edge="1" parent="1" source="uc-at-counter" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-payment-method" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-book-issue" edge="1" parent="1" source="uc-book" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-issue-ticket" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-ticket-points" edge="1" parent="1" source="uc-issue-ticket" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-earn-points" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-reminder-showtimes" edge="1" parent="1" source="uc-reminder" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-showtimes" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-policy-ticket" edge="1" parent="1" source="ticket-policy" style="endArrow=none;dashed=1;html=1;rounded=0;strokeColor=#d6b656;" target="uc-issue-ticket">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-payos-actor" edge="1" parent="1" source="actor-payos" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;html=1;rounded=0;strokeColor=#9673a6;" target="uc-payos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-admin-dashboard" edge="1" parent="1" source="actor-admin" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-dashboard">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-admin-movies" edge="1" parent="1" source="actor-admin" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-manage-movies">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-admin-showtimes" edge="1" parent="1" source="actor-admin" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-manage-showtimes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-admin-orders" edge="1" parent="1" source="actor-admin" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-manage-orders">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-admin-products" edge="1" parent="1" source="actor-admin" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-manage-products">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-admin-cinemas" edge="1" parent="1" source="actor-admin" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-cinema-system">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-admin-members" edge="1" parent="1" source="actor-admin" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-members">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-admin-logout" edge="1" parent="1" source="actor-admin" style="endArrow=none;html=1;rounded=0;strokeColor=#666666;" target="uc-admin-logout">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-staff-counter-sale" edge="1" parent="1" source="actor-staff" style="endArrow=none;html=1;rounded=0;strokeColor=#d6b656;strokeWidth=2;" target="uc-counter-sale">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-staff-check-ticket" edge="1" parent="1" source="actor-staff" style="endArrow=none;html=1;rounded=0;strokeColor=#d6b656;strokeWidth=2;" target="uc-check-ticket">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-staff-process-food" edge="1" parent="1" source="actor-staff" style="endArrow=none;html=1;rounded=0;strokeColor=#d6b656;strokeWidth=2;" target="uc-process-food">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-staff-seat-lookup" edge="1" parent="1" source="actor-staff" style="endArrow=none;html=1;rounded=0;strokeColor=#d6b656;strokeWidth=2;" target="uc-staff-seat-lookup">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-staff-update-order" edge="1" parent="1" source="actor-staff" style="endArrow=none;html=1;rounded=0;strokeColor=#d6b656;strokeWidth=2;" target="uc-update-order">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-staff-logout" edge="1" parent="1" source="actor-staff" style="endArrow=none;html=1;rounded=0;strokeColor=#d6b656;strokeWidth=2;" target="uc-admin-logout">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-counter-payment" edge="1" parent="1" source="uc-counter-sale" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;strokeColor=#d6b656;" target="uc-at-counter" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-counter-ticket" edge="1" parent="1" source="uc-counter-sale" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;strokeColor=#d6b656;" target="uc-issue-ticket" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-dashboard-stats" edge="1" parent="1" source="uc-dashboard" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-stats" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-ai-dashboard" edge="1" parent="1" source="uc-ai-analysis" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-dashboard" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-movie-add" edge="1" parent="1" source="uc-manage-movies" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-add-movie" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-movie-update" edge="1" parent="1" source="uc-manage-movies" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-update-movie" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-movie-delete" edge="1" parent="1" source="uc-manage-movies" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-delete-movie" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-movie-trailer" edge="1" parent="1" source="uc-manage-movies" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-manage-trailer" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-ai-add" edge="1" parent="1" source="uc-ai-description" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-add-movie" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-schedule-date" edge="1" parent="1" source="uc-manage-showtimes" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-show-date" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-schedule-session" edge="1" parent="1" source="uc-manage-showtimes" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-show-session" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-schedule-pricing" edge="1" parent="1" source="uc-manage-showtimes" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-time-pricing" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-order-update" edge="1" parent="1" source="uc-manage-orders" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-update-order" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-products-product" edge="1" parent="1" source="uc-manage-products" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-product" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-products-combo" edge="1" parent="1" source="uc-manage-products" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-combo" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-combo-pricing" edge="1" parent="1" source="uc-combo" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-combo-pricing" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-cinema-branches" edge="1" parent="1" source="uc-cinema-system" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-cinema-branches" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-cinema-rooms" edge="1" parent="1" source="uc-cinema-system" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-rooms" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-rooms-seats" edge="1" parent="1" source="uc-rooms" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-seats" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-members-points" edge="1" parent="1" source="uc-members" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;fontFamily=Arial;fontSize=11;" target="uc-point-policy" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-openai-chat" edge="1" parent="1" source="actor-openai" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;html=1;rounded=0;dashed=1;strokeColor=#6c8ebf;" target="uc-chat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-openai-recommend" edge="1" parent="1" source="actor-openai" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;html=1;rounded=0;dashed=1;strokeColor=#6c8ebf;" target="uc-recommend">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-openai-analysis" edge="1" parent="1" source="actor-openai" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;html=1;rounded=0;dashed=1;strokeColor=#6c8ebf;" target="uc-ai-analysis">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="_l9weO8cx3mjfAKcFc7F-1" connectable="0" parent="e-openai-analysis" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Text" vertex="1">
+          <mxGeometry relative="1" x="0.935" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-openai-description" edge="1" parent="1" source="actor-openai" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;html=1;rounded=0;dashed=1;strokeColor=#6c8ebf;" target="uc-ai-description">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
