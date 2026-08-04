@@ -28,6 +28,13 @@ Chào mừng bạn đến với **CGV Việt Nam**, nền tảng đặt vé xem 
 
     Run Backend: nodemon index.js
     Run frontend: npm run dev
+
+## Swagger API
+
+Sau khi backend chạy, mở tài liệu API tại:
+
+- Swagger UI: `http://localhost:7000/api-docs`
+- OpenAPI JSON: `http://localhost:7000/api-docs.json`
 ---
 ## 🇻🇳 Về CGV Việt Nam
 > **CÔNG TY TNHH CJ CGV VIỆT NAM**  

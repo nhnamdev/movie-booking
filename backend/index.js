@@ -3,6 +3,8 @@
 const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger");
 const { PayOS } = require("@payos/node");
 // Import module dotenv để sử dụng biến môi trường
 require("dotenv").config();
@@ -59,6 +61,16 @@ app.use(
 // Parse JSON bodies in the request
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.get("/api-docs.json", (req, res) => res.json(swaggerDocument));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, {
+    customSiteTitle: "CGV Booking API Docs",
+    swaggerOptions: { persistAuthorization: true },
+  })
+);
 
 const multer = require("multer");
 const upload = multer({ storage: multer.memoryStorage() });
