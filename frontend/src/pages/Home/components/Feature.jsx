@@ -1,3 +1,5 @@
+import { resolveMediaUrl } from "../../../utils/mediaUrl";
+
 export const Feature = ({ idx, title, description, image_path }) => {
   const featureSvgs = {
     "Unparalleled Cinematic Experience": (
@@ -141,7 +143,7 @@ export const Feature = ({ idx, title, description, image_path }) => {
   return (
     <div className="feature-content">
       {idx % 2 === 0 && (
-        <img className="feature-img" src={image_path} alt={title} />
+        <img className="feature-img" src={resolveMediaUrl(image_path)} alt={title} />
       )}
 
       <div className="feature-text">
@@ -151,7 +153,7 @@ export const Feature = ({ idx, title, description, image_path }) => {
       </div>
 
       {idx % 2 !== 0 && (
-        <img className="feature-img" src={image_path} alt={title} />
+        <img className="feature-img" src={resolveMediaUrl(image_path)} alt={title} />
       )}
     </div>
   );

@@ -14,6 +14,7 @@ import { FiGift, FiTrendingDown, FiTrendingUp } from "react-icons/fi";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import HashLoader from "react-spinners/HashLoader";
+import { resolveMediaUrl } from "../../../utils/mediaUrl";
 
 const paymentStatusLabels = {
   UNPAID: "Chưa thanh toán",
@@ -227,7 +228,7 @@ const cancelTicket = async (ticketId) => {
         >
           <img
             className="purchase-item-img"
-            src={cusTicket.movie_image}
+            src={resolveMediaUrl(cusTicket.movie_image)}
             alt={cusTicket.movie_name}
           />
         </div>

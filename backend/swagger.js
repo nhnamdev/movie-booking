@@ -148,6 +148,7 @@ const endpoints = [
   ["get", "/", "System", "Kiểm tra backend"],
   ["get", "/latestMovies", "Catalog", "Lấy danh sách phim đang chiếu"],
   ["get", "/upcomingMovies", "Catalog", "Lấy phim sắp chiếu và trạng thái mở bán sớm"],
+  ["get", "/media/{folder}/{fileName}", "Media", "Đọc ảnh từ Cloudflare R2"],
   ["get", "/locationDetails", "Catalog", "Lấy thông tin địa điểm rạp"],
   ["get", "/locationFeatures", "Catalog", "Lấy tiện ích của rạp"],
   ["get", "/theatres", "Catalog", "Lấy danh sách rạp"],
@@ -309,6 +310,21 @@ for (const [method, path, tag, summary, fields, optional = [], customSchema] of 
   swaggerDocument.paths[path][method] = operation;
 }
 
+swaggerDocument.paths["/media/{folder}/{fileName}"].get.parameters = [
+  {
+    name: "folder",
+    in: "path",
+    required: true,
+    schema: { type: "string", enum: ["movies", "combos"] },
+  },
+  {
+    name: "fileName",
+    in: "path",
+    required: true,
+    schema: { type: "string" },
+  },
+];
+
 swaggerDocument.paths["/payment"].post.deprecated = true;
 swaggerDocument.paths["/payment"].post.tags = ["Legacy"];
 swaggerDocument.paths["/payment"].post.summary = "Tạo thanh toán kiểu cũ (đã ngừng dùng)";
@@ -344,6 +360,7 @@ swaggerDocument.paths["/adminUploadImage"] = {
             properties: {
               email: fieldSchemas.email,
               password: fieldSchemas.password,
+              folder: { type: "string", enum: ["movies", "combos"], default: "movies" },
               image: { type: "string", format: "binary" },
             },
           },

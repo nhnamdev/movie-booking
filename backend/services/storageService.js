@@ -1,4 +1,4 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { GetObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 
 const s3Client = new S3Client({
   region: "auto",
@@ -12,11 +12,24 @@ const s3Client = new S3Client({
 });
 
 const R2_BUCKET = process.env.R2_BUCKET || "tieuluan";
-const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || process.env.R2_ENDPOINT;
+const ALLOWED_FOLDERS = new Set(["movies", "combos"]);
 
-// Tải ảnh phim lên Cloudflare R2 và trả URL công khai.
-const uploadToR2 = async ({ buffer, fileName, mimeType }) => {
-  const Key = `movies/${fileName}`;
+const normalizeFolder = (folder) =>
+  ALLOWED_FOLDERS.has(folder) ? folder : "movies";
+
+const normalizeObjectKey = (key) => {
+  const normalized = String(key || "").replace(/^\/+/, "");
+  if (!/^(movies|combos)\/[a-zA-Z0-9._-]+$/.test(normalized)) {
+    const error = new Error("Đường dẫn ảnh không hợp lệ");
+    error.code = "INVALID_MEDIA_KEY";
+    throw error;
+  }
+  return normalized;
+};
+
+// Tải ảnh vào bucket riêng tư và trả đường dẫn qua backend.
+const uploadToR2 = async ({ buffer, fileName, mimeType, folder = "movies" }) => {
+  const Key = `${normalizeFolder(folder)}/${fileName}`;
 
   await s3Client.send(
     new PutObjectCommand({
@@ -27,15 +40,23 @@ const uploadToR2 = async ({ buffer, fileName, mimeType }) => {
     })
   );
 
-  return `${R2_PUBLIC_URL}/${R2_BUCKET}/${Key}`;
+  return { key: Key, url: `/media/${Key}` };
 };
+
+const getFromR2 = async (key) =>
+  s3Client.send(
+    new GetObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: normalizeObjectKey(key),
+    })
+  );
 
 // Tạo tên file duy nhất nhưng vẫn giữ phần mở rộng gốc.
 const generateFileName = (originalName) => {
-  const ext = originalName.split(".").pop() || "jpg";
+  const ext = originalName.split(".").pop().toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
   return `${timestamp}-${random}.${ext}`;
 };
 
-module.exports = { uploadToR2, generateFileName };
+module.exports = { getFromR2, uploadToR2, generateFileName };

@@ -12,6 +12,7 @@ import {
   ticketPurchaseError,
 } from "../../../toasts/toast";
 import { API_URL } from "../../../utils/apiUrl";
+import { resolveMediaUrl } from "../../../utils/mediaUrl";
 import { RewardPointsSelector } from "../../../components/RewardPointsSelector";
 
 const formatVND = (value) => `${Number(value || 0).toLocaleString("vi-VN")}₫`;
@@ -215,7 +216,7 @@ export const ConcessionsSection = () => {
                       return (
                         <article className={`concession-product ${quantity ? "is-selected" : ""}`} key={product.id}>
                           <div className="concession-product-image">
-                            <img src={product.image_url || "/Images/features/food.webp"} alt={product.name} />
+                            <img src={resolveMediaUrl(product.image_url) || "/Images/features/food.webp"} alt={product.name} />
                           </div>
                           <div className="concession-product-body">
                             <div><h3>{product.name}</h3><p>{product.description}</p></div>

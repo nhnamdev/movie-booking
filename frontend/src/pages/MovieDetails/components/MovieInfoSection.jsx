@@ -6,6 +6,7 @@ import HashLoader from "react-spinners/HashLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { showLoginModal } from "../../../reducers/authSlice";
 import { resetCart } from "../../../reducers/cartSlice";
+import { resolveMediaUrl } from "../../../utils/mediaUrl";
 
 export const MovieInfoSection = () => {
   const [movieData, setMovieData] = useState({});
@@ -191,7 +192,7 @@ export const MovieInfoSection = () => {
             <div className="movie-info-img-container">
               <img
                 className="movie-info-img"
-                src={movieData && movieData.image_path}
+                src={resolveMediaUrl(movieData && movieData.image_path)}
                 alt="Movie Photo"
               />
             </div>

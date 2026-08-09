@@ -1,4 +1,5 @@
 import axios from "axios";
+import { resolveMediaUrl } from "../../../utils/mediaUrl";
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -138,6 +139,7 @@ export const AdminMovieAddSection = () => {
     formData.append("image", file);
     formData.append("email", adminEmail);
     formData.append("password", adminPassword);
+    formData.append("folder", "movies");
 
     const res = await axios.post(
       `${import.meta.env.VITE_API_URL}/adminUploadImage`,
@@ -324,7 +326,7 @@ export const AdminMovieAddSection = () => {
         />
         <div className="admin-image-upload-area" onClick={() => fileRef.current?.click()}>
           {formInfo.imagePath ? (
-            <img src={formInfo.imagePath} alt="Preview" className="admin-image-preview" />
+            <img src={resolveMediaUrl(formInfo.imagePath)} alt="Preview" className="admin-image-preview" />
           ) : (
             <>
               <FiUpload size={24} />
@@ -526,7 +528,7 @@ export const AdminMovieAddSection = () => {
             >
               <img
                 className="admin-movie-poster"
-                src={movie.image_path}
+                src={resolveMediaUrl(movie.image_path)}
                 alt={`${movie.name} poster`}
               />
 

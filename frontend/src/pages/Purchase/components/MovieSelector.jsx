@@ -3,6 +3,7 @@ import axios from "axios";
 import HashLoader from "react-spinners/HashLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { setMovie } from "../../../reducers/cartSlice";
+import { resolveMediaUrl } from "../../../utils/mediaUrl";
 
 export const MovieSelector = ({ movieData, setMovieData, paymentOngoing }) => {
   const override = {
@@ -60,7 +61,7 @@ export const MovieSelector = ({ movieData, setMovieData, paymentOngoing }) => {
           <div className="movie-option-box">
             <div className="movie-option-img-box">
               <img
-                src={movie.image_path}
+                src={resolveMediaUrl(movie.image_path)}
                 className="movie-option-img"
                 alt={movie.movie_name}
               />

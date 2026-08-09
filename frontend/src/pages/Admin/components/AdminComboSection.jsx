@@ -4,6 +4,7 @@ import { FiEdit3, FiPlus, FiSave, FiTrash2, FiUpload } from "react-icons/fi";
 import { useSelector } from "react-redux";
 import { ClipLoader } from "react-spinners";
 import { adminErrorToast, adminShowninToast } from "../../../toasts/toast";
+import { resolveMediaUrl } from "../../../utils/mediaUrl";
 
 const emptyCombo = {
   comboId: "",
@@ -76,6 +77,7 @@ export const AdminComboSection = () => {
         formData.append("image", imageFile);
         formData.append("email", credentials.email || "");
         formData.append("password", credentials.password || "");
+        formData.append("folder", "combos");
         const uploadResponse = await axios.post(
           `${import.meta.env.VITE_API_URL}/adminUploadImage`,
           formData,
@@ -137,7 +139,7 @@ export const AdminComboSection = () => {
           {comboForm.imageUrl || imageFile ? (
             <img
               className="admin-combo-preview"
-              src={imageFile ? URL.createObjectURL(imageFile) : comboForm.imageUrl}
+              src={imageFile ? URL.createObjectURL(imageFile) : resolveMediaUrl(comboForm.imageUrl)}
               alt="Xem trước sản phẩm"
             />
           ) : null}
@@ -173,7 +175,7 @@ export const AdminComboSection = () => {
             {data.combos.map((combo) => (
               <article className="admin-combo-card" key={combo.id}>
                 <div className="admin-combo-card-image">
-                  <img src={combo.image_url || "/Images/features/food.webp"} alt={combo.name} />
+                  <img src={resolveMediaUrl(combo.image_url) || "/Images/features/food.webp"} alt={combo.name} />
                 </div>
                 <div><h3>{combo.name}</h3><p>{combo.description}</p></div>
                 <small>{combo.category}</small>

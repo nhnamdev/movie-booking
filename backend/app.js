@@ -13,6 +13,7 @@ const createCinemaManagementController = require("./controllers/cinemaManagement
 const createConcessionController = require("./controllers/concessionController");
 const createStaffManagementController = require("./controllers/staffManagementController");
 const createRewardController = require("./controllers/rewardController");
+const createMediaController = require("./controllers/mediaController");
 
 const createCatalogRoutes = require("./routes/catalogRoutes");
 const createBookingRoutes = require("./routes/bookingRoutes");
@@ -24,6 +25,7 @@ const createCinemaManagementRoutes = require("./routes/cinemaManagementRoutes");
 const createConcessionRoutes = require("./routes/concessionRoutes");
 const createStaffManagementRoutes = require("./routes/staffManagementRoutes");
 const createRewardRoutes = require("./routes/rewardRoutes");
+const createMediaRoutes = require("./routes/mediaRoutes");
 
 const createApp = ({
   dependencies,
@@ -63,7 +65,9 @@ const createApp = ({
   const concessionController = createConcessionController(dependencies);
   const staffManagementController = createStaffManagementController(dependencies);
   const rewardController = createRewardController(dependencies);
+  const mediaController = createMediaController(dependencies);
 
+  app.use(createMediaRoutes(mediaController));
   app.use(createCatalogRoutes(catalogController));
   app.use(createBookingRoutes(bookingController));
   app.use(createPaymentRoutes(paymentController, { legacyEndpointGuard }));

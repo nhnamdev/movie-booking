@@ -7,6 +7,7 @@ import { SeatSelector } from "./SeatSelector";
 import { LocationSelector } from "../../../components/LocationSelector";
 import { PayMethodSelector } from "./PayMethodSelector";
 import { ComboSelector } from "./ComboSelector";
+import { resolveMediaUrl } from "../../../utils/mediaUrl";
 import BarLoader from "react-spinners/BarLoader";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -286,7 +287,7 @@ export const PurchaseSection = () => {
                 <div className="ticket-movie-img-cont">
                   <img
                     className="ticket-movie-img"
-                    src={currentMovie.image_path}
+                    src={resolveMediaUrl(currentMovie.image_path)}
                     alt="selected movie image"
                   />
                 </div>

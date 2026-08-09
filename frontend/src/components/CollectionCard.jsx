@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { showLoginModal } from "../reducers/authSlice";
 import { resetCart } from "../reducers/cartSlice";
+import { resolveMediaUrl } from "../utils/mediaUrl";
 
 export const CollectionCard = ({
   id,
@@ -36,7 +37,7 @@ export const CollectionCard = ({
       <div className="home-movie-img-box">
         <img
           className="home-movie-img"
-          src={image_path}
+          src={resolveMediaUrl(image_path)}
           alt={`Poster phim ${name}`}
         />
       </div>

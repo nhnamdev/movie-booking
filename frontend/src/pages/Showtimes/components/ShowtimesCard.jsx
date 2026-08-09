@@ -9,6 +9,7 @@ import {
   FiUserCheck,
 } from "react-icons/fi";
 import { showLoginModal } from "../../../reducers/authSlice";
+import { resolveMediaUrl } from "../../../utils/mediaUrl";
 import {
   resetCart,
   setMovie,
@@ -65,7 +66,7 @@ export const ShowtimesCard = ({
           className="showtimes-poster-link"
           onClick={() => navigate(`/movieDetails/${id}`)}
         >
-          <img className="showtimes-img" src={image_path} alt={movie_name} />
+          <img className="showtimes-img" src={resolveMediaUrl(image_path)} alt={movie_name} />
         </button>
         <div className="showtimes-age-mobile">
           <FiUserCheck />

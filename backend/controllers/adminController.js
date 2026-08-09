@@ -1462,7 +1462,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
-  // Kiểm tra quyền và tải ảnh phim lên Cloudflare R2.
+  // Kiểm tra quyền và tải ảnh phim hoặc combo lên Cloudflare R2.
   const adminUploadImage = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -1474,14 +1474,16 @@ const createAdminController = (dependencies) => {
       return res.status(400).json({ message: "Vui lòng chọn ảnh" });
     }
 
+    const folder = req.body.folder === "combos" ? "combos" : "movies";
     const fileName = generateFileName(req.file.originalname);
-    const publicUrl = await uploadToR2({
+    const uploadedImage = await uploadToR2({
       buffer: req.file.buffer,
       fileName,
       mimeType: req.file.mimetype,
+      folder,
     });
 
-    return res.json({ url: publicUrl, fileName });
+    return res.json({ ...uploadedImage, fileName });
   } catch (err) {
     console.error("Upload image error:", err);
     return res.status(500).json({ message: "Không thể tải ảnh lên" });
