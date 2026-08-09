@@ -11,6 +11,8 @@ export const CollectionCard = ({
   duration,
   release_date,
   genres,
+  screening_status,
+  has_bookable_showtime,
 }) => {
   const navigate = useNavigate();
   const { isAuthenticated, signedPerson } = useSelector(
@@ -23,6 +25,8 @@ export const CollectionCard = ({
   const displayRating = Number.isFinite(ratingNumber)
     ? ratingNumber.toFixed(1)
     : "Chưa có";
+  const isUpcoming = screening_status === "upcoming";
+  const bookingAvailable = !isUpcoming || Number(has_bookable_showtime) === 1;
 
   return (
     <div
@@ -53,6 +57,12 @@ export const CollectionCard = ({
       </div>
 
       <p className="movie-genre">{genres}</p>
+
+      {isUpcoming && (
+        <p className={`movie-screening-status ${bookingAvailable ? "is-open" : ""}`}>
+          {bookingAvailable ? "Đã mở bán vé sớm" : "Chưa mở bán vé"}
+        </p>
+      )}
 
       <div className="movie-card-third-line">
         <div className="line-2">
@@ -128,15 +138,17 @@ export const CollectionCard = ({
 
       <button
         className="book-btn btn"
+        disabled={!bookingAvailable}
         onClick={(e) => {
           e.stopPropagation();
+          if (!bookingAvailable) return;
           dispatch(resetCart());
           isAuthenticated && signedPerson.person_type === "Customer"
             ? navigate("/purchase")
             : dispatch(showLoginModal());
         }}
       >
-        Đặt vé
+        {isUpcoming ? (bookingAvailable ? "Đặt vé sớm" : "Chưa mở bán") : "Đặt vé"}
       </button>
     </div>
   );

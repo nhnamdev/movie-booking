@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { DateSelector } from "./DateSelector";
 import { MovieSelector } from "./MovieSelector";
@@ -6,6 +6,7 @@ import { PictureQualitySelector } from "./PictureQualitySelector";
 import { SeatSelector } from "./SeatSelector";
 import { LocationSelector } from "../../../components/LocationSelector";
 import { PayMethodSelector } from "./PayMethodSelector";
+import { ComboSelector } from "./ComboSelector";
 import BarLoader from "react-spinners/BarLoader";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -13,9 +14,10 @@ import {
   purchaseCompletion,
   ticketPurchaseError,
 } from "../../../toasts/toast";
-import { resetCart } from "../../../reducers/cartSlice";
+import { resetCart, setRewardPoints } from "../../../reducers/cartSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 import { formatDateKey } from "../../../utils/dateUtils";
+import { RewardPointsSelector } from "../../../components/RewardPointsSelector";
 
 export const PurchaseSection = () => {
   const navigate = useNavigate();
@@ -24,6 +26,9 @@ export const PurchaseSection = () => {
   const [hallData, setHallData] = useState([]);
   const [movieData, setMovieData] = useState([]);
   const [seatsData, setSeatsData] = useState([]);
+  const [comboData, setComboData] = useState({ hasPromotion: false, combos: [] });
+  const [comboLoading, setComboLoading] = useState(false);
+  const [rewardDiscount, setRewardDiscount] = useState(0);
 
   const [ticketIds, setTicketIds] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -40,6 +45,8 @@ export const PurchaseSection = () => {
     seat_id_list: userSeatList,
     hall_id: userHallId,
     seat_price: userSeatPrice,
+    combo_items: userComboItems,
+    reward_points: userRewardPoints,
   } = useSelector((store) => store.cart);
   const dispatch = useDispatch();
 
@@ -62,6 +69,30 @@ export const PurchaseSection = () => {
     seatsData &&
     seatsData.filter((seatData) => userSeatList.includes(seatData.seat_id));
 
+  const selectedComboLines = (comboData.combos || [])
+    .map((combo) => ({
+      ...combo,
+      quantity:
+        userComboItems.find((item) => item.comboId === combo.id)?.quantity || 0,
+    }))
+    .filter((combo) => combo.quantity > 0);
+  const ticketSubtotal = (userSeats || []).reduce(
+    (sum, seat) => sum + Number(seat.final_price || userSeatPrice || 0),
+    0
+  );
+  const comboSubtotal = selectedComboLines.reduce(
+    (sum, combo) => sum + Number(combo.base_price) * combo.quantity,
+    0
+  );
+  const comboTotal = selectedComboLines.reduce(
+    (sum, combo) => sum + Number(combo.final_price) * combo.quantity,
+    0
+  );
+  const comboDiscount = comboSubtotal - comboTotal;
+  const grandTotal = ticketSubtotal + comboTotal;
+  const payableTotal = Math.max(0, grandTotal - rewardDiscount);
+  const formatVND = (value) => `${Number(value || 0).toLocaleString("vi-VN")}₫`;
+
   const handleTicketPurchase = async () => {
     try {
       setBtnDisabled(true);
@@ -76,10 +107,16 @@ export const PurchaseSection = () => {
             userHallId,
             userMovieId,
             userShowtimeId,
+            comboItems: userComboItems,
+            rewardPoints: userRewardPoints,
+            customerPassword: signedPerson.password,
           }
         );
 
-        counterOrderCreated(counterResponse.data.orderCode);
+        counterOrderCreated(
+          counterResponse.data.orderCode,
+          counterResponse.data.expiresAt
+        );
         dispatch(resetCart());
         navigate("/purchase", { replace: true });
         setLoading(false);
@@ -94,6 +131,9 @@ export const PurchaseSection = () => {
           userHallId,
           userMovieId,
           userShowtimeId,
+          comboItems: userComboItems,
+          rewardPoints: userRewardPoints,
+          customerPassword: signedPerson.password,
         }
       );
 
@@ -107,7 +147,7 @@ export const PurchaseSection = () => {
       ticketPurchaseError(
         err?.response?.data?.message ||
           (userPayMethod === "Thanh toán tại rạp"
-            ? "Không thể tạo vé thanh toán tại rạp"
+            ? "Không thể giữ ghế để thanh toán tại rạp"
             : "Không thể tạo thanh toán PayOS")
       );
       setLoading(false);
@@ -115,8 +155,16 @@ export const PurchaseSection = () => {
   };
 
   useEffect(() => {
-    userPayMethod.length > 0 ? setBtnDisabled(false) : setBtnDisabled(true);
-  }, [userPayMethod]);
+    userPayMethod.length > 0 && !comboLoading
+      ? setBtnDisabled(false)
+      : setBtnDisabled(true);
+  }, [userPayMethod, comboLoading]);
+
+  const handleRewardChange = useCallback(
+    (points) => dispatch(setRewardPoints(points)),
+    [dispatch]
+  );
+  const handleRewardDiscount = useCallback((discount) => setRewardDiscount(discount), []);
 
   useEffect(() => {
     const params = new URLSearchParams(currentPage.search);
@@ -205,12 +253,32 @@ export const PurchaseSection = () => {
           )}
 
           {userSeatList.length > 0 && (
+            <ComboSelector
+              comboData={comboData}
+              setComboData={setComboData}
+              comboLoading={comboLoading}
+              setComboLoading={setComboLoading}
+              paymentOngoing={loading}
+            />
+          )}
+
+          {userSeatList.length > 0 && !comboLoading && (
+            <RewardPointsSelector
+              grossAmount={grandTotal}
+              value={userRewardPoints}
+              onChange={handleRewardChange}
+              onDiscountChange={handleRewardDiscount}
+              disabled={loading}
+            />
+          )}
+
+          {userSeatList.length > 0 && !comboLoading && (
             <PayMethodSelector paymentOngoing={loading} />
           )}
         </div>
 
         <div className="purchase-section-right">
-          <h2 className="ticket-container-heading">Ticket Summary</h2>
+          <h2 className="ticket-container-heading">Tóm tắt đơn hàng</h2>
 
           <div className="ticket-container">
             {currentMovie && (
@@ -488,13 +556,51 @@ export const PurchaseSection = () => {
                         d="M48 192h416M128 300h48v20h-48z"
                       />
                     </svg>
-                    <p>Tổng tiền</p>
+                    <p>Tiền vé</p>
                   </div>
 
                   <p className="ticket-info-val">
-                    {userSeatPrice && userSeats
-                      ? ` ${userSeatPrice * userSeats.length} VNĐ`
-                      : "--"}
+                    {ticketSubtotal > 0 ? formatVND(ticketSubtotal) : "--"}
+                  </p>
+                </li>
+
+                {comboTotal > 0 ? (
+                  <li className="ticket-info-item">
+                    <div className="ticket-info-category">
+                      <span className="ticket-icon-text" aria-hidden="true">🍿</span>
+                      <p>Combo</p>
+                    </div>
+                    <p className="ticket-info-val">{formatVND(comboSubtotal)}</p>
+                  </li>
+                ) : null}
+
+                {comboDiscount > 0 ? (
+                  <li className="ticket-info-item ticket-discount-row">
+                    <div className="ticket-info-category">
+                      <span className="ticket-icon-text" aria-hidden="true">%</span>
+                      <p>Khuyến mãi combo</p>
+                    </div>
+                    <p className="ticket-info-val">-{formatVND(comboDiscount)}</p>
+                  </li>
+                ) : null}
+
+                {rewardDiscount > 0 ? (
+                  <li className="ticket-info-item ticket-discount-row">
+                    <div className="ticket-info-category">
+                      <span className="ticket-icon-text" aria-hidden="true">★</span>
+                      <p>Điểm thưởng ({userRewardPoints} điểm)</p>
+                    </div>
+                    <p className="ticket-info-val">-{formatVND(rewardDiscount)}</p>
+                  </li>
+                ) : null}
+
+                <li className="ticket-info-item ticket-grand-total">
+                  <div className="ticket-info-category">
+                    <span className="ticket-icon-text" aria-hidden="true">=</span>
+                    <p>Tổng thanh toán</p>
+                  </div>
+                  <p className="ticket-info-val">
+                    {payableTotal > 0 ? formatVND(payableTotal) : "--"}
                   </p>
                 </li>
               </ul>
@@ -508,9 +614,9 @@ export const PurchaseSection = () => {
               {loading ? (
                 <BarLoader color="#e6e6e8" />
               ) : userPayMethod === "Thanh toán tại rạp" ? (
-                "Tạo vé tại rạp"
+                "Giữ ghế tại rạp"
               ) : (
-                "Mua vé"
+                "Thanh toán"
               )}
             </button>
           </div>

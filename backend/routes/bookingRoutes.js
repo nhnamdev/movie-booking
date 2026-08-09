@@ -7,6 +7,7 @@ const createBookingRoutes = (controller) => {
   router.post("/uniqueMovies", controller.uniqueMovies);
   router.post("/halls", controller.halls);
   router.post("/seats", controller.seats);
+  router.post("/movieCombos", controller.movieCombos);
 
   return router;
 };

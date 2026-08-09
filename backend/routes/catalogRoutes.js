@@ -5,6 +5,7 @@ const createCatalogRoutes = (controller) => {
 
   router.get("/", controller.health);
   router.get("/latestMovies", controller.latestMovies);
+  router.get("/upcomingMovies", controller.upcomingMovies);
   router.get("/locationDetails", controller.locationDetails);
   router.get("/locationFeatures", controller.locationFeatures);
   router.get("/theatres", controller.theatres);

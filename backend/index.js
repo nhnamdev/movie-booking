@@ -3,7 +3,13 @@ require("dotenv").config();
 const createApp = require("./app");
 const databaseService = require("./services/databaseService");
 const createPaymentService = require("./services/paymentService");
+const createComboService = require("./services/comboService");
+const createCinemaManagementService = require("./services/cinemaManagementService");
+const createConcessionService = require("./services/concessionService");
+const createStaffManagementService = require("./services/staffManagementService");
+const createRewardService = require("./services/rewardService");
 const createAdminService = require("./services/adminService");
+const createShowtimeAvailabilityService = require("./services/showtimeAvailabilityService");
 const registrationLogService = require("./services/registrationLogService");
 const storageService = require("./services/storageService");
 const createLegacyEndpointGuard = require("./middleware/legacyEndpointGuard");
@@ -27,7 +33,31 @@ const corsOrigins = (process.env.CORS_ORIGINS || defaultCorsOrigins.join(","))
   .filter(Boolean);
 
 databaseService.connectDatabase();
-const paymentService = createPaymentService({ queryDbAsync: databaseService.query });
+const comboService = createComboService({ queryDbAsync: databaseService.query });
+const cinemaManagementService = createCinemaManagementService({
+  queryDbAsync: databaseService.query,
+  withTransaction: databaseService.withTransaction,
+});
+const concessionService = createConcessionService({ queryDbAsync: databaseService.query });
+const staffManagementService = createStaffManagementService({
+  queryDbAsync: databaseService.query,
+});
+const rewardService = createRewardService({
+  queryDbAsync: databaseService.query,
+  withTransaction: databaseService.withTransaction,
+});
+const showtimeAvailabilityService = createShowtimeAvailabilityService({
+  queryDbAsync: databaseService.query,
+});
+const paymentService = createPaymentService({
+  queryDbAsync: databaseService.query,
+  withTransaction: databaseService.withTransaction,
+  priceComboSelection: comboService.priceComboSelection,
+  settlePaidOrderRewards: rewardService.settlePaidOrderRewards,
+  releaseRewardHold: rewardService.releaseRewardHold,
+  releaseExpiredRewardHolds: rewardService.releaseExpiredRewardHolds,
+  assertShowtimeBookable: showtimeAvailabilityService.assertShowtimeBookable,
+});
 const adminService = createAdminService({
   db: databaseService.db,
   parsePayOSOrderPayload: paymentService.parsePayOSOrderPayload,
@@ -38,6 +68,12 @@ const dependencies = {
   db: databaseService.db,
   queryDbAsync: databaseService.query,
   frontendUrl,
+  ...comboService,
+  ...cinemaManagementService,
+  ...concessionService,
+  ...staffManagementService,
+  ...rewardService,
+  ...showtimeAvailabilityService,
   ...paymentService,
   ...adminService,
   ...registrationLogService,
@@ -53,6 +89,7 @@ const app = createApp({
 });
 
 if (require.main === module) {
+  paymentService.startExpirationScheduler();
   app.listen(port, () => {
     console.log(` backend running on ${port}`);
   });

@@ -78,14 +78,45 @@ export const purchaseCompletion = (tickets) => {
   });
 };
 
-export const counterOrderCreated = (orderCode) => {
-  toast.success(`Đã tạo vé thanh toán tại rạp. Mã đơn: ${orderCode}`, {
+export const counterOrderCreated = (orderCode, expiresAt) => {
+  const expiresDate = expiresAt ? new Date(expiresAt) : null;
+  const deadline = expiresDate && !Number.isNaN(expiresDate.getTime())
+    ? expiresDate.toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+  toast.success(
+    `Đã giữ ghế trong 30 phút${deadline ? `, đến ${deadline}` : ""}. Mã đơn: ${orderCode}`,
+    {
     position: "top-right",
     autoClose: 8000,
     closeOnClick: true,
     pauseOnHover: false,
     draggable: true,
     theme: "light",
+    style: toastFontStyle,
+    }
+  );
+};
+
+export const concessionOrderCreated = (orderCode, expiresAt) => {
+  const deadline = expiresAt
+    ? new Date(expiresAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
+    : null;
+  toast.success(`Đã tạo đơn bắp nước #${orderCode}${deadline ? `, nhận trước ${deadline}` : ""}`, {
+    ...toastPrimaryCategories,
+    autoClose: 8000,
+    theme: "colored",
+    style: toastFontStyle,
+  });
+};
+
+export const concessionPurchaseCompletion = (orderCode) => {
+  toast.success(`Thanh toán đơn bắp nước #${orderCode} thành công`, {
+    ...toastPrimaryCategories,
+    autoClose: 8000,
+    theme: "colored",
     style: toastFontStyle,
   });
 };

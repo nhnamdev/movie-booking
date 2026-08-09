@@ -3,42 +3,50 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   FaChartBar,
+  FaBuilding,
   FaClock,
   FaClipboardList,
-  FaEdit,
   FaFilm,
   FaHome,
   FaSignOutAlt,
   FaUserCircle,
+  FaUserTie,
 } from "react-icons/fa";
+import { GiPopcorn } from "react-icons/gi";
 import { logout } from "../../reducers/authSlice";
 import { AdminMovieAddSection } from "./components/AdminMovieAddSection";
-import { AdminShowtimesAddSection } from "./components/AdminShowtimesAddSection";
 import { AdminShownInModifySection } from "./components/AdminShownInModifySection";
 import { AdminDashboardPrimary } from "./components/AdminDashboardPrimary";
 import { AdminOrdersSection } from "./components/AdminOrdersSection";
+import { AdminCinemaSection } from "./components/AdminCinemaSection";
+import { AdminComboSection } from "./components/AdminComboSection";
+import { AdminStaffSection } from "./components/AdminStaffSection";
 
-const tabs = [
+const adminTabs = [
   { id: "dashboard", label: "Tổng quan", icon: FaChartBar },
   { id: "orders", label: "Đơn hàng", icon: FaClipboardList },
+  { id: "cinemas", label: "Chi nhánh & phòng", icon: FaBuilding },
+  { id: "combos", label: "Combo bắp nước", icon: GiPopcorn },
   { id: "movies", label: "Quản lý phim", icon: FaFilm },
-  { id: "showtimes", label: "Lịch chiếu", icon: FaClock },
-  { id: "modify", label: "Chỉnh sửa suất chiếu", icon: FaEdit },
+  { id: "showtimes", label: "Quản lý suất chiếu", icon: FaClock },
+  { id: "staff", label: "Nhân viên", icon: FaUserTie },
+];
+
+const staffTabs = [
+  { id: "orders", label: "Đơn hàng", icon: FaClipboardList },
+  { id: "showtimes", label: "Quản lý suất chiếu", icon: FaClock },
 ];
 
 const AdminPage = () => {
-  const [selectedShowDate, setSelectedShowDate] = useState("");
-  const [activeTab, setActiveTab] = useState("dashboard");
   const { signedPerson } = useSelector((store) => store.authentication);
+  const isStaff = signedPerson.person_type === "Staff";
+  const tabs = isStaff ? staffTabs : adminTabs;
+  const [activeTab, setActiveTab] = useState(isStaff ? "orders" : "dashboard");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const activeTabData = tabs.find((tab) => tab.id === activeTab) || tabs[0];
   const ActiveIcon = activeTabData.icon;
-
-  const handleSelectedDate = (e) => {
-    setSelectedShowDate(e.target.value);
-  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -51,7 +59,7 @@ const AdminPage = () => {
         <div className="admin-sidebar-header">
           <div className="admin-logo">
             <FaFilm className="admin-logo-icon" aria-hidden="true" />
-            <h2>CGV Quản trị</h2>
+            <h2>{isStaff ? "CGV Vận hành" : "CGV Quản trị"}</h2>
           </div>
         </div>
 
@@ -78,7 +86,7 @@ const AdminPage = () => {
           <div className="admin-user-info">
             <FaUserCircle className="admin-user-avatar" aria-hidden="true" />
             <span className="admin-user-name">
-              {signedPerson.first_name || "Admin"}
+              {signedPerson.first_name || (isStaff ? "Nhân viên" : "Admin")}
             </span>
           </div>
           <button className="admin-btn-back" onClick={() => navigate("/")}>
@@ -102,7 +110,7 @@ const AdminPage = () => {
             </h1>
           </div>
           <p className="admin-topbar-user">
-            Xin chào, {signedPerson.first_name || "Admin"}
+            Xin chào, {signedPerson.first_name || (isStaff ? "Nhân viên" : "Admin")}
           </p>
         </header>
 
@@ -113,17 +121,13 @@ const AdminPage = () => {
 
           {activeTab === "orders" && <AdminOrdersSection />}
 
-          {activeTab === "showtimes" && (
-            <AdminShowtimesAddSection
-              selectedShowDate={selectedShowDate}
-              setSelectedShowDate={setSelectedShowDate}
-              handleSelectedDate={handleSelectedDate}
-            />
-          )}
+          {activeTab === "cinemas" && <AdminCinemaSection />}
 
-          {activeTab === "modify" && (
-            <AdminShownInModifySection selectedDate={selectedShowDate} />
-          )}
+          {activeTab === "combos" && <AdminComboSection />}
+
+          {activeTab === "staff" && <AdminStaffSection />}
+
+          {activeTab === "showtimes" && <AdminShownInModifySection />}
         </div>
       </main>
     </div>

@@ -10,6 +10,7 @@ const createBookingController = (dependencies) => {
     getHeldOrderSeatIds,
     buildPaymentOrderPayload,
     finalizePaymentOrderTickets,
+    getMovieCombos,
     frontendUrl,
     maskEmail,
     logRegisterDebug,
@@ -32,10 +33,14 @@ const createBookingController = (dependencies) => {
       SELECT showtimes.showtime_date, MAX(showtimes.id) AS latest_showtime_id
       FROM showtimes
       JOIN shown_in ON showtimes.id = shown_in.showtime_id
+      JOIN movie ON movie.id = shown_in.movie_id
       JOIN hall ON shown_in.hall_id = hall.id
       WHERE hall.theatre_id = ?
+        AND hall.status = 'active'
         AND showtimes.status = 'active'
         AND shown_in.status = 'active'
+        AND (movie.end_date IS NULL OR movie.end_date >= CURDATE())
+        AND TIMESTAMPADD(MINUTE, CAST(movie.duration AS UNSIGNED), TIMESTAMP(showtimes.showtime_date, showtimes.movie_start_time)) > NOW()
       GROUP BY showtimes.showtime_date
       ORDER BY latest_showtime_id DESC
       LIMIT 4
@@ -55,7 +60,7 @@ const createBookingController = (dependencies) => {
   const showtimeDate = req.body.userDate;
 
   const sql =
-    "SELECT DISTINCT M.id,M.duration, M.name AS movie_name, M.image_path FROM movie M JOIN shown_in SI ON M.id = SI.movie_id JOIN showtimes S ON SI.showtime_id = S.id JOIN hall H ON SI.hall_id = H.id WHERE H.theatre_id = ? AND S.showtime_date = ? AND S.status = 'active' AND SI.status = 'active'";
+    "SELECT DISTINCT M.id,M.duration, M.name AS movie_name, M.image_path FROM movie M JOIN shown_in SI ON M.id = SI.movie_id JOIN showtimes S ON SI.showtime_id = S.id JOIN hall H ON SI.hall_id = H.id JOIN theatre T ON T.id = H.theatre_id WHERE H.theatre_id = ? AND S.showtime_date = ? AND T.status = 'active' AND H.status = 'active' AND S.status = 'active' AND SI.status = 'active' AND (M.end_date IS NULL OR M.end_date >= CURDATE()) AND TIMESTAMPADD(MINUTE, CAST(M.duration AS UNSIGNED), TIMESTAMP(S.showtime_date, S.movie_start_time)) > NOW()";
 
   db.query(sql, [theatreId, showtimeDate], (err, data) => {
     if (err) return res.json(err);
@@ -71,7 +76,7 @@ const createBookingController = (dependencies) => {
   const movieId = req.body.userMovieId;
 
   const sql =
-    "SELECT H.id AS hall_id, H.name AS hall_name, SI.showtime_id, S.show_type, S.screen_type, S.movie_start_time, S.price_per_seat FROM hall H JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id WHERE H.theatre_id = ? AND S.showtime_date = ? AND SI.movie_id = ? AND S.status = 'active' AND SI.status = 'active'";
+    "SELECT H.id AS hall_id, H.name AS hall_name, SI.showtime_id, S.show_type, S.screen_type, S.movie_start_time, S.price_per_seat FROM hall H JOIN theatre T ON T.id = H.theatre_id JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id JOIN movie M ON M.id = SI.movie_id WHERE H.theatre_id = ? AND S.showtime_date = ? AND SI.movie_id = ? AND T.status = 'active' AND H.status = 'active' AND S.status = 'active' AND SI.status = 'active' AND (M.end_date IS NULL OR M.end_date >= CURDATE()) AND TIMESTAMPADD(MINUTE, CAST(M.duration AS UNSIGNED), TIMESTAMP(S.showtime_date, S.movie_start_time)) > NOW()";
   db.query(sql, [theatreId, showtimeDate, movieId], (err, data) => {
     if (err) return res.json(err);
 
@@ -87,25 +92,43 @@ const createBookingController = (dependencies) => {
 
   const sql = `SELECT
   S.id AS seat_id,
-  S.name AS seat_name,
+  COALESCE(HS.seat_label, S.name) AS seat_name,
+  HS.row_index,
+  HS.column_index,
+  HS.seat_type,
+  HS.price_surcharge,
+  STIME.price_per_seat + HS.price_surcharge AS final_price,
   CASE WHEN T.id IS NULL THEN TRUE ELSE FALSE END AS booked_status
 FROM
   seat AS S
   JOIN hallwise_seat AS HS ON S.id = HS.seat_id
+  JOIN hall AS H ON H.id = HS.hall_id
+  JOIN theatre AS TH ON TH.id = H.theatre_id
   JOIN shown_in AS SI ON HS.hall_id = SI.hall_id
   JOIN showtimes AS STIME ON SI.showtime_id = STIME.id
+  JOIN movie AS M ON M.id = SI.movie_id
   LEFT JOIN ticket AS T ON
       T.seat_id = S.id AND
       T.showtimes_id = SI.showtime_id AND
       T.hall_id = SI.hall_id AND
-      T.movie_id = SI.movie_id
+      T.movie_id = SI.movie_id AND
+      EXISTS (
+        SELECT 1 FROM payment TP
+        WHERE TP.id = T.payment_id
+          AND TP.payment_status <> 'EXPIRED'
+      )
 WHERE
   SI.showtime_id = ? AND
   SI.hall_id = ? AND
   SI.movie_id = ? AND
+  HS.is_active = 1 AND
+  H.status = 'active' AND
+  TH.status = 'active' AND
   SI.status = 'active' AND
-  STIME.status = 'active'
-ORDER BY S.id`;
+  STIME.status = 'active' AND
+  (M.end_date IS NULL OR M.end_date >= CURDATE()) AND
+  TIMESTAMPADD(MINUTE, CAST(M.duration AS UNSIGNED), TIMESTAMP(STIME.showtime_date, STIME.movie_start_time)) > NOW()
+ORDER BY HS.row_index, HS.column_index`;
 
   try {
     const data = await queryDbAsync(sql, [showtime_id, hall_id, movie_id]);
@@ -126,11 +149,24 @@ ORDER BY S.id`;
   }
 };
 
+  // Trả danh mục combo cùng giá khuyến mãi đang áp dụng cho phim.
+  const movieCombos = async (req, res) => {
+  try {
+    const result = await getMovieCombos(req.body.movieId);
+    return res.json(result);
+  } catch (err) {
+    return res.status(err.statusCode || 500).json({
+      message: err.message || "Không thể tải combo bắp nước",
+    });
+  }
+};
+
   return {
     showtimesDates,
     uniqueMovies,
     halls,
     seats,
+    movieCombos,
   };
 };
 

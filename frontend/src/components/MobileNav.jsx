@@ -39,6 +39,14 @@ export const MobileNav = () => {
         <li className="mobile-nav-list-item">
           <button
             className="mobile-nav-item"
+            onClick={() => closeAndNavigate("/bap-nuoc")}
+          >
+            Bắp nước
+          </button>
+        </li>
+        <li className="mobile-nav-list-item">
+          <button
+            className="mobile-nav-item"
             onClick={() => closeAndNavigate("/")}
           >
             Trang chủ
@@ -60,13 +68,13 @@ export const MobileNav = () => {
             Về CGV
           </button>
         </li>
-        {isAuthenticated && signedPerson.person_type === "Admin" && (
+        {isAuthenticated && ["Admin", "Staff"].includes(signedPerson.person_type) && (
           <li className="mobile-nav-list-item">
             <button
               className="mobile-nav-item"
               onClick={() => closeAndNavigate("/admin")}
             >
-              Quản trị
+              {signedPerson.person_type === "Staff" ? "Vận hành" : "Quản trị"}
             </button>
           </li>
         )}

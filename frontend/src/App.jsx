@@ -26,6 +26,7 @@ const MovieDetailsPage = lazy(() =>
   import("./pages/MovieDetails/MovieDetailsPage")
 );
 const AboutUsPage = lazy(() => import("./pages/AboutUs/AboutUsPage"));
+const ConcessionsPage = lazy(() => import("./pages/Concessions/ConcessionsPage"));
 const CustomerInfoPage = lazy(() =>
   import("./pages/CustomerInfo/CustomerInfoPage")
 );
@@ -59,6 +60,7 @@ function App() {
 
               {/*// Xác định địa chỉ /showtimes sẽ dẫn đến ShowTimesPage*/}
             <Route path="/showtimes" element={<ShowtimesPage />} />
+            <Route path="/bap-nuoc" element={<ConcessionsPage />} />
             <Route
               element={
                 <ProtectedRoute
@@ -76,7 +78,7 @@ function App() {
               element={
                 <ProtectedRoute
                   condition={
-                    isAuthenticated && signedPerson.person_type === "Admin"
+                    isAuthenticated && ["Admin", "Staff"].includes(signedPerson.person_type)
                   }
                 />
               }

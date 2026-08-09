@@ -10,6 +10,9 @@ const createAdminController = (dependencies) => {
     getHeldOrderSeatIds,
     buildPaymentOrderPayload,
     finalizePaymentOrderTickets,
+    orderHasExpired,
+    markOrderExpired,
+    expireStaleOrders,
     frontendUrl,
     maskEmail,
     logRegisterDebug,
@@ -17,11 +20,17 @@ const createAdminController = (dependencies) => {
     adminAuthFailed,
     queryDb,
     requireAdmin,
+    requireRole,
+    roleAuthFailed,
     normalizeAdminList,
+    assertMovieShowtimeDate,
     toAdminOrder,
     uploadToR2,
     generateFileName,
   } = dependencies;
+
+  const requireOperator = (email, password) =>
+    requireRole(email, password, ["Admin", "Staff"]);
 
   // Lấy tối đa 200 đơn hàng và lọc theo trạng thái.
   const adminOrders = async (req, res) => {
@@ -29,10 +38,11 @@ const createAdminController = (dependencies) => {
   const statusFilter = String(req.body.status || "ALL").toUpperCase();
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
+    await expireStaleOrders();
 
-    const allowedStatuses = ["UNPAID", "PAID", "PENDING", "FAILED"];
+    const allowedStatuses = ["UNPAID", "PAID", "PENDING", "FAILED", "EXPIRED"];
     const whereSql = allowedStatuses.includes(statusFilter)
       ? "WHERE PO.status = ?"
       : "";
@@ -51,6 +61,7 @@ const createAdminController = (dependencies) => {
         PO.payload_json,
         PO.error_message,
         PO.checkout_url,
+        PO.expires_at,
         PO.created_at,
         PO.updated_at
        FROM payos_orders PO
@@ -79,8 +90,9 @@ const createAdminController = (dependencies) => {
   }
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
+    await expireStaleOrders();
 
     const orderRows = await queryDb(
       "SELECT * FROM payos_orders WHERE order_code = ?",
@@ -93,7 +105,21 @@ const createAdminController = (dependencies) => {
 
     const order = orderRows[0];
 
+    if (order.payment_method !== "Thanh toán tại rạp") {
+      return res.status(409).json({
+        message: "Trạng thái đơn PayOS chỉ được cập nhật qua đối soát PayOS",
+      });
+    }
+
+    if (orderHasExpired(order)) {
+      await markOrderExpired(orderCode);
+      return res.status(409).json({ message: "Đơn đã hết thời gian giữ ghế" });
+    }
+
     if (status === "UNPAID") {
+      if (order.status === "PAID") {
+        return res.status(409).json({ message: "Không thể chuyển đơn đã thanh toán về chưa trả" });
+      }
       if (order.payment_id) {
         await queryDb(
           "UPDATE payment SET payment_status = 'UNPAID' WHERE id = ?",
@@ -110,6 +136,10 @@ const createAdminController = (dependencies) => {
         status: "UNPAID",
         tickets: ticketIds.map((id) => ({ id })),
       });
+    }
+
+    if (order.status !== "UNPAID") {
+      return res.status(409).json({ message: "Đơn không còn ở trạng thái chờ thanh toán" });
     }
 
     const tickets = await finalizePaymentOrderTickets(orderCode);
@@ -141,6 +171,7 @@ const createAdminController = (dependencies) => {
         m.duration,
         m.top_cast,
         m.release_date,
+        m.end_date,
         GROUP_CONCAT(DISTINCT mg.genre ORDER BY mg.genre SEPARATOR ', ') AS genres,
         GROUP_CONCAT(DISTINCT md.director ORDER BY md.director SEPARATOR ', ') AS directors,
         COUNT(DISTINCT si.showtime_id) AS showtime_count,
@@ -175,6 +206,7 @@ const createAdminController = (dependencies) => {
     duration,
     top_cast,
     release_date,
+    end_date,
   } = req.body;
   const genres = normalizeAdminList(req.body.genres);
   const directors = normalizeAdminList(req.body.directors);
@@ -183,17 +215,23 @@ const createAdminController = (dependencies) => {
     if (authErr) return res.status(500).json(authErr);
     if (!isAdmin) return adminAuthFailed(res);
 
-    if (!movieId || !name || !image_path || !language || !synopsis || !rating || !duration || !top_cast || !release_date) {
+    if (!movieId || !name || !image_path || !language || !synopsis || !rating || !duration || !top_cast || !release_date || !end_date) {
       return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin phim" });
+    }
+    if (String(end_date) < String(release_date)) {
+      return res.status(400).json({ message: "Ngày kết thúc phải từ ngày phát hành trở đi" });
+    }
+    if (!Number.isInteger(Number(duration)) || Number(duration) <= 0) {
+      return res.status(400).json({ message: "Thời lượng phim phải là số phút hợp lệ" });
     }
 
     try {
       await queryDb("START TRANSACTION");
       await queryDb(
         `UPDATE movie
-         SET name = ?, image_path = ?, language = ?, synopsis = ?, rating = ?, duration = ?, top_cast = ?, release_date = ?
+         SET name = ?, image_path = ?, language = ?, synopsis = ?, rating = ?, duration = ?, top_cast = ?, release_date = ?, end_date = ?
          WHERE id = ?`,
-        [name, image_path, language, synopsis, rating, duration, top_cast, release_date, movieId]
+        [name, image_path, language, synopsis, rating, duration, top_cast, release_date, end_date, movieId]
       );
       await queryDb("DELETE FROM movie_genre WHERE movie_id = ?", [movieId]);
       await queryDb("DELETE FROM movie_directors WHERE movie_id = ?", [movieId]);
@@ -255,10 +293,21 @@ const createAdminController = (dependencies) => {
   const duration = req.body.duration;
   const top_cast = req.body.top_cast;
   const release_date = req.body.release_date;
+  const end_date = req.body.end_date;
 
-  const sql1 = `Insert into movie (name,image_path,language,synopsis,rating,duration,top_cast,release_date)
+  if (!name || !image_path || !language || !synopsis || !rating || !duration || !top_cast || !release_date || !end_date) {
+    return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin phim" });
+  }
+  if (String(end_date) < String(release_date)) {
+    return res.status(400).json({ message: "Ngày kết thúc phải từ ngày phát hành trở đi" });
+  }
+  if (!Number.isInteger(Number(duration)) || Number(duration) <= 0) {
+    return res.status(400).json({ message: "Thời lượng phim phải là số phút hợp lệ" });
+  }
+
+  const sql1 = `Insert into movie (name,image_path,language,synopsis,rating,duration,top_cast,release_date,end_date)
   values
-  (?,?,?,?,?,?,?,?)`;
+  (?,?,?,?,?,?,?,?,?)`;
   const sql2 = "SELECT LAST_INSERT_ID() as last_id";
 
   db.query(sql0, [email, password, "Admin"], (err, data) => {
@@ -279,6 +328,7 @@ const createAdminController = (dependencies) => {
           duration,
           top_cast,
           release_date,
+          end_date,
         ],
         (err1, data1) => {
           if (err1) return res.json(err1);
@@ -628,9 +678,8 @@ const createAdminController = (dependencies) => {
   const { email, password } = req.body;
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
-
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
     const data = await queryDb(`
       SELECT
         s.showtime_date,
@@ -663,8 +712,8 @@ const createAdminController = (dependencies) => {
   }
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
 
     const existing = await queryDb(
       "SELECT COUNT(*) AS dateCount FROM showtimes WHERE showtime_date = ?",
@@ -698,8 +747,8 @@ const createAdminController = (dependencies) => {
   }
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
 
     const existing = await queryDb(
       "SELECT COUNT(*) AS dateCount FROM showtimes WHERE showtime_date = ? AND showtime_date <> ?",
@@ -742,8 +791,8 @@ const createAdminController = (dependencies) => {
   }
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
 
     const ticketRows = await queryDb(
       `SELECT COUNT(*) AS ticketCount
@@ -786,8 +835,23 @@ const createAdminController = (dependencies) => {
   }
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
+
+    const outsideWindowRows = await queryDb(
+      `SELECT COUNT(*) AS invalidCount
+       FROM shown_in si
+       JOIN showtimes s ON s.id = si.showtime_id
+       JOIN movie m ON m.id = si.movie_id
+       WHERE s.showtime_date = ?
+         AND (s.showtime_date < m.release_date OR (m.end_date IS NOT NULL AND s.showtime_date > m.end_date))`,
+      [showtimeDate]
+    );
+    if (Number(outsideWindowRows[0]?.invalidCount) > 0) {
+      return res.status(409).json({
+        message: "Không thể khôi phục vì có phim nằm ngoài thời gian công chiếu",
+      });
+    }
 
     await queryDb("START TRANSACTION");
     await queryDb("UPDATE showtimes SET status = 'active' WHERE showtime_date = ?", [
@@ -814,15 +878,29 @@ const createAdminController = (dependencies) => {
   const { email, password } = req.body;
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
 
     const [movies, halls, showtimes] = await Promise.all([
-      queryDb("SELECT id, name FROM movie ORDER BY name ASC"),
+      queryDb(`
+        SELECT
+          id,
+          name,
+          DATE_FORMAT(release_date, '%Y-%m-%d') AS release_date,
+          DATE_FORMAT(end_date, '%Y-%m-%d') AS end_date,
+          CASE WHEN release_date > CURDATE() THEN 'upcoming' ELSE 'showing' END AS screening_status
+        FROM movie
+        WHERE end_date >= CURDATE()
+        ORDER BY
+          CASE WHEN release_date <= CURDATE() THEN 0 ELSE 1 END,
+          release_date ASC,
+          name ASC
+      `),
       queryDb(`
         SELECT h.id, h.name, h.theatre_id, t.name AS theatre_name
         FROM hall h
         JOIN theatre t ON h.theatre_id = t.id
+        WHERE h.status = 'active' AND t.status = 'active'
         ORDER BY t.name ASC, h.id ASC
       `),
       queryDb(`
@@ -843,8 +921,8 @@ const createAdminController = (dependencies) => {
   const { email, password, selectedShowDate } = req.body;
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
 
     const params = [];
     let whereSql = "";
@@ -869,6 +947,10 @@ const createAdminController = (dependencies) => {
           s.price_per_seat,
           s.status AS showtime_status,
           si.status AS slot_status,
+          CASE
+            WHEN TIMESTAMPADD(MINUTE, CAST(m.duration AS UNSIGNED), TIMESTAMP(s.showtime_date, s.movie_start_time)) <= NOW()
+            THEN 1 ELSE 0
+          END AS has_ended,
           COUNT(t.id) AS ticket_count
         FROM shown_in si
         JOIN movie m ON si.movie_id = m.id
@@ -893,7 +975,8 @@ const createAdminController = (dependencies) => {
           s.showtime_date,
           s.price_per_seat,
           s.status,
-          si.status
+          si.status,
+          m.duration
         ORDER BY s.showtime_date DESC, s.movie_start_time ASC, th.name ASC, h.id ASC
       `,
       params
@@ -932,9 +1015,10 @@ const createAdminController = (dependencies) => {
   }
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
 
+    await assertMovieShowtimeDate({ movieId, showtimeDate, query: queryDb });
     await queryDb("START TRANSACTION");
     const insertResult = await queryDb(
       `INSERT INTO showtimes (movie_start_time, show_type, screen_type, showtime_date, price_per_seat, status)
@@ -954,7 +1038,9 @@ const createAdminController = (dependencies) => {
     if (err?.code === "ER_DUP_ENTRY") {
       return res.status(400).json({ message: "Suất chiếu này đã tồn tại" });
     }
-    return res.status(500).json(err);
+    return res.status(err.statusCode || 500).json({
+      message: err.message || "Không thể tạo suất chiếu",
+    });
   }
 };
 
@@ -991,9 +1077,10 @@ const createAdminController = (dependencies) => {
   }
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
 
+    await assertMovieShowtimeDate({ movieId, showtimeDate, query: queryDb });
     const ticketRows = await queryDb(
       `SELECT COUNT(*) AS ticketCount
        FROM ticket
@@ -1047,7 +1134,9 @@ const createAdminController = (dependencies) => {
     if (err?.code === "ER_DUP_ENTRY") {
       return res.status(400).json({ message: "Suất chiếu này đã tồn tại" });
     }
-    return res.status(500).json(err);
+    return res.status(err.statusCode || 500).json({
+      message: err.message || "Không thể cập nhật suất chiếu",
+    });
   }
 };
 
@@ -1060,8 +1149,8 @@ const createAdminController = (dependencies) => {
   }
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
 
     const ticketRows = await queryDb(
       `SELECT COUNT(*) AS ticketCount
@@ -1123,8 +1212,21 @@ const createAdminController = (dependencies) => {
   }
 
   try {
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+    const isOperator = await requireOperator(email, password);
+    if (!isOperator) return roleAuthFailed(res);
+
+    const showtimeRows = await queryDb(
+      "SELECT DATE_FORMAT(showtime_date, '%Y-%m-%d') AS showtime_date FROM showtimes WHERE id = ? LIMIT 1",
+      [showtimeId]
+    );
+    if (showtimeRows.length === 0) {
+      return res.status(404).json({ message: "Không tìm thấy suất chiếu" });
+    }
+    await assertMovieShowtimeDate({
+      movieId,
+      showtimeDate: showtimeRows[0].showtime_date,
+      query: queryDb,
+    });
 
     await queryDb("START TRANSACTION");
     await queryDb("UPDATE showtimes SET status = 'active' WHERE id = ?", [
@@ -1139,7 +1241,9 @@ const createAdminController = (dependencies) => {
     return res.json({ success: true, restored: true });
   } catch (err) {
     await queryDb("ROLLBACK").catch(() => {});
-    return res.status(500).json(err);
+    return res.status(err.statusCode || 500).json({
+      message: err.message || "Không thể mở bán lại suất chiếu",
+    });
   }
 };
 
@@ -1154,7 +1258,7 @@ const createAdminController = (dependencies) => {
     const [totalRevenue, totalTickets, totalMovies, totalShowtimesToday, totalUsers, totalOrders] = await Promise.all([
       queryDb("SELECT COALESCE(SUM(amount),0) AS value FROM payment"),
       queryDb("SELECT COUNT(*) AS value FROM ticket"),
-      queryDb("SELECT COUNT(*) AS value FROM movie"),
+      queryDb("SELECT COUNT(*) AS value FROM movie WHERE end_date IS NULL OR end_date >= CURDATE()"),
       queryDb(`SELECT COUNT(*) AS value FROM shown_in si JOIN showtimes s ON si.showtime_id = s.id WHERE s.showtime_date = CURDATE() AND si.status = 'active' AND s.status = 'active'`),
       queryDb("SELECT COUNT(*) AS value FROM person WHERE person_type = 'Customer'"),
       queryDb("SELECT COUNT(*) AS value FROM payos_orders"),
@@ -1215,12 +1319,13 @@ const createAdminController = (dependencies) => {
   try {
     const isAdmin = await requireAdmin(email, password);
     if (!isAdmin) return adminAuthFailed(res);
+    await expireStaleOrders();
 
     const statusStats = await queryDb(
       `SELECT
         COALESCE(SUM(CASE WHEN status = 'PAID' THEN 1 ELSE 0 END), 0) AS paid,
         COALESCE(SUM(CASE WHEN status IN ('UNPAID','PENDING') THEN 1 ELSE 0 END), 0) AS pending,
-        COALESCE(SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END), 0) AS failed
+        COALESCE(SUM(CASE WHEN status IN ('FAILED','EXPIRED') THEN 1 ELSE 0 END), 0) AS failed
        FROM payos_orders`
     );
 
@@ -1253,7 +1358,6 @@ const createAdminController = (dependencies) => {
   try {
     const isAdmin = await requireAdmin(email, password);
     if (!isAdmin) return adminAuthFailed(res);
-
     const timeStats = await queryDb(
       `SELECT
         CASE
@@ -1290,6 +1394,7 @@ const createAdminController = (dependencies) => {
   try {
     const isAdmin = await requireAdmin(email, password);
     if (!isAdmin) return adminAuthFailed(res);
+    await expireStaleOrders();
 
     const rows = await queryDb(
       `SELECT
@@ -1301,6 +1406,8 @@ const createAdminController = (dependencies) => {
         PO.payment_id,
         PO.ticket_ids_json,
         PO.payload_json,
+        PO.error_message,
+        PO.expires_at,
         PO.created_at
        FROM payos_orders PO
        ORDER BY PO.created_at DESC
@@ -1394,19 +1501,6 @@ const createAdminController = (dependencies) => {
     totalTicketPerMovie,
     genreInsert,
     directorInsert,
-    lastShowDate,
-    showdateAdd,
-    shownInUpdate,
-    adminLatestShowDates,
-    adminShowtimes,
-    movieReplaceFrom,
-    movieReplaceTo,
-    movieSwap,
-    adminScheduleDates,
-    adminScheduleDateAdd,
-    adminScheduleDateUpdate,
-    adminScheduleDateDelete,
-    adminScheduleDateRestore,
     adminShowtimeOptions,
     adminShowtimeSlots,
     adminShowtimeCreate,

@@ -34,6 +34,7 @@ const emptyMovieInfo = {
   duration: "",
   cast: "",
   relDate: "",
+  endDate: "",
   genres: "",
   directors: "",
 };
@@ -60,6 +61,7 @@ const toMovieForm = (movie) => ({
   duration: movie.duration || "",
   cast: movie.top_cast || "",
   relDate: toDateInput(movie.release_date),
+  endDate: toDateInput(movie.end_date),
   genres: movie.genres || "",
   directors: movie.directors || "",
 });
@@ -167,6 +169,7 @@ export const AdminMovieAddSection = () => {
     duration: formInfo.duration.trim(),
     top_cast: formInfo.cast.trim(),
     release_date: formInfo.relDate,
+    end_date: formInfo.endDate,
     genres: splitList(formInfo.genres),
     directors: splitList(formInfo.directors),
   });
@@ -367,13 +370,15 @@ export const AdminMovieAddSection = () => {
       </div>
 
       <div>
-        <p>Thời gian chiếu:</p>
+        <p>Thời lượng phim (phút):</p>
         <input
           name="duration"
           onChange={onChange}
-          type="text"
+          type="number"
+          min="1"
+          step="1"
           value={formInfo.duration}
-          placeholder="Ví dụ: 2h30m"
+          placeholder="Ví dụ: 150"
         />
       </div>
 
@@ -395,6 +400,17 @@ export const AdminMovieAddSection = () => {
           onChange={onChange}
           type="date"
           value={formInfo.relDate}
+        />
+      </div>
+
+      <div>
+        <p>Ngày kết thúc công chiếu:</p>
+        <input
+          name="endDate"
+          onChange={onChange}
+          type="date"
+          min={formInfo.relDate || undefined}
+          value={formInfo.endDate}
         />
       </div>
 
@@ -427,7 +443,7 @@ export const AdminMovieAddSection = () => {
       <div className="admin-movie-list-header">
         <h2 className="form-admin-heading">
           <FiFilm className="admin-heading-icon" />
-          Phim đang chiếu
+          Quản lý phim
         </h2>
         <div className="admin-movie-toolbar-actions">
           <button
@@ -556,6 +572,7 @@ export const AdminMovieAddSection = () => {
                     <span><FiStar />{formatRating(movie.rating)}/10</span>
                     <span><FiClock />{movie.duration}</span>
                     <span><FiCalendar />{toDateInput(movie.release_date)}</span>
+                    <span><FiCalendar />Đến {toDateInput(movie.end_date)}</span>
                     <span><FiFilm />{movie.showtime_count || 0} suất chiếu</span>
                     <span><FiUsers />{movie.ticket_count || 0} vé</span>
                   </div>

@@ -11,6 +11,7 @@ const statusOptions = [
   { label: "Đã thanh toán", value: "PAID" },
   { label: "PayOS chờ", value: "PENDING" },
   { label: "Lỗi", value: "FAILED" },
+  { label: "Hết hạn", value: "EXPIRED" },
 ];
 
 const statusLabels = {
@@ -18,6 +19,7 @@ const statusLabels = {
   PAID: "Đã thanh toán",
   PENDING: "PayOS chờ",
   FAILED: "Lỗi",
+  EXPIRED: "Hết hạn",
 };
 
 const formatCurrency = (value) =>
@@ -44,12 +46,23 @@ const formatShowtime = (order) => {
   return `${date} - ${order.movie_start_time || "--"}`;
 };
 
+const formatRemaining = (expiresAt, now) => {
+  const seconds = Math.max(
+    0,
+    Math.floor((new Date(expiresAt).getTime() - now) / 1000)
+  );
+  const minutes = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const remainingSeconds = String(seconds % 60).padStart(2, "0");
+  return `${minutes}:${remainingSeconds}`;
+};
+
 export const AdminOrdersSection = () => {
   const { signedPerson } = useSelector((store) => store.authentication);
   const [orders, setOrders] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [loading, setLoading] = useState(false);
   const [updatingOrderCode, setUpdatingOrderCode] = useState("");
+  const [now, setNow] = useState(Date.now());
 
   const adminPayload = useMemo(
     () => ({
@@ -82,6 +95,11 @@ export const AdminOrdersSection = () => {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const handleMarkPaid = async (orderCode) => {
     try {
@@ -152,7 +170,13 @@ export const AdminOrdersSection = () => {
 
           {orders.map((order) => {
             const status = String(order.status || "").toUpperCase();
-            const canMarkPaid = status === "UNPAID";
+            const isConcessionOrder = order.order_type === "CONCESSION";
+            const expiresAt = new Date(order.expires_at).getTime();
+            const holdActive = Number.isFinite(expiresAt) && expiresAt > now;
+            const canMarkPaid =
+              status === "UNPAID" &&
+              order.payment_method === "Thanh toán tại rạp" &&
+              holdActive;
             const isUpdating = updatingOrderCode === order.order_code;
 
             return (
@@ -161,6 +185,12 @@ export const AdminOrdersSection = () => {
                   <span className="admin-order-mobile-label">Mã đơn</span>
                   <strong>#{order.order_code}</strong>
                   <small>{formatDateTime(order.created_at)}</small>
+                  {order.expires_at && status !== "PAID" ? (
+                    <small>
+                      {isConcessionOrder ? "Hạn nhận hàng" : "Hạn giữ ghế"}: {formatDateTime(order.expires_at)}
+                      {holdActive ? ` · Còn ${formatRemaining(order.expires_at, now)}` : ""}
+                    </small>
+                  ) : null}
                 </div>
                 <div>
                   <span className="admin-order-mobile-label">Khách hàng</span>
@@ -168,19 +198,33 @@ export const AdminOrdersSection = () => {
                 </div>
                 <div>
                   <span className="admin-order-mobile-label">Phim / suất</span>
-                  <strong>{order.movie_name || "--"}</strong>
+                  <strong>{isConcessionOrder ? "Đơn bắp nước" : order.movie_name || "--"}</strong>
                   <small>
-                    {order.hall_name || "--"} · {formatShowtime(order)}
+                    {isConcessionOrder
+                      ? `${order.theatre_name || "--"} · ${order.theatre_address || "--"}`
+                      : `${order.hall_name || "--"} · ${formatShowtime(order)}`}
                   </small>
                 </div>
                 <div>
                   <span className="admin-order-mobile-label">Ghế</span>
-                  <span>{order.seats?.join(", ") || "--"}</span>
+                  <span>{order.seat_names?.join(", ") || order.seats?.join(", ") || "--"}</span>
+                  {order.combo_items?.length ? (
+                    <small>
+                      Combo: {order.combo_items
+                        .map((combo) => `${combo.name} ×${combo.quantity}`)
+                        .join(", ")}
+                    </small>
+                  ) : null}
                 </div>
                 <div>
                   <span className="admin-order-mobile-label">Thanh toán</span>
                   <strong>{formatCurrency(order.amount)}</strong>
                   <small>{order.payment_method}</small>
+                  {order.reward_points_used > 0 ? (
+                    <small>
+                      Điểm: -{order.reward_points_used} · Giảm {formatCurrency(order.reward_discount)}
+                    </small>
+                  ) : null}
                 </div>
                 <div>
                   <span className="admin-order-mobile-label">Trạng thái</span>

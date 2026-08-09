@@ -25,6 +25,8 @@ export const Navbar = () => {
     pageName = "showtimes";
   } else if (location.pathname === "/aboutus") {
     pageName = "aboutUs";
+  } else if (location.pathname === "/bap-nuoc") {
+    pageName = "concessions";
   } else if (location.pathname === "/admin") {
     pageName = "admin";
   } else {
@@ -42,7 +44,7 @@ export const Navbar = () => {
     e.stopPropagation();
     if (signedPerson.person_type === "Customer") {
       navigate("/customer");
-    } else if (signedPerson.person_type === "Admin") {
+    } else if (["Admin", "Staff"].includes(signedPerson.person_type)) {
       navigate("/admin");
     }
   };
@@ -64,6 +66,15 @@ export const Navbar = () => {
 
       <nav>
         <ul className="nav-items">
+          <li>
+            <Link
+              className="nav-item"
+              to="/bap-nuoc"
+              style={pageName === "concessions" ? selectionTab : {}}
+            >
+              Bắp nước
+            </Link>
+          </li>
           <li>
             <Link
               className="nav-item"
@@ -92,14 +103,14 @@ export const Navbar = () => {
             </Link>
           </li>
 
-          {isAuthenticated && signedPerson.person_type === "Admin" && (
+          {isAuthenticated && ["Admin", "Staff"].includes(signedPerson.person_type) && (
             <li>
               <Link
                 className="nav-item"
                 to="/admin"
                 style={pageName === "admin" ? selectionTab : {}}
               >
-                Quản trị
+                {signedPerson.person_type === "Staff" ? "Vận hành" : "Quản trị"}
               </Link>
             </li>
           )}

@@ -7,6 +7,7 @@ const statusLabel = {
   UNPAID: "Chưa thanh toán",
   PENDING: "Đang chờ",
   FAILED: "Thất bại",
+  EXPIRED: "Hết hạn",
 };
 
 const statusClass = {
@@ -14,6 +15,7 @@ const statusClass = {
   UNPAID: "is-unpaid",
   PENDING: "is-pending",
   FAILED: "is-failed",
+  EXPIRED: "is-expired",
 };
 
 export const RecentOrders = () => {

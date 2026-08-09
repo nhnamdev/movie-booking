@@ -44,65 +44,15 @@ export const SeatSelector = ({ seatsData, setSeatsData, paymentOngoing }) => {
     fetchData();
   }, [userHallId, userShowtimeId, userMovieId, setSeatsData]);
 
-  let rows = [];
-  let rowSeat = [];
-
-  // seatsData.forEach((seat) => {
-  //   return seat.selected && userSeat.push(seat.seat_id);
-  // });
-
-  seatsData.forEach((seat, idx) => {
-    let seatStatus;
-
-    const handleTouchStart = (e) => {
-      e.preventDefault();
-      dispatch(setSeat(seat.seat_id));
-    };
-
-    seat.booked_status === 0
-      ? (seatStatus = "booked")
-      : (seatStatus = "available");
-
-    const seatHtml = (
-      <div
-        className={`seat ${seatStatus}`}
-        disabled={loading || paymentOngoing}
-        onClick={() =>
-          seatStatus !== "booked" && dispatch(setSeat(seat.seat_id))
-        }
-        onTouchEnd={seatStatus !== "booked" ? handleTouchStart : undefined}
-        key={seat.seat_id}
-        style={{
-          backgroundColor: userSeatList.includes(seat.seat_id) ? "#ef5e78" : "",
-        }}
-      >
-        {seat.seat_name}
-      </div>
-    );
-
-    if (idx === 0) {
-      rowSeat.push(seatHtml);
-    } else if (
-      seatsData[idx].seat_name[0] !== seatsData[idx - 1].seat_name[0]
-    ) {
-      rows.push(
-        <div className="row" key={seatsData[idx - 1].seat_name[0]}>
-          {rowSeat}
-        </div>
-      );
-      rowSeat = [];
-      rowSeat.push(seatHtml);
-    } else if (idx === seatsData.length - 1) {
-      rowSeat.push(seatHtml);
-      rows.push(
-        <div className="row" key={seatsData[idx - 1].seat_name[0]}>
-          {rowSeat}
-        </div>
-      );
-    } else {
-      rowSeat.push(seatHtml);
-    }
-  });
+  const seatRows = Object.values(
+    seatsData.reduce((rows, seat) => {
+      const rowIndex = Number(seat.row_index || 1);
+      rows[rowIndex] = rows[rowIndex] || { rowIndex, seats: [] };
+      rows[rowIndex].seats.push(seat);
+      return rows;
+    }, {})
+  ).sort((a, b) => a.rowIndex - b.rowIndex);
+  const maxColumn = Math.max(1, ...seatsData.map((seat) => Number(seat.column_index || 1)));
 
   return (
     <div>
@@ -117,13 +67,41 @@ export const SeatSelector = ({ seatsData, setSeatsData, paymentOngoing }) => {
             <p className="seat-status-details">Đã đặt</p>
             <div className="seat-selected-demo"></div>
             <p className="seat-status-details">Đang chọn</p>
+            <div className="seat-vip-demo"></div>
+            <p className="seat-status-details">VIP</p>
           </div>
           <div className="theatre-screen">
             <div className="screen-1"></div>
             <div className="screen-2"></div>
           </div>
           <div className="theatre-screen-heading">Màn hình</div>
-          <div className="seat-container">{rows}</div>
+          <div className="seat-container">
+            {seatRows.map((row) => (
+              <div
+                className="row seat-layout-row"
+                key={row.rowIndex}
+                style={{ gridTemplateColumns: `repeat(${maxColumn}, 4.4rem)` }}
+              >
+                {row.seats.map((seat) => {
+                  const seatStatus = Number(seat.booked_status) === 0 ? "booked" : "available";
+                  const selected = userSeatList.includes(seat.seat_id);
+                  return (
+                    <button
+                      type="button"
+                      className={`seat ${seatStatus} ${seat.seat_type === "VIP" ? "vip" : ""} ${selected ? "selected" : ""}`}
+                      disabled={loading || paymentOngoing || seatStatus === "booked"}
+                      onClick={() => dispatch(setSeat(seat.seat_id))}
+                      key={seat.seat_id}
+                      style={{ gridColumn: Number(seat.column_index || 1) }}
+                      title={`${seat.seat_name} · ${seat.seat_type === "VIP" ? "VIP" : "Thường"} · ${Number(seat.final_price || 0).toLocaleString("vi-VN")}₫`}
+                    >
+                      {seat.seat_name}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         </>
       )}
     </div>

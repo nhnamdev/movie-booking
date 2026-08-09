@@ -266,6 +266,151 @@ async function normalizeSeedShowtimes(connection) {
 }
 
 async function applySchemaMigrations(connection) {
+  if (await tableExists(connection, "theatre")) {
+    await query(connection, "ALTER TABLE theatre MODIFY name VARCHAR(100) DEFAULT NULL");
+    await query(connection, "ALTER TABLE theatre MODIFY location VARCHAR(100) DEFAULT NULL");
+    await query(connection, "ALTER TABLE theatre MODIFY location_details VARCHAR(500) DEFAULT NULL");
+    await ensureColumn(connection, "theatre", "status", "VARCHAR(20) NOT NULL DEFAULT 'active'");
+    await query(connection, "UPDATE theatre SET status = 'active' WHERE status IS NULL OR status = ''");
+  }
+
+  if (await tableExists(connection, "hall")) {
+    await query(connection, "ALTER TABLE hall MODIFY name VARCHAR(100) DEFAULT NULL");
+    await ensureColumn(connection, "hall", "status", "VARCHAR(20) NOT NULL DEFAULT 'active'");
+    await query(connection, "UPDATE hall SET status = 'active' WHERE status IS NULL OR status = ''");
+  }
+
+  if (await tableExists(connection, "seat")) {
+    await query(connection, "ALTER TABLE seat MODIFY name VARCHAR(10) DEFAULT NULL");
+  }
+
+  if (await tableExists(connection, "hallwise_seat")) {
+    await ensureColumn(connection, "hallwise_seat", "seat_label", "VARCHAR(10) DEFAULT NULL");
+    await ensureColumn(connection, "hallwise_seat", "row_index", "INT DEFAULT NULL");
+    await ensureColumn(connection, "hallwise_seat", "column_index", "INT DEFAULT NULL");
+    await ensureColumn(
+      connection,
+      "hallwise_seat",
+      "seat_type",
+      "VARCHAR(20) NOT NULL DEFAULT 'STANDARD'"
+    );
+    await ensureColumn(
+      connection,
+      "hallwise_seat",
+      "price_surcharge",
+      "INT NOT NULL DEFAULT 0"
+    );
+    await ensureColumn(
+      connection,
+      "hallwise_seat",
+      "is_active",
+      "TINYINT(1) NOT NULL DEFAULT 1"
+    );
+    await query(
+      connection,
+      `UPDATE hallwise_seat HS
+       JOIN seat S ON S.id = HS.seat_id
+       SET HS.seat_label = COALESCE(HS.seat_label, S.name),
+         HS.row_index = COALESCE(HS.row_index, ASCII(UPPER(LEFT(S.name, 1))) - 64),
+         HS.column_index = COALESCE(HS.column_index, CAST(SUBSTRING(S.name, 2) AS UNSIGNED))`
+    );
+  }
+
+  await query(
+    connection,
+    `CREATE TABLE IF NOT EXISTS concession_combo (
+      id INT NOT NULL AUTO_INCREMENT,
+      name VARCHAR(100) NOT NULL,
+      description VARCHAR(255) NOT NULL,
+      category VARCHAR(80) NOT NULL DEFAULT 'Combo bắp nước',
+      image_url VARCHAR(500) DEFAULT NULL,
+      base_price INT NOT NULL,
+      is_active TINYINT(1) NOT NULL DEFAULT 1,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
+  );
+  await ensureColumn(
+    connection,
+    "concession_combo",
+    "category",
+    "VARCHAR(80) NOT NULL DEFAULT 'Combo bắp nước'"
+  );
+  await ensureColumn(
+    connection,
+    "concession_combo",
+    "image_url",
+    "VARCHAR(500) DEFAULT NULL"
+  );
+  await query(
+    connection,
+    "UPDATE concession_combo SET category = 'Combo bắp nước' WHERE category IS NULL OR category = ''"
+  );
+  await query(
+    connection,
+    `CREATE TABLE IF NOT EXISTS movie_combo_promotion (
+      id INT NOT NULL AUTO_INCREMENT,
+      movie_id INT NOT NULL,
+      combo_id INT NOT NULL,
+      discount_percent DECIMAL(5,2) NOT NULL DEFAULT 0,
+      promotion_label VARCHAR(120) DEFAULT NULL,
+      start_at DATETIME DEFAULT NULL,
+      end_at DATETIME DEFAULT NULL,
+      is_active TINYINT(1) NOT NULL DEFAULT 1,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY movie_combo_promotion_unique (movie_id, combo_id),
+      KEY movie_combo_promotion_combo_idx (combo_id),
+      CONSTRAINT movie_combo_promotion_movie_fk FOREIGN KEY (movie_id) REFERENCES movie(id) ON DELETE CASCADE,
+      CONSTRAINT movie_combo_promotion_combo_fk FOREIGN KEY (combo_id) REFERENCES concession_combo(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
+  );
+  await query(
+    connection,
+    `INSERT IGNORE INTO concession_combo (id, name, description, base_price, is_active) VALUES
+      (1, 'CGV Solo', '1 bắp rang bơ cỡ vừa và 1 nước ngọt cỡ vừa', 89000, 1),
+      (2, 'CGV Couple', '1 bắp rang bơ cỡ lớn và 2 nước ngọt cỡ vừa', 139000, 1),
+      (3, 'CGV Family', '2 bắp rang bơ cỡ lớn và 4 nước ngọt cỡ vừa', 259000, 1),
+      (4, 'Bắp rang bơ cỡ lớn', 'Bắp rang bơ truyền thống, phục vụ tại quầy', 65000, 1),
+      (5, 'Bắp caramel cỡ lớn', 'Bắp rang phủ caramel thơm giòn', 75000, 1),
+      (6, 'Coke 32oz', 'Nước ngọt Coke cỡ 32oz', 37000, 1),
+      (7, 'Coke Zero 32oz', 'Nước ngọt không đường cỡ 32oz', 37000, 1),
+      (8, 'Nước suối 500ml', 'Nước suối đóng chai 500ml', 20000, 1),
+      (9, 'Snack khoai tây', 'Snack khoai tây giòn vị truyền thống', 28000, 1)`
+  );
+  await query(
+    connection,
+    `UPDATE concession_combo SET category = CASE
+       WHEN id IN (4, 5) THEN 'Bắp rang'
+       WHEN id IN (6, 7) THEN 'Nước ngọt'
+       WHEN id = 8 THEN 'Nước uống'
+       WHEN id = 9 THEN 'Snacks - Kẹo'
+       ELSE category
+     END
+     WHERE id BETWEEN 4 AND 9`
+  );
+
+  const promotionRows = await query(
+    connection,
+    "SELECT COUNT(*) AS promotionCount FROM movie_combo_promotion"
+  );
+  if (Number(promotionRows[0].promotionCount) === 0) {
+    await query(
+      connection,
+      `INSERT INTO movie_combo_promotion
+        (movie_id, combo_id, discount_percent, promotion_label, is_active)
+       SELECT M.id, C.id,
+         CASE C.id WHEN 1 THEN 10 WHEN 2 THEN 15 ELSE 20 END,
+         'Ưu đãi combo theo phim',
+         1
+       FROM (SELECT id FROM movie ORDER BY id LIMIT 2) M
+       CROSS JOIN concession_combo C
+       WHERE C.is_active = 1`
+    );
+  }
+
   if (!(await tableExists(connection, "payos_orders"))) {
     await query(
       connection,
@@ -282,6 +427,7 @@ async function applySchemaMigrations(connection) {
         payment_id INT DEFAULT NULL,
         ticket_ids_json LONGTEXT DEFAULT NULL,
         error_message TEXT DEFAULT NULL,
+        expires_at DATETIME DEFAULT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
@@ -299,6 +445,12 @@ async function applySchemaMigrations(connection) {
       "payment_method",
       "VARCHAR(30) NOT NULL DEFAULT 'PayOS'"
     );
+    await ensureColumn(
+      connection,
+      "payos_orders",
+      "expires_at",
+      "DATETIME DEFAULT NULL"
+    );
     await query(
       connection,
       "UPDATE payos_orders SET payment_method = 'PayOS' WHERE payment_method IS NULL OR payment_method = ''"
@@ -307,9 +459,19 @@ async function applySchemaMigrations(connection) {
       connection,
       "UPDATE payos_orders SET payment_method = 'Thanh toán tại rạp' WHERE payment_method = 'Tại quầy'"
     );
+    await query(
+      connection,
+      `UPDATE payos_orders
+       SET expires_at = CASE
+         WHEN payment_method = 'Thanh toán tại rạp' THEN DATE_ADD(created_at, INTERVAL 30 MINUTE)
+         ELSE DATE_ADD(created_at, INTERVAL 10 MINUTE)
+       END
+       WHERE expires_at IS NULL AND status IN ('UNPAID', 'PENDING')`
+    );
   }
 
   if (await tableExists(connection, "movie")) {
+    await ensureColumn(connection, "movie", "end_date", "DATE DEFAULT NULL");
     await ensureColumn(
       connection,
       "movie",
@@ -325,6 +487,33 @@ async function applySchemaMigrations(connection) {
     await query(
       connection,
       "UPDATE movie SET audio_type = COALESCE(NULLIF(audio_type, ''), 'Phụ Đề'), age_rating = COALESCE(NULLIF(age_rating, ''), 'P: Phim dành cho khán giả mọi lứa tuổi')"
+    );
+    await query(
+      connection,
+      `UPDATE movie
+       SET duration = CASE
+         WHEN LOWER(duration) REGEXP '^[0-9]+h[0-9]+m$' THEN
+           CAST(SUBSTRING_INDEX(LOWER(duration), 'h', 1) AS UNSIGNED) * 60 +
+           CAST(REPLACE(SUBSTRING_INDEX(LOWER(duration), 'h', -1), 'm', '') AS UNSIGNED)
+         WHEN LOWER(duration) REGEXP '^[0-9]+h$' THEN
+           CAST(REPLACE(LOWER(duration), 'h', '') AS UNSIGNED) * 60
+         ELSE duration
+       END`
+    );
+    await query(
+      connection,
+      `UPDATE movie m
+       LEFT JOIN (
+         SELECT si.movie_id, MAX(s.showtime_date) AS latest_showtime_date
+         FROM shown_in si
+         JOIN showtimes s ON s.id = si.showtime_id
+         GROUP BY si.movie_id
+       ) schedule ON schedule.movie_id = m.id
+       SET m.end_date = GREATEST(
+         DATE_ADD(m.release_date, INTERVAL 30 DAY),
+         COALESCE(schedule.latest_showtime_date, m.release_date)
+       )
+       WHERE m.end_date IS NULL`
     );
     await normalizeSeedMovieMetadata(connection);
     await normalizeSeedMoviePeople(connection);
@@ -393,6 +582,76 @@ async function applySchemaMigrations(connection) {
   }
 
   if (!(await tableExists(connection, "person"))) return;
+
+  await ensureColumn(
+    connection,
+    "person",
+    "account_status",
+    "VARCHAR(20) NOT NULL DEFAULT 'active'"
+  );
+  await query(
+    connection,
+    "UPDATE person SET account_status = 'active' WHERE account_status IS NULL OR account_status = ''"
+  );
+
+  await query(
+    connection,
+    `CREATE TABLE IF NOT EXISTS reward_account (
+      customer_email VARCHAR(100) NOT NULL,
+      available_points INT NOT NULL DEFAULT 0,
+      held_points INT NOT NULL DEFAULT 0,
+      lifetime_earned INT NOT NULL DEFAULT 0,
+      lifetime_redeemed INT NOT NULL DEFAULT 0,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (customer_email),
+      CONSTRAINT reward_account_customer_fk FOREIGN KEY (customer_email)
+        REFERENCES person(email) ON DELETE CASCADE ON UPDATE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
+  );
+  await query(
+    connection,
+    `CREATE TABLE IF NOT EXISTS reward_point_hold (
+      id INT NOT NULL AUTO_INCREMENT,
+      order_code BIGINT NOT NULL,
+      customer_email VARCHAR(100) NOT NULL,
+      points INT NOT NULL,
+      discount_amount INT NOT NULL,
+      status VARCHAR(20) NOT NULL DEFAULT 'HELD',
+      expires_at DATETIME NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY reward_point_hold_order_unique (order_code),
+      KEY reward_point_hold_customer_idx (customer_email, status),
+      KEY reward_point_hold_expiry_idx (status, expires_at),
+      CONSTRAINT reward_point_hold_customer_fk FOREIGN KEY (customer_email)
+        REFERENCES person(email) ON DELETE CASCADE ON UPDATE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
+  );
+  await query(
+    connection,
+    `CREATE TABLE IF NOT EXISTS reward_point_ledger (
+      id BIGINT NOT NULL AUTO_INCREMENT,
+      customer_email VARCHAR(100) NOT NULL,
+      order_code BIGINT NOT NULL,
+      entry_type VARCHAR(20) NOT NULL,
+      points_delta INT NOT NULL,
+      balance_after INT NOT NULL,
+      description VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY reward_point_ledger_order_type_unique (order_code, entry_type),
+      KEY reward_point_ledger_customer_idx (customer_email, created_at),
+      CONSTRAINT reward_point_ledger_customer_fk FOREIGN KEY (customer_email)
+        REFERENCES person(email) ON DELETE CASCADE ON UPDATE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
+  );
+  await query(
+    connection,
+    `INSERT IGNORE INTO reward_account (customer_email)
+     SELECT email FROM person WHERE person_type = 'Customer'`
+  );
 
   await normalizeSeedPhoneNumbers(connection);
   await normalizeSeedPeople(connection);

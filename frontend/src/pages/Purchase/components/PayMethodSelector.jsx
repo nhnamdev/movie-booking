@@ -48,6 +48,11 @@ export const PayMethodSelector = ({ paymentOngoing }) => {
             )
           )}
         </div>
+        <p className="form-pay-window" role="status">
+          {userPayMethod === "Thanh toán tại rạp"
+            ? "Ghế được giữ trong 30 phút. Vui lòng đến quầy và thanh toán trước khi hết hạn."
+            : "Hoàn tất thanh toán PayOS trong 10 phút để giữ ghế."}
+        </p>
       </form>
     </div>
   );

@@ -51,7 +51,7 @@ export const HomeCollection = () => {
       {loading && <HashLoader cssOverride={override} color="#eb3656" />}
       {!loading && movieData.length === 0 && (
         <p className="home-collection-empty">
-          Hiện chưa có phim mới để hiển thị.
+          Hiện chưa có phim đang chiếu.
         </p>
       )}
       {!loading && movieData.length > 0 && (

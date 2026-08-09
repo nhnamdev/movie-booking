@@ -106,7 +106,8 @@ const createAuthController = (dependencies) => {
   const email = req.body.email;
   const password = req.body.password;
   // 1.1.9	Thư viện ExpressJs thực hiện câu lệnh SELECT kiểm tra người dùng có tồn  trong bảng person hay không?
-  const sql = `SELECT email, first_name, person_type, password FROM person WHERE email=? AND password=?`;
+  const sql = `SELECT email, first_name, last_name, phone_number, person_type, password, account_status
+    FROM person WHERE email=? AND password=?`;
 
   db.query(sql, [email, password], (err, data) => {
     if (err) return res.json(err);
@@ -114,6 +115,9 @@ const createAuthController = (dependencies) => {
     if (data.length === 0) {
       //1.2.7    API nhận dữ liệu rỗng từ database trả về lỗi không tìm thấy user dưới dạng json.
       return res.status(404).json({ message: "Xin lỗi, tài khoản không tồn tại!" });
+    }
+    if (data[0].account_status !== "active") {
+      return res.status(403).json({ message: "Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên." });
     }
    // 1.2.0	Nếu người dùng tồn tại Database trả về dữ liệu user.
    //1.2.1	API nhận được data tiếp tục trả về dữ liệu user dưới dạng json cho frontend.

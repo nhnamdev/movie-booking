@@ -8,6 +8,8 @@ const initialState = {
   showtime_id: "",
   seat_id_list: [],
   seat_price: "",
+  combo_items: [],
+  reward_points: 0,
   payment_method: "",
 };
 
@@ -22,6 +24,8 @@ const cartSlice = createSlice({
       state.showtime_id = "";
       state.seat_id_list = [];
       state.seat_price = "";
+      state.combo_items = [];
+      state.reward_points = 0;
       state.payment_method = "";
     },
 
@@ -32,6 +36,8 @@ const cartSlice = createSlice({
       state.showtime_id = "";
       state.seat_id_list = [];
       state.seat_price = "";
+      state.combo_items = [];
+      state.reward_points = 0;
       state.payment_method = "";
     },
 
@@ -41,6 +47,8 @@ const cartSlice = createSlice({
       state.showtime_id = "";
       state.seat_id_list = [];
       state.seat_price = "";
+      state.combo_items = [];
+      state.reward_points = 0;
       state.payment_method = "";
     },
 
@@ -51,6 +59,7 @@ const cartSlice = createSlice({
       state.hall_id = parseInt(infoArr[1]);
       state.seat_price = parseInt(infoArr[2]);
       state.seat_id_list = [];
+      state.reward_points = 0;
       state.payment_method = "";
     },
 
@@ -70,6 +79,19 @@ const cartSlice = createSlice({
     setPaymentMethod(state, action) {
       state.payment_method = action.payload;
     },
+
+    setComboQuantity(state, action) {
+      const comboId = Number(action.payload.comboId);
+      const quantity = Math.max(0, Math.min(10, Number(action.payload.quantity) || 0));
+      const remaining = state.combo_items.filter((item) => item.comboId !== comboId);
+      state.combo_items = quantity > 0 ? [...remaining, { comboId, quantity }] : remaining;
+      state.payment_method = "";
+    },
+
+    setRewardPoints(state, action) {
+      state.reward_points = Math.max(0, Number(action.payload) || 0);
+      state.payment_method = "";
+    },
   },
 });
 
@@ -79,6 +101,8 @@ export const {
   setShowDetail,
   setSeat,
   setPaymentMethod,
+  setComboQuantity,
+  setRewardPoints,
   resetCart,
 } = cartSlice.actions;
 

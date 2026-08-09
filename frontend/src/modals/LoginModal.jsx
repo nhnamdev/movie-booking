@@ -52,8 +52,8 @@ export const LoginModal = () => {
         // 1.2.4	Khi cập nhật xong trạng thái thì hiển thị thông báo đăng nhập thành công trên trang chủ 
         loginSuccessToast();
 
-        // Nếu là Admin thì tự động chuyển sang trang /admin
-        if (userData.person_type === "Admin") {
+        // Admin và nhân viên vận hành dùng chung khu vực nội bộ, nhưng khác quyền.
+        if (["Admin", "Staff"].includes(userData.person_type)) {
           navigate("/admin");
         }
        
