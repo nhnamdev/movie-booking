@@ -1,4 +1,6 @@
+// Cung cấp các tiện ích xác thực và chuẩn hoá dữ liệu quản trị.
 const createAdminService = ({ db, parsePayOSOrderPayload, normalizeSeatIds }) => {
+  // Kiểm tra thông tin đăng nhập có thuộc tài khoản admin hay không.
   const verifyAdmin = (email, password, callback) => {
     const sql = `SELECT email from person WHERE email = ? and password = ? and person_type = ?`;
   
@@ -8,9 +10,11 @@ const createAdminService = ({ db, parsePayOSOrderPayload, normalizeSeatIds }) =>
     });
   };
 
+  // Trả phản hồi khi người dùng không có quyền admin.
   const adminAuthFailed = (res) =>
     res.status(403).json({ message: "Xin lỗi, bạn không phải là Admin!" });
 
+  // Chuyển truy vấn callback sang Promise cho luồng async/await.
   const queryDb = (sql, params = []) =>
     new Promise((resolve, reject) => {
       db.query(sql, params, (err, data) => {
@@ -19,6 +23,7 @@ const createAdminService = ({ db, parsePayOSOrderPayload, normalizeSeatIds }) =>
       });
     });
 
+  // Xác thực admin dưới dạng Promise.
   const requireAdmin = (email, password) =>
     new Promise((resolve, reject) => {
       verifyAdmin(email, password, (err, isAdmin) => {
@@ -27,6 +32,7 @@ const createAdminService = ({ db, parsePayOSOrderPayload, normalizeSeatIds }) =>
       });
     });
 
+  // Chuẩn hoá chuỗi hoặc mảng thành danh sách giá trị hợp lệ.
   const normalizeAdminList = (value) => {
     if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
     return String(value || "")
@@ -35,6 +41,7 @@ const createAdminService = ({ db, parsePayOSOrderPayload, normalizeSeatIds }) =>
       .filter(Boolean);
   };
 
+  // Chuyển bản ghi đơn hàng thành dữ liệu dùng cho trang quản trị.
   const toAdminOrder = (order) => {
     const payload = parsePayOSOrderPayload(order.payload_json) || {};
     const ticketIds = parsePayOSOrderPayload(order.ticket_ids_json) || [];

@@ -10,6 +10,7 @@ const configuration = {
 
 let connection;
 
+// Giữ một giao diện truy vấn ổn định sau khi kết nối được khởi tạo.
 const db = {
   query(...args) {
     if (!connection) throw new Error("Database connection has not been initialized");
@@ -17,6 +18,7 @@ const db = {
   },
 };
 
+// Kết nối MySQL và tự kết nối lại khi đường truyền bị mất.
 const handleDisconnect = () => {
   connection = mysql.createConnection(configuration);
   connection.connect((err) => {
@@ -38,11 +40,13 @@ const handleDisconnect = () => {
   });
 };
 
+// Khởi tạo kết nối một lần và trả giao diện truy vấn dùng chung.
 const connectDatabase = () => {
   if (!connection) handleDisconnect();
   return db;
 };
 
+// Thực thi truy vấn MySQL dưới dạng Promise.
 const query = (sql, params = []) =>
   new Promise((resolve, reject) => {
     db.query(sql, params, (err, data) => {

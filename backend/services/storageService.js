@@ -14,6 +14,7 @@ const s3Client = new S3Client({
 const R2_BUCKET = process.env.R2_BUCKET || "tieuluan";
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || process.env.R2_ENDPOINT;
 
+// Tải ảnh phim lên Cloudflare R2 và trả URL công khai.
 const uploadToR2 = async ({ buffer, fileName, mimeType }) => {
   const Key = `movies/${fileName}`;
 
@@ -29,6 +30,7 @@ const uploadToR2 = async ({ buffer, fileName, mimeType }) => {
   return `${R2_PUBLIC_URL}/${R2_BUCKET}/${Key}`;
 };
 
+// Tạo tên file duy nhất nhưng vẫn giữ phần mở rộng gốc.
 const generateFileName = (originalName) => {
   const ext = originalName.split(".").pop() || "jpg";
   const timestamp = Date.now();

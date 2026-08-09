@@ -1,3 +1,4 @@
+// Xử lý đăng ký và đăng nhập tài khoản.
 const createAuthController = (dependencies) => {
   const {
     db,
@@ -22,6 +23,7 @@ const createAuthController = (dependencies) => {
     generateFileName,
   } = dependencies;
 
+  // Kiểm tra dữ liệu và tạo tài khoản khách hàng mới.
   const registration = (req, res) => {
   const email = req.body.email;
   const firstName = req.body.firstName;
@@ -98,6 +100,7 @@ const createAuthController = (dependencies) => {
   });
 };
 
+  // Xác thực tài khoản bằng email và mật khẩu.
   const login = (req, res) => {
   // Lấy email và password từ body của request
   const email = req.body.email;

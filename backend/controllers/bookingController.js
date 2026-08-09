@@ -1,3 +1,4 @@
+// Cung cấp dữ liệu theo từng bước của quy trình đặt vé.
 const createBookingController = (dependencies) => {
   const {
     db,
@@ -22,6 +23,7 @@ const createBookingController = (dependencies) => {
     generateFileName,
   } = dependencies;
 
+  // Lấy các ngày chiếu đang mở bán tại rạp đã chọn.
   const showtimesDates = (req, res) => {
   const theatreId = req.body.theatreId;
 
@@ -47,6 +49,7 @@ const createBookingController = (dependencies) => {
   });
 };
 
+  // Lấy danh sách phim theo rạp và ngày chiếu.
   const uniqueMovies = (req, res) => {
   const theatreId = req.body.theatreId;
   const showtimeDate = req.body.userDate;
@@ -61,6 +64,7 @@ const createBookingController = (dependencies) => {
   });
 };
 
+  // Lấy phòng và suất chiếu phù hợp với phim đã chọn.
   const halls = (req, res) => {
   const theatreId = req.body.theatreId;
   const showtimeDate = req.body.userDate;
@@ -75,6 +79,7 @@ const createBookingController = (dependencies) => {
   });
 };
 
+  // Trả trạng thái ghế, gồm ghế đã bán và ghế đang được giữ.
   const seats = async (req, res) => {
   const showtime_id = Number(req.body.userShowtimeId);
   const hall_id = Number(req.body.userHallId);

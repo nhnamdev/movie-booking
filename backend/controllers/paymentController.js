@@ -1,3 +1,4 @@
+// Điều phối thanh toán và phát hành vé.
 const createPaymentController = (dependencies) => {
   const {
     db,
@@ -22,6 +23,7 @@ const createPaymentController = (dependencies) => {
     generateFileName,
   } = dependencies;
 
+  // Tạo bản ghi thanh toán qua endpoint cũ.
   const payment = (req, res) => {
   const amount = req.body.amount;
   const email = req.body.email;
@@ -42,6 +44,7 @@ const createPaymentController = (dependencies) => {
   });
 };
 
+  // Phát hành một vé nếu suất chiếu và ghế vẫn còn hợp lệ.
   const purchaseTicket = (req, res) => {
   const price = req.body.price;
   const date = req.body.purchase_date;
@@ -102,6 +105,7 @@ const createPaymentController = (dependencies) => {
   );
 };
 
+  // Lấy các mã vé vừa tạo theo mã thanh toán.
   const recentPurchase = (req, res) => {
   const payment_id = req.body.paymentID;
   const sql = `SELECT id FROM ticket WHERE payment_id=?`;
@@ -113,6 +117,7 @@ const createPaymentController = (dependencies) => {
   });
 };
 
+  // Tạo đơn và liên kết thanh toán PayOS cho các ghế đã chọn.
   const payosCreatePaymentLink = async (req, res) => {
   const { email, seatIds, userHallId, userMovieId, userShowtimeId } = req.body;
 
@@ -188,6 +193,7 @@ const createPaymentController = (dependencies) => {
   }
 };
 
+  // Tạo vé chưa thanh toán cho hình thức trả tiền tại rạp.
   const counterOrdersCreate = async (req, res) => {
   const { email, seatIds, userHallId, userMovieId, userShowtimeId } = req.body;
 
@@ -228,6 +234,7 @@ const createPaymentController = (dependencies) => {
   }
 };
 
+  // Đối soát trạng thái PayOS khi khách quay lại website.
   const payosConfirmReturn = async (req, res) => {
   const orderCode = Number(req.body.orderCode);
 
@@ -261,6 +268,7 @@ const createPaymentController = (dependencies) => {
   }
 };
 
+  // Xác thực webhook PayOS và hoàn tất hoặc đánh dấu đơn lỗi.
   const payosWebhook = async (req, res) => {
   try {
     const payOS = getPayOSClient();

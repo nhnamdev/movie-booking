@@ -1,6 +1,8 @@
 const { PayOS } = require("@payos/node");
 
+// Xử lý nghiệp vụ giữ ghế, đơn PayOS và phát hành vé.
 const createPaymentService = ({ queryDbAsync }) => {
+  // Khởi tạo PayOS client từ cấu hình môi trường bắt buộc.
   const getPayOSClient = () => {
     if (
       !process.env.PAYOS_CLIENT_ID ||
@@ -17,6 +19,7 @@ const createPaymentService = ({ queryDbAsync }) => {
     });
   };
 
+  // Tạo ngày hiện tại theo định dạng dùng trong cơ sở dữ liệu.
   const getTodayDateKey = () => {
     const date = new Date();
     const year = date.getFullYear();
@@ -25,6 +28,7 @@ const createPaymentService = ({ queryDbAsync }) => {
     return `${year}-${month}-${day}`;
   };
 
+  // Đọc JSON của đơn PayOS an toàn, trả null nếu sai định dạng.
   const parsePayOSOrderPayload = (payloadJson) => {
     try {
       return JSON.parse(payloadJson);
@@ -33,14 +37,17 @@ const createPaymentService = ({ queryDbAsync }) => {
     }
   };
 
+  // Sinh mã đơn số nguyên dựa trên thời gian hiện tại.
   const generatePayOSOrderCode = () =>
     Math.floor(Date.now() / 1000) * 1000 + Math.floor(Math.random() * 1000);
 
+  // Chuẩn hoá và loại bỏ mã ghế trùng hoặc không hợp lệ.
   const normalizeSeatIds = (seatIds) =>
     Array.isArray(seatIds)
       ? [...new Set(seatIds.map((seatId) => Number(seatId)).filter(Number.isInteger))]
       : [];
 
+  // Tìm các ghế đang được giữ bởi đơn chưa thanh toán còn hiệu lực.
   const getHeldOrderSeatIds = async ({ hallId, movieId, showtimeId }) => {
     const rows = await queryDbAsync(
       `SELECT order_code, status, payment_method, payload_json, created_at
@@ -79,6 +86,7 @@ const createPaymentService = ({ queryDbAsync }) => {
     return heldSeatIds;
   };
 
+  // Kiểm tra suất, ghế và tính tổng tiền trước khi tạo đơn.
   const buildPaymentOrderPayload = async ({
     email,
     seatIds,
@@ -178,6 +186,7 @@ const createPaymentService = ({ queryDbAsync }) => {
     };
   };
 
+  // Chỉ chèn vé khi suất còn mở và ghế chưa được bán.
   const ticketInsertSql = `
     INSERT INTO ticket (price,purchase_date,payment_id,seat_id,hall_id,movie_id,showtimes_id)
     SELECT ?, ?, ?, ?, ?, ?, ?
@@ -198,6 +207,7 @@ const createPaymentService = ({ queryDbAsync }) => {
       )
     LIMIT 1`;
 
+  // Tạo thanh toán và vé trong transaction, bảo đảm xử lý lặp an toàn.
   const finalizePaymentOrderTickets = async (
     orderCode,
     { orderStatus = "PAID", paymentStatus = "PAID" } = {}

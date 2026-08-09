@@ -1,3 +1,4 @@
+// Xử lý quản lý đơn hàng, phim, lịch chiếu và thống kê.
 const createAdminController = (dependencies) => {
   const {
     db,
@@ -22,6 +23,7 @@ const createAdminController = (dependencies) => {
     generateFileName,
   } = dependencies;
 
+  // Lấy tối đa 200 đơn hàng và lọc theo trạng thái.
   const adminOrders = async (req, res) => {
   const { email, password } = req.body;
   const statusFilter = String(req.body.status || "ALL").toUpperCase();
@@ -66,6 +68,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Chuyển đơn giữa trạng thái chưa trả và đã thanh toán.
   const adminOrderStatusUpdate = async (req, res) => {
   const { email, password } = req.body;
   const orderCode = Number(req.body.orderCode);
@@ -119,6 +122,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Lấy danh sách phim kèm thể loại, đạo diễn và số vé.
   const adminMovies = (req, res) => {
   const { email, password } = req.body;
 
@@ -157,6 +161,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Cập nhật phim cùng toàn bộ thể loại và đạo diễn trong transaction.
   const adminMovieUpdate = async (req, res) => {
   const {
     email,
@@ -210,6 +215,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Xoá phim chưa phát sinh vé để bảo toàn lịch sử mua.
   const adminMovieDelete = (req, res) => {
   const { email, password, movieId } = req.body;
 
@@ -234,6 +240,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Thêm phim mới và trả về mã phim vừa tạo.
   const adminMovieAdd = (req, res) => {
   //admin revalidation
   const email = req.body.email;
@@ -286,6 +293,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Đếm tổng số vé đã phát hành.
   const totalTickets = (req, res) => {
   const { email, password } = req.body;
 
@@ -301,6 +309,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Tính tổng giá trị các bản ghi thanh toán.
   const totalPayment = (req, res) => {
   const { email, password } = req.body;
 
@@ -316,6 +325,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Đếm tổng số tài khoản khách hàng.
   const totalCustomers = (req, res) => {
   const { email, password } = req.body;
 
@@ -331,6 +341,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Thống kê số vé đã bán theo từng phim.
   const totalTicketPerMovie = (req, res) => {
   const { email, password } = req.body;
 
@@ -346,6 +357,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Gắn một thể loại cho phim.
   const genreInsert = (req, res) => {
   //admin revalidation
   const email = req.body.email;
@@ -374,6 +386,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Gắn một đạo diễn cho phim.
   const directorInsert = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -401,6 +414,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Lấy ngày chiếu xa nhất đang có trong hệ thống.
   const lastShowDate = (req, res) => {
   const sql = `SELECT max(showtime_date) as lastDate FROM showtimes`;
 
@@ -411,6 +425,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Tạo ba khung giờ mặc định cho một ngày chiếu.
   const showdateAdd = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -444,6 +459,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Gán sẵn phim và phòng cho các suất chiếu vừa tạo.
   const shownInUpdate = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -482,6 +498,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Lấy bốn ngày chiếu đang hoạt động gần nhất.
   const adminLatestShowDates = (req, res) => {
   const sql = `SELECT DISTINCT s.showtime_date
   FROM showtimes s
@@ -504,6 +521,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Lấy các suất chiếu đang hoạt động theo ngày.
   const adminShowtimes = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -528,6 +546,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Lấy các phim hiện được gán cho một suất chiếu.
   const movieReplaceFrom = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -552,6 +571,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Lấy các phim có thể dùng để thay thế trong suất chiếu.
   const movieReplaceTo = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -576,6 +596,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Thay phim đang được gán cho một suất chiếu.
   const movieSwap = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -602,6 +623,7 @@ const createAdminController = (dependencies) => {
   });
 };
 
+  // Tổng hợp số suất, trạng thái và số vé theo ngày chiếu.
   const adminScheduleDates = async (req, res) => {
   const { email, password } = req.body;
 
@@ -632,6 +654,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Tạo một ngày chiếu với ba suất mặc định.
   const adminScheduleDateAdd = async (req, res) => {
   const { email, password, showtimeDate } = req.body;
 
@@ -666,6 +689,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Đổi ngày của lịch chưa có vé.
   const adminScheduleDateUpdate = async (req, res) => {
   const { email, password, currentDate, nextDate } = req.body;
 
@@ -709,6 +733,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Xoá lịch chưa có vé hoặc huỷ mềm lịch đã phát sinh vé.
   const adminScheduleDateDelete = async (req, res) => {
   const { email, password, showtimeDate } = req.body;
 
@@ -752,6 +777,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Khôi phục ngày chiếu và các lịch phim đã bị huỷ.
   const adminScheduleDateRestore = async (req, res) => {
   const { email, password, showtimeDate } = req.body;
 
@@ -783,6 +809,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Lấy dữ liệu phim, phòng và suất chiếu cho biểu mẫu quản trị.
   const adminShowtimeOptions = async (req, res) => {
   const { email, password } = req.body;
 
@@ -811,6 +838,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Lấy chi tiết các lịch phim, có thể lọc theo ngày.
   const adminShowtimeSlots = async (req, res) => {
   const { email, password, selectedShowDate } = req.body;
 
@@ -877,6 +905,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Tạo suất chiếu và gán phim vào phòng trong transaction.
   const adminShowtimeCreate = async (req, res) => {
   const {
     email,
@@ -929,6 +958,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Cập nhật lịch phim nhưng bảo vệ thông tin của suất đã bán vé.
   const adminShowtimeUpdate = async (req, res) => {
   const {
     email,
@@ -1021,6 +1051,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Xoá lịch phim chưa có vé hoặc huỷ mềm khi đã có vé.
   const adminShowtimeDelete = async (req, res) => {
   const { email, password, movieId, hallId, showtimeId } = req.body;
 
@@ -1083,6 +1114,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Khôi phục suất chiếu và lịch phim đã bị huỷ.
   const adminShowtimeRestore = async (req, res) => {
   const { email, password, movieId, hallId, showtimeId } = req.body;
 
@@ -1111,6 +1143,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Tổng hợp các chỉ số chính cho bảng điều khiển admin.
   const adminDashboardStats = async (req, res) => {
   const { email, password } = req.body;
 
@@ -1141,6 +1174,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Thống kê doanh thu bán vé trong 30 ngày gần nhất.
   const adminRevenueStats = async (req, res) => {
   const { email, password } = req.body;
 
@@ -1174,6 +1208,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Thống kê số đơn theo nhóm trạng thái thanh toán.
   const adminOrderStatusStats = async (req, res) => {
   const { email, password } = req.body;
 
@@ -1211,6 +1246,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Thống kê lượt đặt vé theo buổi chiếu trong ngày.
   const adminBookingTimeStats = async (req, res) => {
   const { email, password } = req.body;
 
@@ -1247,6 +1283,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Lấy mười đơn hàng mới nhất cho dashboard.
   const adminRecentOrders = async (req, res) => {
   const { email, password } = req.body;
 
@@ -1278,6 +1315,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Xếp hạng phim theo số vé đã bán.
   const adminTopMovies = async (req, res) => {
   const { email, password } = req.body;
 
@@ -1317,6 +1355,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  // Kiểm tra quyền và tải ảnh phim lên Cloudflare R2.
   const adminUploadImage = async (req, res) => {
   try {
     const { email, password } = req.body;

@@ -1,3 +1,4 @@
+// Xử lý hồ sơ và lịch sử mua vé của khách hàng.
 const createCustomerController = (dependencies) => {
   const {
     db,
@@ -22,6 +23,7 @@ const createCustomerController = (dependencies) => {
     generateFileName,
   } = dependencies;
 
+  // Lấy hồ sơ khách hàng sau khi xác thực thông tin đăng nhập.
   const customerProfile = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -35,6 +37,7 @@ const createCustomerController = (dependencies) => {
   });
 };
 
+  // Lấy lịch sử thanh toán và vé đã mua theo email.
   const customerPurchases = (req, res) => {
   const email = req.body.email;
 
@@ -90,6 +93,7 @@ const createCustomerController = (dependencies) => {
   });
 };
 
+  // Xoá một vé khỏi lịch sử đặt theo mã vé.
   const cancelOneTicket = (req, res) => {
   const ticketId = req.body.ticketId;
   const sql = "DELETE FROM ticket WHERE id = ?";

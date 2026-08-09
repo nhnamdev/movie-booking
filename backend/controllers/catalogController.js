@@ -1,3 +1,4 @@
+// Cung cấp dữ liệu phim, rạp và suất chiếu công khai.
 const createCatalogController = (dependencies) => {
   const {
     db,
@@ -22,10 +23,12 @@ const createCatalogController = (dependencies) => {
     generateFileName,
   } = dependencies;
 
+  // Kiểm tra nhanh trạng thái phản hồi của backend.
   const health = (req, res) => {
   return res.json("Hello Backend Side");
 };
 
+  // Lấy sáu phim mới nhất kèm thể loại.
   const latestMovies = (req, res) => {
   const sql =
     "SELECT m.id, m.name, m.image_path, m.rating, m.duration, m.release_date as release_date, GROUP_CONCAT(g.genre SEPARATOR ', ') as genres FROM movie m INNER JOIN movie_genre g ON m.id = g.movie_id GROUP BY m.id ORDER BY release_date DESC LIMIT 6";
@@ -37,6 +40,7 @@ const createCatalogController = (dependencies) => {
   });
 };
 
+  // Lấy thông tin mô tả địa điểm của các rạp.
   const locationDetails = (req, res) => {
   const sql = "SELECT location_details FROM theatre";
 
@@ -47,6 +51,7 @@ const createCatalogController = (dependencies) => {
   });
 };
 
+  // Lấy các tiện ích nổi bật tại rạp.
   const locationFeatures = (req, res) => {
   const sql = "SELECT DISTINCT title,image_path,description FROM features";
 
@@ -57,6 +62,7 @@ const createCatalogController = (dependencies) => {
   });
 };
 
+  // Lấy danh sách rạp và địa chỉ.
   const theatres = (req, res) => {
   const sql = "SELECT id, name,location FROM theatre";
 
@@ -67,6 +73,7 @@ const createCatalogController = (dependencies) => {
   });
 };
 
+  // Lọc lịch chiếu đang hoạt động theo rạp và thể loại.
   const showtimes = (req, res) => {
   const theatreName = req.body.theatreName;
   const userGenre = req.body.userGenre;
@@ -133,6 +140,7 @@ const createCatalogController = (dependencies) => {
       });
 };
 
+  // Lấy danh sách thể loại phim không trùng lặp.
   const genres = (req, res) => {
   const sql = "SELECT DISTINCT genre FROM movie_genre";
 
@@ -143,6 +151,7 @@ const createCatalogController = (dependencies) => {
   });
 };
 
+  // Lấy chi tiết phim kèm đạo diễn và thể loại.
   const movieDetail = (req, res) => {
   const id = req.body.movieDetailsId;
 
@@ -169,6 +178,7 @@ GROUP BY
   });
 };
 
+  // Lấy các suất chiếu của một phim tại rạp đã chọn.
   const movieWiseShowtime = (req, res) => {
   const movieId = req.body.movieDetailsId;
   const theatreId = req.body.theatreId;
@@ -182,6 +192,7 @@ GROUP BY
   });
 };
 
+  // Lấy các phim khác để hiển thị nội dung liên quan.
   const otherMovies = (req, res) => {
   const movieId = req.body.movieDetailsId;
 
