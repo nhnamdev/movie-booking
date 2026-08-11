@@ -4,6 +4,7 @@ import HashLoader from "react-spinners/esm/HashLoader.js";
 import { useSelector } from "react-redux";
 
 import { ShowtimesCard } from "./ShowtimesCard";
+import { CollectionCard } from "../../../components/CollectionCard";
 import { toDateKey } from "../../../utils/dateUtils";
 
 const tabs = [
@@ -102,8 +103,12 @@ export const ShowTimesCollection = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("now");
 
+  const [noTheatreMovies, setNoTheatreMovies] = useState([]);
+  const [noTheatreLoading, setNoTheatreLoading] = useState(false);
+
   const { name: theatreName } = useSelector((store) => store.currentLocation);
 
+  // Fetch showtimes khi đã chọn rạp
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -124,8 +129,34 @@ export const ShowTimesCollection = () => {
       }
     };
 
-    theatreName !== "" && fetchData();
+    if (theatreName !== "") {
+      fetchData();
+    }
   }, [theatreName]);
+
+  // Fetch movies khi chưa chọn rạp
+  useEffect(() => {
+    if (theatreName !== "") return;
+    if (activeTab === "prices") return;
+
+    const fetchNoTheatreData = async () => {
+      setNoTheatreLoading(true);
+      try {
+        const url = activeTab === "upcoming"
+          ? `${import.meta.env.VITE_API_URL}/upcomingMovies`
+          : `${import.meta.env.VITE_API_URL}/latestMovies`;
+        const response = await axios.get(url);
+        setNoTheatreMovies(response.data || []);
+      } catch (err) {
+        console.error(err);
+        setNoTheatreMovies([]);
+      } finally {
+        setNoTheatreLoading(false);
+      }
+    };
+
+    fetchNoTheatreData();
+  }, [theatreName, activeTab]);
 
   const movieShowtimes = useMemo(
     () => buildMovieSchedule(showtimesData),
@@ -145,6 +176,35 @@ export const ShowTimesCollection = () => {
           const releaseDate = new Date(movie.release_date);
           return !Number.isNaN(releaseDate.getTime()) && releaseDate <= today;
         });
+
+  // Render khi không chọn rạp (Hiển thị card banner trượt giống trang chủ)
+  const renderNoTheatreContent = () => {
+    if (noTheatreLoading) {
+      return <HashLoader cssOverride={override} color="#eb3656" />;
+    }
+
+    if (noTheatreMovies.length === 0) {
+      return (
+        <p className="showtimes-empty">
+          Hiện tại chưa có phim phù hợp.
+        </p>
+      );
+    }
+
+    const latestMoviesCards = noTheatreMovies.map((movie) => (
+      <CollectionCard key={movie.id} {...movie} />
+    ));
+    const latestMovieCardsDouble = noTheatreMovies.map((movie) => (
+      <CollectionCard key={movie.id + 100} {...movie} />
+    ));
+
+    return (
+      <div className="home-collection-container">
+        <div className="home-collection-inner">{latestMoviesCards}</div>
+        <div className="home-collection-inner">{latestMovieCardsDouble}</div>
+      </div>
+    );
+  };
 
   return (
     <section className="section-showtimes">
@@ -172,10 +232,12 @@ export const ShowTimesCollection = () => {
           </div>
         )}
 
-        {loading && activeTab !== "prices" ? (
-          <HashLoader cssOverride={override} color="#eb3656" />
-        ) : activeTab === "prices" ? (
+        {activeTab === "prices" ? (
           <TicketPriceTable />
+        ) : theatreName === "" ? (
+          renderNoTheatreContent()
+        ) : loading ? (
+          <HashLoader cssOverride={override} color="#eb3656" />
         ) : visibleMovies.length > 0 ? (
           <div className="showtimes-movies-list">
             {visibleMovies.map((showtime) => (
@@ -183,7 +245,9 @@ export const ShowTimesCollection = () => {
             ))}
           </div>
         ) : (
-          <p className="showtimes-empty">Chưa có lịch chiếu phù hợp.</p>
+          <p className="showtimes-empty">
+            Không có lịch chiếu phù hợp tại rạp này.
+          </p>
         )}
       </div>
     </section>

@@ -27,9 +27,6 @@ export const LocationSelector = ({ paymentOngoing }) => {
         );
 
         setLocationData(response.data);
-        if (!selectedLocationIdRef.current && response.data.length > 0) {
-          dispatch(selectLocation(response.data[0]));
-        }
       } catch (err) {
         console.log(err);
       } finally {
@@ -43,14 +40,21 @@ export const LocationSelector = ({ paymentOngoing }) => {
   const locationOptions = locationData?.map((location, idx) => {
     return (
       <option key={idx} value={location.id}>
-        {location.location}
+        {location.name}
       </option>
     );
   });
 
   const handleLocationSelection = (e) => {
+    const val = e.target.value;
+    if (val === "") {
+      dispatch(resetCart());
+      dispatch(selectLocation({ id: "", location: "", name: "", location_details: "" }));
+      return;
+    }
+
     const selectedLocationObj = locationData.find(
-      (locationObj) => locationObj.id === Number(e.target.value)
+      (locationObj) => locationObj.id === Number(val)
     );
 
     if (!selectedLocationObj) return;
@@ -67,18 +71,18 @@ export const LocationSelector = ({ paymentOngoing }) => {
       <select
         id="location-selector"
         onChange={handleLocationSelection}
-        value={userLocation?.id}
+        value={userLocation?.id || ""}
         disabled={loading || paymentOngoing}
       >
+        <option value="">-- Chọn rạp chiếu --</option>
         {locationOptions}
       </select>
 
-      <p className="selected-location">
-        Location: <span>{userLocation?.location}</span>
-      </p>
-      <p className="selected-theatre">
-        Theatre: <span>{userLocation?.name}</span>
-      </p>
+      {userLocation?.id && (
+        <p className="selected-theatre">
+          Địa chỉ: <span>{userLocation?.location_details}</span>
+        </p>
+      )}
     </div>
   ) : (
     <HashLoader color="#eb3656" />

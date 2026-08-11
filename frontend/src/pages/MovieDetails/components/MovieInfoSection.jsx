@@ -373,28 +373,34 @@ export const MovieInfoSection = () => {
         <LocationSelector />
       </div>
 
-      <h3 className="movie-info-screen-heading">Lịch chiếu phim</h3>
+      {userLocation.id && (
+        <>
+          <h3 className="movie-info-screen-heading">Lịch chiếu phim</h3>
 
-      {loading2 ? (
-        <HashLoader cssOverride={override} size={60} color="#eb3656" />
-      ) : (
-        <div className="movie-info-screen-container">
-          {showHtml3d.length > 0 && (
-            <div className="movie-info-screen-container-3d">
-              <h2 className="showtimes-screen">3D</h2>
+          {loading2 ? (
+            <HashLoader cssOverride={override} size={60} color="#eb3656" />
+          ) : (
+            <div className="movie-info-screen-container">
+              {showHtml3d.length > 0 && (
+                <div className="movie-info-screen-container-3d">
+                  <h2 className="showtimes-screen">3D</h2>
+                  {showHtml3d}
+                </div>
+              )}
 
-              {showHtml3d}
+              {showHtml2d.length > 0 && (
+                <div className="movie-info-screen-container-2d">
+                  <h2 className="showtimes-screen">2D</h2>
+                  {showHtml2d}
+                </div>
+              )}
+
+              {showHtml3d.length === 0 && showHtml2d.length === 0 && (
+                <p className="no-showtimes-msg">Không có suất chiếu cho phim này tại rạp đã chọn.</p>
+              )}
             </div>
           )}
-
-          {showHtml2d.length > 0 && (
-            <div className="movie-info-screen-container-2d">
-              <h2 className="showtimes-screen">2D</h2>
-
-              {showHtml2d}
-            </div>
-          )}
-        </div>
+        </>
       )}
 
       {trailerOpen && trailerEmbedUrl && (

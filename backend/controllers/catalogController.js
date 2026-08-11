@@ -106,7 +106,7 @@ const createCatalogController = (dependencies) => {
 
   // Lấy danh sách rạp và địa chỉ.
   const theatres = (req, res) => {
-  const sql = "SELECT id, name,location FROM theatre WHERE status = 'active' ORDER BY name";
+  const sql = "SELECT id, name, location, location_details FROM theatre WHERE status = 'active' ORDER BY name";
 
   db.query(sql, (err, data) => {
     if (err) return res.json(err);
