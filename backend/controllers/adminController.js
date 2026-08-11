@@ -1186,8 +1186,7 @@ const createAdminController = (dependencies) => {
     !showtimeDate ||
     !movieStartTime ||
     !showType ||
-    !screenType ||
-    !pricePerSeat
+    !screenType
   ) {
     return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin suất chiếu" });
   }
@@ -1199,13 +1198,16 @@ const createAdminController = (dependencies) => {
 
     transaction = await withTransaction();
     await assertMovieShowtimeDate({ movieId, showtimeDate, query: transaction.query });
-    await assertHallSupportsShowtime({
+    const hallSupport = await assertHallSupportsShowtime({
       hallId,
       showType,
       screenType,
+      showtimeDate,
       pricePerSeat,
       query: transaction.query,
     });
+    const autoPrice = Number(hallSupport.price_per_seat || pricePerSeat || 120000);
+
     await assertNoShowtimeOverlap({
       movieId,
       hallId,
@@ -1216,7 +1218,7 @@ const createAdminController = (dependencies) => {
     const insertResult = await transaction.query(
       `INSERT INTO showtimes (movie_start_time, show_type, screen_type, showtime_date, price_per_seat, status)
        VALUES (?, ?, ?, ?, ?, 'active')`,
-      [movieStartTime, showType, screenType, showtimeDate, pricePerSeat]
+      [movieStartTime, showType, screenType, showtimeDate, autoPrice]
     );
     const showtimeId = insertResult.insertId;
     await transaction.query(
@@ -1268,8 +1270,7 @@ const createAdminController = (dependencies) => {
     !showtimeDate ||
     !movieStartTime ||
     !showType ||
-    !screenType ||
-    !pricePerSeat
+    !screenType
   ) {
     return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin suất chiếu" });
   }
@@ -1281,13 +1282,16 @@ const createAdminController = (dependencies) => {
 
     transaction = await withTransaction();
     await assertMovieShowtimeDate({ movieId, showtimeDate, query: transaction.query });
-    await assertHallSupportsShowtime({
+    const hallSupport = await assertHallSupportsShowtime({
       hallId,
       showType,
       screenType,
+      showtimeDate,
       pricePerSeat,
       query: transaction.query,
     });
+    const autoPrice = Number(hallSupport.price_per_seat || pricePerSeat || 120000);
+
     const ticketRows = await transaction.query(
       `SELECT COUNT(*) AS ticketCount
        FROM ticket
@@ -1307,8 +1311,7 @@ const createAdminController = (dependencies) => {
       (String(currentShowtime.showtime_date).slice(0, 10) !== String(showtimeDate).slice(0, 10) ||
         String(currentShowtime.movie_start_time) !== String(movieStartTime) ||
         String(currentShowtime.show_type) !== String(showType) ||
-        String(currentShowtime.screen_type) !== String(screenType) ||
-        Number(currentShowtime.price_per_seat) !== Number(pricePerSeat));
+        String(currentShowtime.screen_type) !== String(screenType));
 
     if (ticketRows[0]?.ticketCount > 0 && changesSeatOwner) {
       await transaction.rollback();
@@ -1722,6 +1725,57 @@ const createAdminController = (dependencies) => {
     }
   };
 
+  const adminTicketPriceConfigs = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      const isOperator = await requireOperator(email, password);
+      if (!isOperator) return roleAuthFailed(res);
+
+      const configs = await queryDb(
+        "SELECT id, room_type, show_type, day_type, seat_type, price FROM ticket_price_config ORDER BY room_type, show_type, day_type, seat_type"
+      );
+      return res.json(configs);
+    } catch (err) {
+      return res.status(500).json({ message: err.message || "Không thể tải cấu hình giá vé" });
+    }
+  };
+
+  const adminTicketPriceConfigUpdate = async (req, res) => {
+    const { email, password, configs } = req.body;
+    try {
+      const isOperator = await requireOperator(email, password);
+      if (!isOperator) return roleAuthFailed(res);
+
+      if (!Array.isArray(configs) || configs.length === 0) {
+        return res.status(400).json({ message: "Dữ liệu cấu hình không hợp lệ" });
+      }
+
+      for (const item of configs) {
+        const { id, price, room_type, show_type, day_type, seat_type } = item;
+        const numPrice = Number(price);
+        if (!numPrice || numPrice <= 0) continue;
+
+        if (id) {
+          await queryDb(
+            "UPDATE ticket_price_config SET price = ? WHERE id = ?",
+            [numPrice, Number(id)]
+          );
+        } else if (room_type && show_type && day_type && seat_type) {
+          await queryDb(
+            `INSERT INTO ticket_price_config (room_type, show_type, day_type, seat_type, price)
+             VALUES (?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE price = VALUES(price)`,
+            [room_type, show_type, day_type, seat_type, numPrice]
+          );
+        }
+      }
+
+      return res.json({ success: true, message: "Cập nhật cấu hình giá vé thành công" });
+    } catch (err) {
+      return res.status(500).json({ message: err.message || "Không thể cập nhật cấu hình giá vé" });
+    }
+  };
+
   return {
     adminOrders,
     adminOrderStatusUpdate,
@@ -1750,6 +1804,8 @@ const createAdminController = (dependencies) => {
     adminTopMovies,
     adminUploadImage,
     adminMediaDelete,
+    adminTicketPriceConfigs,
+    adminTicketPriceConfigUpdate,
   };
 };
 

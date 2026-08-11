@@ -31,7 +31,7 @@ const createCatalogController = (dependencies) => {
   // Lấy sáu phim mới nhất kèm thể loại.
   const latestMovies = (req, res) => {
   const sql =
-    "SELECT m.id, m.name, m.image_path, m.rating, m.duration, m.release_date, m.end_date, 'showing' AS screening_status, GROUP_CONCAT(g.genre SEPARATOR ', ') AS genres FROM movie m INNER JOIN movie_genre g ON m.id = g.movie_id WHERE m.release_date <= CURDATE() AND m.end_date >= CURDATE() GROUP BY m.id ORDER BY m.release_date DESC LIMIT 6";
+    "SELECT m.id, MAX(m.name) AS name, MAX(m.image_path) AS image_path, MAX(m.rating) AS rating, MAX(m.duration) AS duration, MAX(m.release_date) AS release_date, MAX(m.end_date) AS end_date, 'showing' AS screening_status, GROUP_CONCAT(g.genre SEPARATOR ', ') AS genres FROM movie m INNER JOIN movie_genre g ON m.id = g.movie_id WHERE m.release_date <= CURDATE() AND m.end_date >= CURDATE() GROUP BY m.id ORDER BY MAX(m.release_date) DESC LIMIT 6";
 
   db.query(sql, (err, data) => {
     if (err) return res.json(err);
@@ -45,12 +45,12 @@ const createCatalogController = (dependencies) => {
   const sql = `
     SELECT
       m.id,
-      m.name,
-      m.image_path,
-      m.rating,
-      m.duration,
-      m.release_date,
-      m.end_date,
+      MAX(m.name) AS name,
+      MAX(m.image_path) AS image_path,
+      MAX(m.rating) AS rating,
+      MAX(m.duration) AS duration,
+      MAX(m.release_date) AS release_date,
+      MAX(m.end_date) AS end_date,
       'upcoming' AS screening_status,
       GROUP_CONCAT(DISTINCT g.genre ORDER BY g.genre SEPARATOR ', ') AS genres,
       EXISTS (
@@ -72,7 +72,7 @@ const createCatalogController = (dependencies) => {
     WHERE m.release_date > CURDATE()
       AND m.end_date >= m.release_date
     GROUP BY m.id
-    ORDER BY m.release_date ASC, m.name ASC
+    ORDER BY MAX(m.release_date) ASC, MAX(m.name) ASC
     LIMIT 6
   `;
 

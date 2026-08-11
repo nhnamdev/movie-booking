@@ -97,7 +97,10 @@ const createBookingController = (dependencies) => {
   HS.column_index,
   HS.seat_type,
   HS.price_surcharge,
-  STIME.price_per_seat + HS.price_surcharge AS final_price,
+  COALESCE(
+    TPC.price,
+    STIME.price_per_seat + HS.price_surcharge
+  ) AS final_price,
   CASE WHEN T.id IS NULL THEN TRUE ELSE FALSE END AS booked_status
 FROM
   seat AS S
@@ -107,6 +110,11 @@ FROM
   JOIN shown_in AS SI ON HS.hall_id = SI.hall_id
   JOIN showtimes AS STIME ON SI.showtime_id = STIME.id
   JOIN movie AS M ON M.id = SI.movie_id
+  LEFT JOIN ticket_price_config AS TPC ON
+      TPC.room_type = H.screen_type AND
+      TPC.show_type = STIME.show_type AND
+      TPC.day_type = CASE WHEN DAYOFWEEK(STIME.showtime_date) IN (1, 6, 7) THEN 'WEEKEND' ELSE 'WEEKDAY' END AND
+      TPC.seat_type = HS.seat_type
   LEFT JOIN ticket AS T ON
       T.seat_id = S.id AND
       T.showtimes_id = SI.showtime_id AND

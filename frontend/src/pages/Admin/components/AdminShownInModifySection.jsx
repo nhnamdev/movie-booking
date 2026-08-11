@@ -25,16 +25,8 @@ const emptyShowtimeForm = {
   movieStartTime: "",
   showType: "2D",
   screenType: "Tiêu chuẩn",
-  pricePerSeat: "120000",
+  pricePerSeat: "0",
 };
-
-const ticketPrices = {
-  "Tiêu chuẩn": { "2D": "120000", "3D": "150000" },
-  "Cao cấp": { "2D": "150000", "3D": "180000" },
-};
-
-const getTicketPrice = (screenType, showType) =>
-  ticketPrices[screenType]?.[showType] || "";
 
 const toDateInput = (value) => {
   if (!value) return "";
@@ -64,10 +56,7 @@ const toFormFromSlot = (slot, hall) => ({
   movieStartTime: slot.movie_start_time || "",
   showType: slot.show_type || "2D",
   screenType: hall?.screen_type || slot.screen_type || "Tiêu chuẩn",
-  pricePerSeat: getTicketPrice(
-    hall?.screen_type || slot.screen_type || "Tiêu chuẩn",
-    slot.show_type || "2D"
-  ),
+  pricePerSeat: String(slot.price_per_seat || "0"),
 });
 
 export const AdminShownInModifySection = () => {
@@ -262,7 +251,6 @@ export const AdminShownInModifySection = () => {
           hallId: "",
           showType: "2D",
           screenType: "Tiêu chuẩn",
-          pricePerSeat: getTicketPrice("Tiêu chuẩn", "2D"),
         };
       }
       if (name === "hallId") {
@@ -274,14 +262,12 @@ export const AdminShownInModifySection = () => {
           hallId: value,
           showType,
           screenType,
-          pricePerSeat: getTicketPrice(screenType, showType),
         };
       }
       if (name === "showType") {
         return {
           ...prev,
           showType: value,
-          pricePerSeat: getTicketPrice(prev.screenType, value),
         };
       }
       return { ...prev, [name]: value };
@@ -289,7 +275,9 @@ export const AdminShownInModifySection = () => {
   };
 
   const formIsValid = (form) =>
-    Object.values(form).every((value) => String(value).trim() !== "");
+    ["movieId", "theatreId", "hallId", "showtimeDate", "movieStartTime", "showType", "screenType"].every(
+      (key) => String(form[key] || "").trim() !== ""
+    );
 
   const refreshAll = async () => {
     await fetchOptions();
@@ -496,16 +484,11 @@ export const AdminShownInModifySection = () => {
         <input value={selectedHall ? form.screenType : ""} placeholder="Chọn phòng trước" readOnly />
       </div>
       <div>
-        <label>Giá vé</label>
-        <input
-          name="pricePerSeat"
-          type="number"
-          min="0"
-          step="1000"
-          value={form.pricePerSeat}
-          readOnly
-        />
-        <small className="admin-field-hint">Tự động theo bảng giá vé.</small>
+        <label>Giá vé suất chiếu</label>
+        <div style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", padding: "10px 14px", borderRadius: "8px", color: "#10b981", fontSize: "0.85rem", fontWeight: 600 }}>
+          ✨ Giá vé & ghế được áp dụng tự động từ <strong>Cài đặt giá ghế</strong> theo loại ngày (Thường / Cuối tuần) & loại ghế.
+        </div>
+        <small className="admin-field-hint">Không cần nhập hoặc chỉnh giá khi tạo/sửa suất chiếu.</small>
       </div>
     </>
     );

@@ -222,9 +222,19 @@ const createPaymentService = ({
         COALESCE(HS.seat_label, S.name) AS seat_name,
         HS.seat_type,
         HS.price_surcharge,
-        ? + HS.price_surcharge AS final_price
+        COALESCE(
+          TPC.price,
+          ? + HS.price_surcharge
+        ) AS final_price
        FROM seat S
        JOIN hallwise_seat HS ON S.id = HS.seat_id
+       JOIN hall H ON H.id = HS.hall_id
+       JOIN showtimes STIME ON STIME.id = ?
+       LEFT JOIN ticket_price_config TPC ON
+         TPC.room_type = H.screen_type AND
+         TPC.show_type = STIME.show_type AND
+         TPC.day_type = CASE WHEN DAYOFWEEK(STIME.showtime_date) IN (1, 6, 7) THEN 'WEEKEND' ELSE 'WEEKDAY' END AND
+         TPC.seat_type = HS.seat_type
        WHERE HS.hall_id = ?
          AND HS.is_active = 1
          AND S.id IN (?)
@@ -238,7 +248,7 @@ const createPaymentService = ({
              AND T.showtimes_id = ?
              AND TP.payment_status <> 'EXPIRED'
          )`,
-      [Number(show.price_per_seat), hallId, normalizedSeatIds, hallId, movieId, showtimeId]
+      [Number(show.price_per_seat), showtimeId, hallId, normalizedSeatIds, hallId, movieId, showtimeId]
     );
   
     const heldSeatIds = await getHeldOrderSeatIds({ hallId, movieId, showtimeId });

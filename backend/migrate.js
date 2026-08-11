@@ -451,6 +451,51 @@ async function applySchemaMigrations(connection) {
       CONSTRAINT movie_combo_promotion_combo_fk FOREIGN KEY (combo_id) REFERENCES concession_combo(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
   );
+
+  await query(
+    connection,
+    `CREATE TABLE IF NOT EXISTS ticket_price_config (
+      id INT NOT NULL AUTO_INCREMENT,
+      room_type VARCHAR(30) NOT NULL,
+      show_type VARCHAR(10) NOT NULL,
+      day_type VARCHAR(10) NOT NULL,
+      seat_type VARCHAR(20) NOT NULL,
+      price INT NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY ticket_price_config_unique (room_type, show_type, day_type, seat_type)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
+  );
+
+  const defaultPriceConfigs = [
+    { room_type: 'Tiêu chuẩn', show_type: '2D', day_type: 'WEEKDAY', seat_type: 'STANDARD', price: 80000 },
+    { room_type: 'Tiêu chuẩn', show_type: '2D', day_type: 'WEEKDAY', seat_type: 'VIP', price: 90000 },
+    { room_type: 'Tiêu chuẩn', show_type: '2D', day_type: 'WEEKEND', seat_type: 'STANDARD', price: 110000 },
+    { room_type: 'Tiêu chuẩn', show_type: '2D', day_type: 'WEEKEND', seat_type: 'VIP', price: 120000 },
+    { room_type: 'Tiêu chuẩn', show_type: '3D', day_type: 'WEEKDAY', seat_type: 'STANDARD', price: 110000 },
+    { room_type: 'Tiêu chuẩn', show_type: '3D', day_type: 'WEEKDAY', seat_type: 'VIP', price: 120000 },
+    { room_type: 'Tiêu chuẩn', show_type: '3D', day_type: 'WEEKEND', seat_type: 'STANDARD', price: 140000 },
+    { room_type: 'Tiêu chuẩn', show_type: '3D', day_type: 'WEEKEND', seat_type: 'VIP', price: 150000 },
+    { room_type: 'Cao cấp', show_type: '2D', day_type: 'WEEKDAY', seat_type: 'STANDARD', price: 110000 },
+    { room_type: 'Cao cấp', show_type: '2D', day_type: 'WEEKDAY', seat_type: 'VIP', price: 120000 },
+    { room_type: 'Cao cấp', show_type: '2D', day_type: 'WEEKEND', seat_type: 'STANDARD', price: 140000 },
+    { room_type: 'Cao cấp', show_type: '2D', day_type: 'WEEKEND', seat_type: 'VIP', price: 150000 },
+    { room_type: 'Cao cấp', show_type: '3D', day_type: 'WEEKDAY', seat_type: 'STANDARD', price: 140000 },
+    { room_type: 'Cao cấp', show_type: '3D', day_type: 'WEEKDAY', seat_type: 'VIP', price: 150000 },
+    { room_type: 'Cao cấp', show_type: '3D', day_type: 'WEEKEND', seat_type: 'STANDARD', price: 170000 },
+    { room_type: 'Cao cấp', show_type: '3D', day_type: 'WEEKEND', seat_type: 'VIP', price: 180000 },
+  ];
+
+  for (const cfg of defaultPriceConfigs) {
+    await query(
+      connection,
+      `INSERT IGNORE INTO ticket_price_config (room_type, show_type, day_type, seat_type, price)
+       VALUES (?, ?, ?, ?, ?)`,
+      [cfg.room_type, cfg.show_type, cfg.day_type, cfg.seat_type, cfg.price]
+    );
+  }
+
   await query(
     connection,
     `INSERT IGNORE INTO concession_combo (id, name, description, base_price, is_active) VALUES

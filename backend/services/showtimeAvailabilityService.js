@@ -34,12 +34,42 @@ const getShowtimeEndAt = ({ showtimeDate, movieStartTime, duration }) => {
   return new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
 };
 
+const getDayType = (showtimeDate) => {
+  const dateKey = toDateKey(showtimeDate);
+  if (!dateKey) return "WEEKDAY";
+  const date = new Date(`${dateKey}T00:00:00`);
+  const day = date.getDay();
+  if ([0, 5, 6].includes(day)) return "WEEKEND";
+  return "WEEKDAY";
+};
+
 const TICKET_PRICE_BY_ROOM = {
   "Tiêu chuẩn": { "2D": 120000, "3D": 150000 },
   "Cao cấp": { "2D": 150000, "3D": 180000 },
 };
 
 const createShowtimeAvailabilityService = ({ queryDbAsync }) => {
+  const resolveTicketPrice = async ({
+    roomType,
+    showType,
+    showtimeDate,
+    seatType = "STANDARD",
+    query = queryDbAsync,
+  }) => {
+    const dayType = getDayType(showtimeDate);
+    const rows = await query(
+      `SELECT price FROM ticket_price_config
+       WHERE room_type = ? AND show_type = ? AND day_type = ? AND seat_type = ?
+       LIMIT 1`,
+      [roomType, showType, dayType, seatType]
+    );
+    if (rows.length > 0) {
+      return Number(rows[0].price);
+    }
+    const fallback = TICKET_PRICE_BY_ROOM[roomType]?.[showType] || 120000;
+    return fallback;
+  };
+
   const getMovieScreeningWindow = async (movieId, query = queryDbAsync) => {
     const rows = await query(
       `SELECT id, name, duration,
@@ -153,6 +183,7 @@ const createShowtimeAvailabilityService = ({ queryDbAsync }) => {
     hallId,
     showType,
     screenType,
+    showtimeDate,
     pricePerSeat,
     query = queryDbAsync,
   }) => {
@@ -195,17 +226,13 @@ const createShowtimeAvailabilityService = ({ queryDbAsync }) => {
       throw err;
     }
 
-    const expectedPrice = TICKET_PRICE_BY_ROOM[hall.screen_type]?.[normalizedShowType];
-    if (!expectedPrice || Number(pricePerSeat) !== expectedPrice) {
-      const err = new Error(
-        `Giá vé ${hall.screen_type} ${normalizedShowType} phải là ${Number(
-          expectedPrice || 0
-        ).toLocaleString("vi-VN")} VNĐ`
-      );
-      err.statusCode = 409;
-      err.code = "SHOWTIME_PRICE_MISMATCH";
-      throw err;
-    }
+    const expectedPrice = await resolveTicketPrice({
+      roomType: hall.screen_type,
+      showType: normalizedShowType,
+      showtimeDate,
+      seatType: "STANDARD",
+      query,
+    });
 
     return { ...hall, show_type: normalizedShowType, price_per_seat: expectedPrice };
   };
@@ -293,6 +320,8 @@ const createShowtimeAvailabilityService = ({ queryDbAsync }) => {
   };
 
   return {
+    getDayType,
+    resolveTicketPrice,
     parseDurationMinutes,
     getShowtimeEndAt,
     getMovieScreeningWindow,

@@ -25,7 +25,6 @@ export const AdminCinemaSection = () => {
   const [layout, setLayout] = useState({});
   const [rowCount, setRowCount] = useState(6);
   const [columnCount, setColumnCount] = useState(8);
-  const [vipSurcharge, setVipSurcharge] = useState(30000);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeForm, setActiveForm] = useState(null);
@@ -156,8 +155,6 @@ export const AdminCinemaSection = () => {
       setLayout(nextLayout);
       setRowCount(Math.max(1, ...response.data.seats.map((seat) => Number(seat.row_index))));
       setColumnCount(Math.max(1, ...response.data.seats.map((seat) => Number(seat.column_index))));
-      const firstVip = response.data.seats.find((seat) => seat.seat_type === "VIP");
-      if (firstVip) setVipSurcharge(Number(firstVip.price_surcharge || 0));
       setSelectedHall({ ...hall, theatre_name: response.data.theatre_name });
     } catch (err) {
       adminErrorToast(err?.response?.data?.message || "Không thể tải sơ đồ ghế");
@@ -184,7 +181,7 @@ export const AdminCinemaSection = () => {
     if (!current) {
       next[key] = { seatId: null, seatType: "STANDARD", priceSurcharge: 0 };
     } else if (current.seatType === "STANDARD") {
-      next[key] = { ...current, seatType: "VIP", priceSurcharge: vipSurcharge };
+      next[key] = { ...current, seatType: "VIP", priceSurcharge: 0 };
     } else {
       delete next[key];
     }
@@ -202,7 +199,7 @@ export const AdminCinemaSection = () => {
           rowIndex,
           columnIndex,
           seatType: seat.seatType,
-          priceSurcharge: seat.seatType === "VIP" ? Number(vipSurcharge) : 0,
+          priceSurcharge: 0,
         };
       })
       .filter(Boolean);
@@ -280,10 +277,9 @@ export const AdminCinemaSection = () => {
           <div className="admin-layout-controls">
             <label>Số hàng <input type="number" min="1" max="26" value={rowCount} onChange={(e) => setRowCount(Number(e.target.value))} /></label>
             <label>Số cột <input type="number" min="1" max="50" value={columnCount} onChange={(e) => setColumnCount(Number(e.target.value))} /></label>
-            <label>Phụ thu VIP <input type="number" min="0" step="1000" value={vipSurcharge} onChange={(e) => setVipSurcharge(Number(e.target.value))} /></label>
             <button className="btn-admin is-secondary" onClick={fillGrid}>Tạo đủ lưới</button>
           </div>
-          <p className="admin-seat-help">Bấm từng ô để đổi: Lối đi → Ghế thường → Ghế VIP → Lối đi.</p>
+          <p className="admin-seat-help">Bấm từng ô để đổi: Lối đi → Ghế Thường → Ghế VIP → Lối đi (Giá vé ghế Thường / VIP được tự động áp theo Cài đặt giá ghế).</p>
           <div className="admin-seat-grid-scroll">
             <div className="admin-seat-screen">Màn hình</div>
             <div className="admin-seat-matrix" style={{ gridTemplateColumns: `repeat(${columnCount}, 4rem)` }}>

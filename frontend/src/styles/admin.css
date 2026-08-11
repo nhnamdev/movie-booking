@@ -2577,3 +2577,343 @@
 .admin-movie-trailer-status a:hover {
   color: #fda4b4;
 }
+
+/* ================================== */
+/* ADMIN TICKET PRICE CONFIG STYLES   */
+/* ================================== */
+
+.admin-price-config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2.4rem;
+}
+
+.admin-price-config-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-price-config-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #eb3656;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.admin-price-config-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.admin-price-config-subtitle {
+  font-size: 1.3rem;
+  color: #9ea0aa;
+  margin-top: 0.6rem;
+  line-height: 1.5;
+}
+
+.admin-price-config-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.btn-admin-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  padding: 1rem 1.8rem;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #e6e6e8;
+  font-family: inherit;
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-admin-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.btn-admin-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  padding: 1rem 2.2rem;
+  background: linear-gradient(135deg, #eb3656 0%, #c02641 100%);
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0.8rem 2rem rgba(235, 54, 86, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-admin-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 1rem 2.4rem rgba(235, 54, 86, 0.35);
+  background: linear-gradient(135deg, #ff3e60 0%, #d42a47 100%);
+}
+
+.btn-admin-primary:disabled,
+.btn-admin-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Info Box */
+.admin-price-info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.4rem;
+  padding: 1.6rem 2rem;
+  background: rgba(30, 58, 138, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 14px;
+}
+
+.admin-price-info-icon {
+  flex-shrink: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  color: #60a5fa;
+  margin-top: 0.2rem;
+}
+
+.admin-price-info-content {
+  font-size: 1.3rem;
+  color: #dbeafe;
+  line-height: 1.6;
+}
+
+.admin-price-info-content strong {
+  color: #ffffff;
+}
+
+.admin-price-info-list {
+  margin-top: 0.6rem;
+  padding-left: 1.8rem;
+  list-style-type: disc;
+}
+
+.admin-price-info-list li {
+  margin-bottom: 0.4rem;
+}
+
+/* Room Tabs */
+.admin-price-room-tabs {
+  display: flex;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.2rem;
+}
+
+.admin-price-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.2rem 2.4rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #9ea0aa;
+  font-family: inherit;
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-price-tab-btn:hover {
+  color: #ffffff;
+}
+
+.admin-price-tab-btn.active {
+  color: #eb3656;
+  border-bottom-color: #eb3656;
+}
+
+/* Grid Layout */
+.admin-price-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(34rem, 1fr));
+  gap: 2.4rem;
+}
+
+/* Card */
+.admin-price-card {
+  background: #222536;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 2.4rem;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-price-card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.admin-price-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  padding-bottom: 1.6rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-price-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.4rem;
+  height: 4.4rem;
+  border-radius: 14px;
+  font-size: 2rem;
+}
+
+.admin-price-card-icon.weekday {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.admin-price-card-icon.weekend {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+}
+
+.admin-price-card-title h3 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.admin-price-card-title p {
+  font-size: 1.2rem;
+  color: #9ea0aa;
+  margin-top: 0.3rem;
+}
+
+/* Formats Container */
+.admin-price-formats {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.admin-price-format-block {
+  background: #181b2a;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 1.8rem;
+}
+
+.admin-price-format-badge {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.4rem;
+}
+
+.admin-price-format-badge.type-2d {
+  background: rgba(235, 54, 86, 0.15);
+  color: #fda4b4;
+  border: 1px solid rgba(235, 54, 86, 0.3);
+}
+
+.admin-price-format-badge.type-3d {
+  background: rgba(168, 85, 247, 0.15);
+  color: #e9d5ff;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+/* Seat Row Grid */
+.admin-price-seats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.4rem;
+}
+
+.admin-price-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.admin-price-input-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #d4d4d8;
+}
+
+.admin-price-formatted-preview {
+  font-size: 1.1rem;
+  color: #eb3656;
+  font-weight: 700;
+}
+
+.admin-price-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-price-input {
+  width: 100%;
+  padding: 1rem 4.5rem 1rem 1.4rem;
+  background: #111422;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 1.4rem;
+  font-weight: 700;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.admin-price-input:focus {
+  border-color: #eb3656;
+  box-shadow: 0 0 0 3px rgba(235, 54, 86, 0.25);
+}
+
+.admin-price-unit {
+  position: absolute;
+  right: 1.4rem;
+  color: #71717a;
+  font-size: 1.1rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+

@@ -14,6 +14,7 @@ import {
   FaUserCircle,
   FaUserTie,
   FaGift,
+  FaMoneyBillWave,
 } from "react-icons/fa";
 import { GiPopcorn } from "react-icons/gi";
 import { logout } from "../../reducers/authSlice";
@@ -27,11 +28,13 @@ import { AdminStaffSection } from "./components/AdminStaffSection";
 import { AdminMoviePerformanceSection } from "./components/AdminMoviePerformanceSection";
 import { API_URL } from "../../utils/apiUrl";
 import { AdminRewardSection } from "./components/AdminRewardSection";
+import { AdminTicketPriceConfigSection } from "./components/AdminTicketPriceConfigSection";
 
 const adminTabs = [
   { id: "dashboard", label: "Tổng quan", icon: FaChartBar },
   { id: "orders", label: "Đơn hàng", icon: FaClipboardList },
   { id: "cinemas", label: "Chi nhánh & phòng", icon: FaBuilding },
+  { id: "prices", label: "Cài đặt giá ghế", icon: FaMoneyBillWave },
   { id: "combos", label: "Combo bắp nước", icon: GiPopcorn },
   { id: "movies", label: "Quản lý phim", icon: FaFilm },
   { id: "showtimes", label: "Quản lý suất chiếu", icon: FaClock },
@@ -130,6 +133,8 @@ const AdminPage = () => {
           {activeTab === "orders" && <AdminOrdersSection />}
 
           {activeTab === "cinemas" && <AdminCinemaSection />}
+
+          {activeTab === "prices" && <AdminTicketPriceConfigSection />}
 
           {activeTab === "combos" && <AdminComboSection />}
 

@@ -15,21 +15,21 @@ const createCustomerController = ({ queryDbAsync, parsePayOSOrderPayload }) => {
       ), queryDbAsync(
         `SELECT
           P.id AS payment_id,
-          P.payment_time,
-          P.amount,
-          P.method,
-          P.payment_status,
+          MAX(P.payment_time) AS payment_time,
+          MAX(P.amount) AS amount,
+          MAX(P.method) AS method,
+          MAX(P.payment_status) AS payment_status,
           GROUP_CONCAT(DISTINCT T.id ORDER BY T.id SEPARATOR ', ') AS ticket_ids,
           GROUP_CONCAT(DISTINCT COALESCE(T.seat_label_snapshot, HS.seat_label, SE.name)
             ORDER BY COALESCE(HS.row_index, 0), COALESCE(HS.column_index, 0) SEPARATOR ', ') AS seat_numbers,
-          COALESCE(T.theatre_name_snapshot, TH.name) AS theatre_name,
-          COALESCE(T.hall_name_snapshot, H.name) AS hall_name,
-          M.name AS movie_name,
-          M.id AS movie_id,
-          M.image_path AS movie_image,
-          S.movie_start_time,
-          S.show_type,
-          DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date,
+          MAX(COALESCE(T.theatre_name_snapshot, TH.name)) AS theatre_name,
+          MAX(COALESCE(T.hall_name_snapshot, H.name)) AS hall_name,
+          MAX(M.name) AS movie_name,
+          T.movie_id AS movie_id,
+          MAX(M.image_path) AS movie_image,
+          MAX(S.movie_start_time) AS movie_start_time,
+          MAX(S.show_type) AS show_type,
+          MAX(DATE_FORMAT(S.showtime_date, '%Y-%m-%d')) AS showtime_date,
           SUM(T.price) AS ticket_subtotal
          FROM payment P
          JOIN ticket T ON T.payment_id = P.id
@@ -44,7 +44,7 @@ const createCustomerController = ({ queryDbAsync, parsePayOSOrderPayload }) => {
            AND T.ticket_status IN ('ISSUED', 'CHECKED_IN')
            AND NOT EXISTS (SELECT 1 FROM payos_orders PO WHERE PO.payment_id = P.id)
          GROUP BY P.id, T.movie_id, T.hall_id, T.showtimes_id
-         ORDER BY P.payment_time DESC, P.id DESC`,
+         ORDER BY MAX(P.payment_time) DESC, P.id DESC`,
         [req.user.email]
       )]);
 
