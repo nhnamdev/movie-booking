@@ -2118,9 +2118,13 @@ header {
 .movie-option-img-box {
   border-radius: 6px;
   overflow: hidden;
+  width: 100%;
+  aspect-ratio: 2 / 3;
 }
 .movie-option-img {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .movie-option-name {

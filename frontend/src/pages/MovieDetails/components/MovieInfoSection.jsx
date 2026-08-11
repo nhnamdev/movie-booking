@@ -144,7 +144,7 @@ export const MovieInfoSection = () => {
 
     const timesHtml = times.map((singleTime) => {
       return (
-        <li key={`3d ${singleTime.movie_start_time}`}>
+        <li key={`3d ${singleTime.showtime_id}`}>
           <button
             className="showtimes-startime-btn"
             onClick={() => {
@@ -178,7 +178,7 @@ export const MovieInfoSection = () => {
 
     const timesHtml = times.map((singleTime) => {
       return (
-        <li key={`2d ${singleTime.movie_start_time}`}>
+        <li key={`2d ${singleTime.showtime_id}`}>
           <button
             className="showtimes-startime-btn"
             onClick={() => {
