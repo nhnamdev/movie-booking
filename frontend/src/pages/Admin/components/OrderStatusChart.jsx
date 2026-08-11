@@ -8,24 +8,23 @@ import {
 const COLORS = {
   "Đã thanh toán": "#10b981",
   "Chờ thanh toán": "#f59e0b",
-  "Đã hủy": "#ef4444",
+  "Lỗi hoặc hết hạn": "#ef4444",
 };
 
 export const OrderStatusChart = () => {
   const { signedPerson } = useSelector((store) => store.authentication);
   const email = signedPerson?.email;
-  const password = signedPerson?.password;
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!email || !password) return;
+    if (!email) return;
 
     const fetchData = async () => {
       try {
         const res = await axios.post(
           `${import.meta.env.VITE_API_URL}/adminOrderStatusStats`,
-          { email, password }
+          { email }
         );
         setData(res.data);
       } catch (err) {
@@ -36,7 +35,7 @@ export const OrderStatusChart = () => {
     };
 
     fetchData();
-  }, [email, password]);
+  }, [email]);
 
   if (loading) {
     return (

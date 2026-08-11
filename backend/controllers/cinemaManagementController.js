@@ -14,6 +14,7 @@ const createCinemaManagementController = (dependencies) => {
     upsertCombo,
     upsertComboPromotion,
     deleteComboPromotion,
+    upsertBranchCombo,
   } = dependencies;
 
   const authorized = async (req, res) => {
@@ -138,6 +139,16 @@ const createCinemaManagementController = (dependencies) => {
     }
   };
 
+  const adminBranchComboUpsert = async (req, res) => {
+    try {
+      if (!(await authorized(req, res))) return;
+      await upsertBranchCombo(req.body);
+      return res.json({ success: true });
+    } catch (err) {
+      return respondError(res, err, "Không thể lưu combo theo chi nhánh");
+    }
+  };
+
   return {
     adminCinemaStructure,
     adminTheatreUpsert,
@@ -150,6 +161,7 @@ const createCinemaManagementController = (dependencies) => {
     adminComboUpsert,
     adminComboPromotionUpsert,
     adminComboPromotionDelete,
+    adminBranchComboUpsert,
   };
 };
 

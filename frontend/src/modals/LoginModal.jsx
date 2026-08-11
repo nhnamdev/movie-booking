@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import BarLoader from "react-spinners/BarLoader";
+import BarLoader from "react-spinners/esm/BarLoader.js";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { hideLoginModal, login } from "../reducers/authSlice";
@@ -45,7 +45,7 @@ export const LoginModal = () => {
           }
         );
         // 1.2.2	Frontend tiếp tục gọi login(response.data) để cập nhập trạng thái login cho authSlice.js
-        const userData = response.data[0];
+        const userData = response.data.user;
         dispatch(login(userData));
         // 1.2.5	Khi cập nhật xong trạng thái thì đóng modal login
         dispatch(hideLoginModal());

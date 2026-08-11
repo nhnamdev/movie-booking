@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import HashLoader from "react-spinners/HashLoader";
+import HashLoader from "react-spinners/esm/HashLoader.js";
 import { useDispatch, useSelector } from "react-redux";
 import { resetCart, setShowDate } from "../../../reducers/cartSlice";
 import { dateKeyToDate, toDateKey } from "../../../utils/dateUtils";
@@ -42,13 +42,6 @@ export const DateSelector = ({ paymentOngoing }) => {
     theatreId !== "" && fetchData();
   }, [theatreId, dispatch, userDate]);
 
-  const checkedColor = (val) => {
-    return {
-      backgroundColor: val === userDate ? "#ef5e78" : "",
-      color: val === userDate ? "#e6e6e8" : "",
-    };
-  };
-
   const hasSelectedDate = showDatesData.some(
     (dateData) => toDateKey(dateData.showtime_date) === userDate
   );
@@ -62,35 +55,38 @@ export const DateSelector = ({ paymentOngoing }) => {
   const dateOptions = visibleDates.map((dateData, idx) => {
     const formattedDate = toDateKey(dateData.showtime_date);
     const showtimeDate = dateKeyToDate(formattedDate);
-    const day = showtimeDate.toLocaleString("en-us", {
+    const day = showtimeDate.toLocaleString("vi-VN", {
       weekday: "short",
     });
 
-    const month = showtimeDate.toLocaleString("en-us", {
+    const month = showtimeDate.toLocaleString("vi-VN", {
       month: "short",
     });
 
-    const date = showtimeDate.toLocaleString("en-us", {
+    const date = showtimeDate.toLocaleString("vi-VN", {
       day: "numeric",
     });
+    const inputId = `purchase-date-${formattedDate}`;
+    const isSelected = formattedDate === userDate;
 
     return (
       <div
-        className="date-input-container"
-        key={idx}
-        style={checkedColor(formattedDate)}
+        className={`date-input-container ${isSelected ? "is-selected" : ""} ${
+          paymentOngoing ? "is-disabled" : ""
+        }`}
+        key={`${formattedDate}-${idx}`}
       >
         <input
           disabled={loading || paymentOngoing}
           type="radio"
-          id={idx}
+          id={inputId}
           name="Select Date"
           value={formattedDate}
           onChange={(e) => dispatch(setShowDate(e.target.value))}
-          checked={formattedDate === userDate}
+          checked={isSelected}
         />
 
-        <label className="form-date-detail" htmlFor={idx}>
+        <label className="form-date-detail" htmlFor={inputId}>
           <p className="form-day">{day}</p>
           <div className="form-date-month">
             <p className="form-date">{date}</p>

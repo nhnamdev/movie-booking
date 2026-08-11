@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import HashLoader from "react-spinners/HashLoader";
+import HashLoader from "react-spinners/esm/HashLoader.js";
 import { useDispatch, useSelector } from "react-redux";
 import { setShowDetail } from "../../../reducers/cartSlice";
 
@@ -52,13 +52,6 @@ export const PictureQualitySelector = ({
     fetchData();
   }, [userMovieId, theatreId, userDate, setHallData]);
 
-  const checkedColor = (val) => {
-    return {
-      backgroundColor: val === userAns ? "#ef5e78" : "",
-      border: val === userAns ? "2px solid #ef5e78" : "",
-    };
-  };
-
   hallData.forEach((hall) => {
     const isPresent = newHallData.some(
       (hallData) =>
@@ -90,24 +83,27 @@ export const PictureQualitySelector = ({
   const showtimeOptions = newHallData.map((show) => {
     const options = show.movie_start_time.map((option, idx) => {
       const valStr = `${show.showtime_id[idx]},${show.hall_id},${show.price_per_seat}`;
+      const inputId = `purchase-showtime-${show.showtime_id[idx]}-${show.hall_id}`;
+      const isSelected = userAns === valStr;
       return (
         <div
-          className="time-input-container"
-          key={idx}
-          style={checkedColor(valStr)}
+          className={`time-input-container ${isSelected ? "is-selected" : ""} ${
+            paymentOngoing ? "is-disabled" : ""
+          }`}
+          key={inputId}
         >
           <input
             disabled={loading || paymentOngoing}
             type="radio"
-            id={show.showtime_id[idx]}
+            id={inputId}
             name="Select picture quality"
             value={valStr}
             onChange={(e) => dispatch(setShowDetail(e.target.value))}
-            checked={userAns === valStr}
+            checked={isSelected}
           />
 
-          <label className="form-time-detail" htmlFor={show.showtime_id[idx]}>
-            {option}
+          <label className="form-time-detail" htmlFor={inputId}>
+            {String(option).slice(0, 5)}
           </label>
         </div>
       );
@@ -119,10 +115,13 @@ export const PictureQualitySelector = ({
         key={`${show.hall_name} (${show.show_type})`}
       >
         <div className="form-picture-quality">
-          {`${show.hall_name} (${show.show_type})`}
+          <div className="form-hall-heading">
+            <strong>{show.hall_name}</strong>
+            <span>{show.show_type}</span>
+          </div>
           <div className="form-showtimes">{options}</div>
         </div>
-        <p className="form-show-price">{` ${show.price_per_seat} VNĐ`}</p>
+        <p className="form-show-price">Từ <strong>{Number(show.price_per_seat).toLocaleString("vi-VN")}₫</strong></p>
       </div>
     );
   });
@@ -130,7 +129,7 @@ export const PictureQualitySelector = ({
   return (
     <div>
       <form>
-        <div className="form-item-heading">Chọn suất chiếu</div>
+        <div className="form-item-heading">Chọn giờ chiếu</div>
         {loading && <HashLoader cssOverride={override} color="#eb3656" />}
         {!loading && (
           <div className="form-hall-container">{showtimeOptions}</div>

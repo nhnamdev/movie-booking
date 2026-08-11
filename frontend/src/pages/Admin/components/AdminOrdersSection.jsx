@@ -2,7 +2,7 @@ import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiCheckCircle, FiRefreshCw, FiShoppingBag } from "react-icons/fi";
 import { useSelector } from "react-redux";
-import { ClipLoader } from "react-spinners";
+import ClipLoader from "react-spinners/esm/ClipLoader.js";
 import { adminErrorToast, adminShowninToast } from "../../../toasts/toast";
 
 const statusOptions = [
@@ -12,6 +12,7 @@ const statusOptions = [
   { label: "PayOS chờ", value: "PENDING" },
   { label: "Lỗi", value: "FAILED" },
   { label: "Hết hạn", value: "EXPIRED" },
+  { label: "Cần đối soát", value: "PAID_REVIEW" },
 ];
 
 const statusLabels = {
@@ -20,7 +21,9 @@ const statusLabels = {
   PENDING: "PayOS chờ",
   FAILED: "Lỗi",
   EXPIRED: "Hết hạn",
+  PAID_REVIEW: "Cần đối soát",
 };
+const fulfillmentLabels = { PENDING: "Chờ chuẩn bị", PREPARING: "Đang chuẩn bị", READY: "Sẵn sàng giao", PICKED_UP: "Đã giao" };
 
 const formatCurrency = (value) =>
   Number(value || 0).toLocaleString("vi-VN", {
@@ -67,13 +70,12 @@ export const AdminOrdersSection = () => {
   const adminPayload = useMemo(
     () => ({
       email: signedPerson?.email,
-      password: signedPerson?.password,
     }),
-    [signedPerson?.email, signedPerson?.password]
+    [signedPerson?.email]
   );
 
   const fetchOrders = useCallback(async () => {
-    if (!adminPayload.email || !adminPayload.password) return;
+    if (!adminPayload.email) return;
 
     try {
       setLoading(true);
@@ -118,6 +120,27 @@ export const AdminOrdersSection = () => {
     } finally {
       setUpdatingOrderCode("");
     }
+  };
+
+  const handleFulfillment = async (orderCode, status) => {
+    try {
+      setUpdatingOrderCode(orderCode);
+      await axios.post(`${import.meta.env.VITE_API_URL}/adminOrderFulfillmentUpdate`, { orderCode, status });
+      await fetchOrders();
+    } catch (err) {
+      adminErrorToast(err?.response?.data?.message || "Không thể cập nhật bắp nước");
+    } finally { setUpdatingOrderCode(""); }
+  };
+
+  const handleCheckIn = async (orderCode) => {
+    try {
+      setUpdatingOrderCode(orderCode);
+      await axios.post(`${import.meta.env.VITE_API_URL}/adminTicketCheckIn`, { orderCode });
+      adminShowninToast("Check-in vé thành công");
+      await fetchOrders();
+    } catch (err) {
+      adminErrorToast(err?.response?.data?.message || "Không thể check-in vé");
+    } finally { setUpdatingOrderCode(""); }
   };
 
   return (
@@ -178,6 +201,10 @@ export const AdminOrdersSection = () => {
               order.payment_method === "Thanh toán tại rạp" &&
               holdActive;
             const isUpdating = updatingOrderCode === order.order_code;
+            const hasCombos = Boolean(order.combo_items?.length);
+            const hasTickets = Boolean(order.ticket_ids?.length);
+            const fulfillmentStatus = order.fulfillment_status || "PENDING";
+            const nextFulfillment = fulfillmentStatus === "PENDING" ? "PREPARING" : fulfillmentStatus === "PREPARING" ? "READY" : fulfillmentStatus === "READY" ? "PICKED_UP" : null;
 
             return (
               <article className="admin-order-row" key={order.order_code}>
@@ -231,6 +258,7 @@ export const AdminOrdersSection = () => {
                   <span className={`admin-order-status is-${status.toLowerCase()}`}>
                     {statusLabels[status] || status}
                   </span>
+                  {status === "PAID" && hasCombos ? <small>{fulfillmentLabels[fulfillmentStatus] || fulfillmentStatus}</small> : null}
                 </div>
                 <div className="admin-order-actions">
                   {canMarkPaid ? (
@@ -248,6 +276,12 @@ export const AdminOrdersSection = () => {
                         </>
                       )}
                     </button>
+                  ) : status === "PAID" && (hasTickets || (hasCombos && nextFulfillment)) ? (
+                    <div className="admin-inline-actions">
+                      {hasTickets && !order.ticket_checked_in_at ? <button className="btn-admin" onClick={() => handleCheckIn(order.order_code)} disabled={isUpdating}>Check-in vé</button> : null}
+                      {hasCombos && nextFulfillment ? <button className="btn-admin is-secondary" onClick={() => handleFulfillment(order.order_code, nextFulfillment)} disabled={isUpdating}>{fulfillmentLabels[nextFulfillment]}</button> : null}
+                      {order.ticket_checked_in_at ? <small>Vé đã check-in</small> : null}
+                    </div>
                   ) : (
                     <span className="admin-order-action-note">
                       {order.ticket_ids?.length

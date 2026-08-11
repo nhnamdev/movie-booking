@@ -28,10 +28,13 @@ const createConcessionService = ({ queryDbAsync }) => {
     }
 
     const products = await queryDbAsync(
-      `SELECT id, name, description, category, image_url, base_price
-       FROM concession_combo
-       WHERE is_active = 1
-       ORDER BY category, id`
+      `SELECT C.id, C.name, C.description, C.category, C.image_url,
+        COALESCE(BC.price_override, C.base_price) AS base_price
+       FROM concession_combo C
+       JOIN branch_combo BC ON BC.combo_id = C.id AND BC.theatre_id = ?
+       WHERE C.is_active = 1 AND BC.is_available = 1
+       ORDER BY C.category, C.id`,
+      [normalizedTheatreId]
     );
 
     return {

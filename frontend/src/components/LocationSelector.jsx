@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
-import HashLoader from "react-spinners/HashLoader";
+import HashLoader from "react-spinners/esm/HashLoader.js";
 import { useDispatch, useSelector } from "react-redux";
 import { selectLocation } from "../reducers/locationSlice";
 import { resetCart } from "../reducers/cartSlice";

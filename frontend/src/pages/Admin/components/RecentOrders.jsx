@@ -21,18 +21,17 @@ const statusClass = {
 export const RecentOrders = () => {
   const { signedPerson } = useSelector((store) => store.authentication);
   const email = signedPerson?.email;
-  const password = signedPerson?.password;
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!email || !password) return;
+    if (!email) return;
 
     const fetchOrders = async () => {
       try {
         const res = await axios.post(
           `${import.meta.env.VITE_API_URL}/adminRecentOrders`,
-          { email, password }
+          { email }
         );
         setOrders(res.data);
       } catch (err) {
@@ -43,7 +42,7 @@ export const RecentOrders = () => {
     };
 
     fetchOrders();
-  }, [email, password]);
+  }, [email]);
 
   const formatVND = (val) => {
     if (!Number.isFinite(val)) return "0₫";

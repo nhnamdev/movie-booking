@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
-import HashLoader from "react-spinners/HashLoader";
+import HashLoader from "react-spinners/esm/HashLoader.js";
 import { useSelector } from "react-redux";
 
 import { ShowtimesCard } from "./ShowtimesCard";
@@ -141,7 +141,10 @@ export const ShowTimesCollection = () => {
           const releaseDate = new Date(movie.release_date);
           return !Number.isNaN(releaseDate.getTime()) && releaseDate > today;
         })
-      : movieShowtimes;
+      : movieShowtimes.filter((movie) => {
+          const releaseDate = new Date(movie.release_date);
+          return !Number.isNaN(releaseDate.getTime()) && releaseDate <= today;
+        });
 
   return (
     <section className="section-showtimes">

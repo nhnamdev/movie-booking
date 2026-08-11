@@ -6,18 +6,17 @@ import { FaStar } from "react-icons/fa";
 export const TopMovies = () => {
   const { signedPerson } = useSelector((store) => store.authentication);
   const email = signedPerson?.email;
-  const password = signedPerson?.password;
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!email || !password) return;
+    if (!email) return;
 
     const fetchMovies = async () => {
       try {
         const res = await axios.post(
           `${import.meta.env.VITE_API_URL}/adminTopMovies`,
-          { email, password }
+          { email }
         );
         setMovies(res.data);
       } catch (err) {
@@ -28,7 +27,7 @@ export const TopMovies = () => {
     };
 
     fetchMovies();
-  }, [email, password]);
+  }, [email]);
 
   if (loading) {
     return (

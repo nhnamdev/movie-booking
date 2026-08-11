@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 
-import BarLoader from "react-spinners/BarLoader";
+import BarLoader from "react-spinners/esm/BarLoader.js";
 import { signupFailedToast, signupSuccessToast } from "../toasts/toast";
 import { useDispatch } from "react-redux";
 import { hideSignModal } from "../reducers/authSlice";

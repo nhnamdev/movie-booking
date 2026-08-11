@@ -6,8 +6,7 @@ const configuration = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  // MySQL hiện lưu DATETIME theo UTC; khai báo rõ để Node không trừ thêm 7 giờ.
-  timezone: process.env.DB_TIMEZONE || "Z",
+  timezone: process.env.DB_TIMEZONE || "+07:00",
   waitForConnections: true,
   connectionLimit: Number(process.env.DB_CONNECTION_LIMIT) || 10,
   queueLimit: 0,
@@ -28,6 +27,9 @@ const connectDatabase = () => {
   if (pool) return db;
 
   pool = mysql.createPool(configuration);
+  pool.on("connection", (connection) => {
+    connection.query("SET time_zone = ?", [process.env.DB_SESSION_TIMEZONE || "+07:00"]);
+  });
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("error when connecting to db:", err.message);

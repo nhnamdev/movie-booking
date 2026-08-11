@@ -1,9 +1,10 @@
 const express = require("express");
 
-const createStaffManagementRoutes = (controller) => {
+const createStaffManagementRoutes = (controller, { allowRoles }) => {
   const router = express.Router();
-  router.post("/adminStaffList", controller.adminStaffList);
-  router.post("/adminStaffUpsert", controller.adminStaffUpsert);
+  const adminOnly = allowRoles("Admin");
+  router.post("/adminStaffList", ...adminOnly, controller.adminStaffList);
+  router.post("/adminStaffUpsert", ...adminOnly, controller.adminStaffUpsert);
   return router;
 };
 

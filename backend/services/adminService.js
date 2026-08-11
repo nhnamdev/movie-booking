@@ -1,11 +1,16 @@
 // Cung cấp các tiện ích xác thực và chuẩn hoá dữ liệu quản trị.
+const { AUTHENTICATED_REQUEST } = require("../middleware/authContext");
+
 const createAdminService = ({ db, parsePayOSOrderPayload, normalizeSeatIds }) => {
   // Kiểm tra thông tin đăng nhập có thuộc tài khoản admin hay không.
   const verifyAdmin = (email, password, callback) => {
+    const sessionAuthenticated = password === AUTHENTICATED_REQUEST;
     const sql = `SELECT email from person
-      WHERE email = ? and password = ? and person_type = ? and account_status = 'active'`;
+      WHERE email = ? ${sessionAuthenticated ? "" : "and password = ?"}
+        and person_type = ? and account_status = 'active'`;
+    const params = sessionAuthenticated ? [email, "Admin"] : [email, password, "Admin"];
   
-    db.query(sql, [email, password, "Admin"], (err, data) => {
+    db.query(sql, params, (err, data) => {
       if (err) return callback(err);
       return callback(null, data.length > 0);
     });
@@ -42,12 +47,16 @@ const createAdminService = ({ db, parsePayOSOrderPayload, normalizeSeatIds }) =>
       return false;
     }
     const placeholders = allowedRoles.map(() => "?").join(",");
+    const sessionAuthenticated = password === AUTHENTICATED_REQUEST;
     const rows = await queryDb(
       `SELECT email, person_type FROM person
-       WHERE email = ? AND password = ? AND account_status = 'active'
+       WHERE email = ? ${sessionAuthenticated ? "" : "AND password = ?"}
+         AND account_status = 'active'
          AND person_type IN (${placeholders})
        LIMIT 1`,
-      [email, password, ...allowedRoles]
+      sessionAuthenticated
+        ? [email, ...allowedRoles]
+        : [email, password, ...allowedRoles]
     );
     return rows.length > 0;
   };
@@ -75,6 +84,11 @@ const createAdminService = ({ db, parsePayOSOrderPayload, normalizeSeatIds }) =>
       customer_email: order.customer_email,
       payment_method: order.payment_method || payload.paymentMethod || "PayOS",
       payment_status: order.payment_status || order.status,
+      fulfillment_status: order.fulfillment_status || "PENDING",
+      fulfilled_at: order.fulfilled_at,
+      fulfilled_by: order.fulfilled_by,
+      ticket_checked_in_at: order.ticket_checked_in_at,
+      ticket_checked_in_by: order.ticket_checked_in_by,
       payment_id: order.payment_id,
       ticket_ids: ticketIds,
       seats: normalizeSeatIds(payload.seatIds),

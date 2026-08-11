@@ -8,18 +8,17 @@ import {
 export const MovieTicketChart = () => {
   const { signedPerson } = useSelector((store) => store.authentication);
   const email = signedPerson?.email;
-  const password = signedPerson?.password;
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!email || !password) return;
+    if (!email) return;
 
     const fetchData = async () => {
       try {
         const res = await axios.post(
           `${import.meta.env.VITE_API_URL}/totalTicketPerMovie`,
-          { email, password }
+          { email }
         );
         setData(res.data);
       } catch (err) {
@@ -30,7 +29,7 @@ export const MovieTicketChart = () => {
     };
 
     fetchData();
-  }, [email, password]);
+  }, [email]);
 
   if (loading) {
     return (

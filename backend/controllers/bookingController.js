@@ -30,7 +30,7 @@ const createBookingController = (dependencies) => {
 
   const sql = `SELECT DATE_FORMAT(subquery.showtime_date, '%Y-%m-%d') AS showtime_date
   FROM (
-      SELECT showtimes.showtime_date, MAX(showtimes.id) AS latest_showtime_id
+      SELECT showtimes.showtime_date
       FROM showtimes
       JOIN shown_in ON showtimes.id = shown_in.showtime_id
       JOIN movie ON movie.id = shown_in.movie_id
@@ -42,7 +42,7 @@ const createBookingController = (dependencies) => {
         AND (movie.end_date IS NULL OR movie.end_date >= CURDATE())
         AND TIMESTAMPADD(MINUTE, CAST(movie.duration AS UNSIGNED), TIMESTAMP(showtimes.showtime_date, showtimes.movie_start_time)) > NOW()
       GROUP BY showtimes.showtime_date
-      ORDER BY latest_showtime_id DESC
+      ORDER BY showtimes.showtime_date ASC
       LIMIT 4
   ) AS subquery
   ORDER BY subquery.showtime_date ASC`;
@@ -152,7 +152,7 @@ ORDER BY HS.row_index, HS.column_index`;
   // Trả danh mục combo cùng giá khuyến mãi đang áp dụng cho phim.
   const movieCombos = async (req, res) => {
   try {
-    const result = await getMovieCombos(req.body.movieId);
+    const result = await getMovieCombos(req.body.movieId, req.body.theatreId);
     return res.json(result);
   } catch (err) {
     return res.status(err.statusCode || 500).json({

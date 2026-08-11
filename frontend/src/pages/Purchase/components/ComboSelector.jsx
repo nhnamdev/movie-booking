@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { FiMinus, FiPlus } from "react-icons/fi";
 import { GiPopcorn } from "react-icons/gi";
 import { useDispatch, useSelector } from "react-redux";
-import HashLoader from "react-spinners/HashLoader";
+import HashLoader from "react-spinners/esm/HashLoader.js";
 import { setComboQuantity } from "../../../reducers/cartSlice";
 
 const formatVND = (value) => `${Number(value || 0).toLocaleString("vi-VN")}₫`;
@@ -19,28 +19,29 @@ export const ComboSelector = ({
   const { movie_id: movieId, combo_items: selectedCombos } = useSelector(
     (store) => store.cart
   );
+  const { id: theatreId } = useSelector((store) => store.currentLocation);
 
   useEffect(() => {
-    if (!movieId) return;
+    if (!movieId || !theatreId) return;
 
     const fetchCombos = async () => {
       try {
         setComboLoading(true);
         const response = await axios.post(
           `${import.meta.env.VITE_API_URL}/movieCombos`,
-          { movieId }
+          { movieId, theatreId }
         );
         setComboData(response.data);
       } catch (err) {
         console.error(err);
-        setComboData({ movieId, hasPromotion: false, combos: [] });
+        setComboData({ movieId, theatreId, hasPromotion: false, combos: [] });
       } finally {
         setComboLoading(false);
       }
     };
 
     fetchCombos();
-  }, [movieId, setComboData, setComboLoading]);
+  }, [movieId, theatreId, setComboData, setComboLoading]);
 
   const quantityOf = (comboId) =>
     selectedCombos.find((item) => item.comboId === comboId)?.quantity || 0;

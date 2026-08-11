@@ -1,5 +1,5 @@
 // Quản lý cấu trúc chi nhánh, phòng, sơ đồ ghế và danh mục combo.
-const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
+const createCinemaManagementService = ({ queryDbAsync, withTransaction, deleteFromR2 }) => {
   const requiredText = (value, label, maxLength = 255) => {
     const text = String(value || "").trim();
     if (!text || text.length > maxLength) {
@@ -17,11 +17,13 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
     );
     const halls = await queryDbAsync(
       `SELECT H.id, H.name, H.total_seats, H.theatre_id, H.status,
+        H.screen_type, H.projection_capability,
         COUNT(CASE WHEN HS.is_active = 1 THEN 1 END) AS configured_seats,
         COUNT(CASE WHEN HS.is_active = 1 AND HS.seat_type = 'VIP' THEN 1 END) AS vip_seats
        FROM hall H
        LEFT JOIN hallwise_seat HS ON HS.hall_id = H.id
-       GROUP BY H.id, H.name, H.total_seats, H.theatre_id, H.status
+       GROUP BY H.id, H.name, H.total_seats, H.theatre_id, H.status,
+         H.screen_type, H.projection_capability
        ORDER BY H.theatre_id, H.name, H.id`
     );
 
@@ -61,6 +63,11 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
       "INSERT INTO theatre(name, location, location_details, status) VALUES(?,?,?,?)",
       [normalizedName, normalizedLocation, normalizedDetails, normalizedStatus]
     );
+    await queryDbAsync(
+      `INSERT IGNORE INTO branch_combo (theatre_id, combo_id)
+       SELECT ?, id FROM concession_combo`,
+      [result.insertId]
+    );
     return result.insertId;
   };
 
@@ -82,9 +89,22 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
     }
   };
 
-  const upsertHall = async ({ hallId, theatreId, name, status }) => {
+  const upsertHall = async ({
+    hallId,
+    theatreId,
+    name,
+    status,
+    screenType,
+    projectionCapability,
+  }) => {
     const normalizedName = requiredText(name, "Tên phòng", 100);
     const normalizedStatus = status === "inactive" ? "inactive" : "active";
+    const normalizedScreenType = ["Tiêu chuẩn", "Cao cấp"].includes(screenType)
+      ? screenType
+      : "Tiêu chuẩn";
+    const normalizedProjection = ["2D", "3D", "BOTH"].includes(projectionCapability)
+      ? projectionCapability
+      : "BOTH";
     const normalizedTheatreId = Number(theatreId);
     const theatreRows = await queryDbAsync("SELECT id FROM theatre WHERE id = ?", [
       normalizedTheatreId,
@@ -118,16 +138,58 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
         err.statusCode = 409;
         throw err;
       }
+      const incompatibleFuture = await queryDbAsync(
+        `SELECT COUNT(*) AS value FROM shown_in SI
+         JOIN showtimes S ON S.id = SI.showtime_id
+         WHERE SI.hall_id = ? AND SI.status = 'active' AND S.status = 'active'
+           AND S.showtime_date >= CURDATE()
+           AND (S.screen_type <> ? OR (? <> 'BOTH' AND S.show_type <> ?))`,
+        [Number(hallId), normalizedScreenType, normalizedProjection, normalizedProjection]
+      );
+      if (Number(incompatibleFuture[0].value) > 0) {
+        const err = new Error("Loại phòng mới không phù hợp với các suất chiếu tương lai");
+        err.statusCode = 409;
+        throw err;
+      }
+      if (normalizedStatus === "inactive") {
+        const futureTickets = await queryDbAsync(
+          `SELECT COUNT(*) AS value FROM ticket T JOIN showtimes S ON S.id = T.showtimes_id
+           WHERE T.hall_id = ? AND S.showtime_date >= CURDATE()`,
+          [Number(hallId)]
+        );
+        if (Number(futureTickets[0].value) > 0) {
+          const err = new Error("Không thể ngừng phòng đang có vé cho suất tương lai");
+          err.statusCode = 409;
+          throw err;
+        }
+      }
       await queryDbAsync(
-        "UPDATE hall SET name = ?, theatre_id = ?, status = ? WHERE id = ?",
-        [normalizedName, normalizedTheatreId, normalizedStatus, Number(hallId)]
+        `UPDATE hall
+         SET name = ?, theatre_id = ?, status = ?, screen_type = ?, projection_capability = ?
+         WHERE id = ?`,
+        [
+          normalizedName,
+          normalizedTheatreId,
+          normalizedStatus,
+          normalizedScreenType,
+          normalizedProjection,
+          Number(hallId),
+        ]
       );
       return Number(hallId);
     }
 
     const result = await queryDbAsync(
-      "INSERT INTO hall(name, total_seats, theatre_id, status) VALUES(?,0,?,?)",
-      [normalizedName, normalizedTheatreId, normalizedStatus]
+      `INSERT INTO hall
+        (name, total_seats, theatre_id, status, screen_type, projection_capability)
+       VALUES(?,0,?,?,?,?)`,
+      [
+        normalizedName,
+        normalizedTheatreId,
+        normalizedStatus,
+        normalizedScreenType,
+        normalizedProjection,
+      ]
     );
     return result.insertId;
   };
@@ -165,7 +227,8 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
 
   const getHallLayout = async (hallId) => {
     const hallRows = await queryDbAsync(
-      `SELECT H.id, H.name, H.total_seats, H.theatre_id, T.name AS theatre_name
+      `SELECT H.id, H.name, H.total_seats, H.theatre_id, H.screen_type,
+        H.projection_capability, T.name AS theatre_name
        FROM hall H JOIN theatre T ON T.id = H.theatre_id WHERE H.id = ?`,
       [Number(hallId)]
     );
@@ -230,6 +293,17 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
       if (hallRows.length === 0) {
         const err = new Error("Không tìm thấy phòng chiếu");
         err.statusCode = 404;
+        throw err;
+      }
+      const futureTickets = await transaction.query(
+        `SELECT COUNT(*) AS value FROM ticket T
+         JOIN showtimes S ON S.id = T.showtimes_id
+         WHERE T.hall_id = ? AND S.showtime_date >= CURDATE()`,
+        [normalizedHallId]
+      );
+      if (Number(futureTickets[0].value) > 0) {
+        const err = new Error("Không thể sửa sơ đồ ghế khi phòng đã bán vé cho suất tương lai");
+        err.statusCode = 409;
         throw err;
       }
       const currentMappings = await transaction.query(
@@ -309,7 +383,16 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
        ORDER BY M.name, C.name`
     );
     const movies = await queryDbAsync("SELECT id, name FROM movie ORDER BY name");
-    return { combos, promotions, movies };
+    const theatres = await queryDbAsync("SELECT id, name FROM theatre ORDER BY name");
+    const branchCombos = await queryDbAsync(
+      `SELECT BC.theatre_id, T.name AS theatre_name, BC.combo_id, C.name AS combo_name,
+        BC.price_override, BC.is_available
+       FROM branch_combo BC
+       JOIN theatre T ON T.id = BC.theatre_id
+       JOIN concession_combo C ON C.id = BC.combo_id
+       ORDER BY T.name, C.name`
+    );
+    return { combos, promotions, movies, theatres, branchCombos };
   };
 
   const upsertCombo = async ({
@@ -330,6 +413,11 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
       err.statusCode = 400;
       throw err;
     }
+    if (normalizedImageUrl && !normalizedImageUrl.startsWith("/media/combos/")) {
+      const err = new Error("Ảnh combo phải được tải lên Cloudflare R2");
+      err.statusCode = 400;
+      throw err;
+    }
     const normalizedPrice = Number(basePrice);
     if (!Number.isInteger(normalizedPrice) || normalizedPrice < 0 || normalizedPrice > 10000000) {
       const err = new Error("Giá combo không hợp lệ");
@@ -337,6 +425,7 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
       throw err;
     }
     if (comboId) {
+      const previousRows = await queryDbAsync("SELECT image_url FROM concession_combo WHERE id = ?", [Number(comboId)]);
       const result = await queryDbAsync(
         `UPDATE concession_combo
          SET name = ?, description = ?, category = ?, image_url = ?, base_price = ?, is_active = ?
@@ -356,6 +445,15 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
         err.statusCode = 404;
         throw err;
       }
+      await queryDbAsync(
+        `INSERT IGNORE INTO branch_combo (theatre_id, combo_id)
+         SELECT id, ? FROM theatre`,
+        [Number(comboId)]
+      );
+      const previousImage = previousRows[0]?.image_url;
+      if (previousImage && previousImage !== normalizedImageUrl && previousImage.startsWith("/media/")) {
+        await deleteFromR2?.(previousImage).catch((err) => console.error("Delete old combo image error:", err.message));
+      }
       return Number(comboId);
     }
     const result = await queryDbAsync(
@@ -370,6 +468,11 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
         normalizedPrice,
         isActive === false ? 0 : 1,
       ]
+    );
+    await queryDbAsync(
+      `INSERT IGNORE INTO branch_combo (theatre_id, combo_id)
+       SELECT id, ? FROM theatre`,
+      [result.insertId]
     );
     return result.insertId;
   };
@@ -447,6 +550,22 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
     }
   };
 
+  const upsertBranchCombo = async ({ theatreId, comboId, priceOverride, isAvailable }) => {
+    const normalizedTheatreId = Number(theatreId);
+    const normalizedComboId = Number(comboId);
+    const normalizedPrice = priceOverride === "" || priceOverride == null ? null : Number(priceOverride);
+    if (!Number.isInteger(normalizedTheatreId) || !Number.isInteger(normalizedComboId) ||
+        (normalizedPrice !== null && (!Number.isInteger(normalizedPrice) || normalizedPrice < 0))) {
+      throw Object.assign(new Error("Cấu hình combo theo chi nhánh không hợp lệ"), { statusCode: 400 });
+    }
+    await queryDbAsync(
+      `INSERT INTO branch_combo (theatre_id, combo_id, price_override, is_available)
+       VALUES (?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE price_override = VALUES(price_override), is_available = VALUES(is_available)`,
+      [normalizedTheatreId, normalizedComboId, normalizedPrice, isAvailable === false ? 0 : 1]
+    );
+  };
+
   return {
     getCinemaStructure,
     upsertTheatre,
@@ -459,6 +578,7 @@ const createCinemaManagementService = ({ queryDbAsync, withTransaction }) => {
     upsertCombo,
     upsertComboPromotion,
     deleteComboPromotion,
+    upsertBranchCombo,
   };
 };
 

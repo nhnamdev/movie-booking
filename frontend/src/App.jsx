@@ -1,7 +1,8 @@
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSelector } from "react-redux";
-import { lazy, Suspense } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { lazy, Suspense, useEffect } from "react";
+import axios from "axios";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
@@ -19,6 +20,8 @@ import { PageLoader } from "./components/PageLoader";
 import { ScrollToTop } from "./components/ScrollToTop";
 
 import HomePage from "./pages/Home/HomePage";
+import { API_URL } from "./utils/apiUrl";
+import { finishAuthCheck, login } from "./reducers/authSlice";
 
 const PurchasePage = lazy(() => import("./pages/Purchase/PurchasePage"));
 const ShowtimesPage = lazy(() => import("./pages/Showtimes/ShowtimesPage"));
@@ -38,11 +41,29 @@ const blurredStyle = {
   userSelect: "none",
 };
 
+let sessionRequest;
+const fetchCurrentSession = () => {
+  if (!sessionRequest) sessionRequest = axios.get(`${API_URL}/auth/me`);
+  return sessionRequest;
+};
+
 function App() {
-  const { isAuthenticated, signedPerson, signModalState, loginModalState } =
+  const { isAuthenticated, authChecked, signedPerson, signModalState, loginModalState } =
     useSelector((store) => store.authentication);
+  const dispatch = useDispatch();
   const { menuState } = useSelector((store) => store.mobileNav);
   const currentPage = useLocation();
+
+  useEffect(() => {
+    fetchCurrentSession()
+      .then((response) => {
+        if (response.data.user) dispatch(login(response.data.user));
+        else dispatch(finishAuthCheck());
+      })
+      .catch(() => dispatch(finishAuthCheck()));
+  }, [dispatch]);
+
+  if (!authChecked) return <PageLoader />;
 
   return (
     <>
@@ -101,7 +122,7 @@ function App() {
       {signModalState && <SignupModal />}
       {loginModalState && <LoginModal />}
       <MobileNav />
-      <SpeedInsights />
+      {import.meta.env.PROD && <SpeedInsights />}
     </>
   );
 }

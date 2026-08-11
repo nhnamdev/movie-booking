@@ -1,12 +1,19 @@
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FiEdit3, FiGrid, FiPlus, FiSave, FiTrash2 } from "react-icons/fi";
+import { FiEdit3, FiGrid, FiPlus, FiSave, FiTrash2, FiX } from "react-icons/fi";
 import { useSelector } from "react-redux";
-import { ClipLoader } from "react-spinners";
+import ClipLoader from "react-spinners/esm/ClipLoader.js";
 import { adminErrorToast, adminShowninToast } from "../../../toasts/toast";
 
 const emptyTheatre = { theatreId: "", name: "", location: "", locationDetails: "", status: "active" };
-const emptyHall = { hallId: "", theatreId: "", name: "", status: "active" };
+const emptyHall = {
+  hallId: "",
+  theatreId: "",
+  name: "",
+  screenType: "Tiêu chuẩn",
+  projectionCapability: "BOTH",
+  status: "active",
+};
 const cellKey = (rowIndex, columnIndex) => `${rowIndex}-${columnIndex}`;
 
 export const AdminCinemaSection = () => {
@@ -21,10 +28,11 @@ export const AdminCinemaSection = () => {
   const [vipSurcharge, setVipSurcharge] = useState(30000);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [activeForm, setActiveForm] = useState(null);
 
   const credentials = useMemo(
-    () => ({ email: signedPerson?.email, password: signedPerson?.password }),
-    [signedPerson?.email, signedPerson?.password]
+    () => ({ email: signedPerson?.email }),
+    [signedPerson?.email]
   );
 
   const apiPost = useCallback(
@@ -49,12 +57,44 @@ export const AdminCinemaSection = () => {
     loadStructure();
   }, [loadStructure]);
 
+  useEffect(() => {
+    if (!activeForm) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape" && !saving) setActiveForm(null);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [activeForm, saving]);
+
+  const openTheatreForm = (theatre = emptyTheatre) => {
+    setTheatreForm(theatre);
+    setActiveForm("theatre");
+  };
+
+  const openHallForm = (hall = emptyHall) => {
+    setHallForm(hall);
+    setActiveForm("hall");
+  };
+
+  const closeManagementForm = () => {
+    if (saving) return;
+    setActiveForm(null);
+    setTheatreForm(emptyTheatre);
+    setHallForm(emptyHall);
+  };
+
   const saveTheatre = async (event) => {
     event.preventDefault();
     try {
       setSaving(true);
       await apiPost("adminTheatreUpsert", theatreForm);
       setTheatreForm(emptyTheatre);
+      setActiveForm(null);
       await loadStructure();
       adminShowninToast("Đã lưu chi nhánh");
     } catch (err) {
@@ -70,6 +110,7 @@ export const AdminCinemaSection = () => {
       setSaving(true);
       await apiPost("adminHallUpsert", hallForm);
       setHallForm(emptyHall);
+      setActiveForm(null);
       await loadStructure();
       adminShowninToast("Đã lưu phòng chiếu");
     } catch (err) {
@@ -185,32 +226,9 @@ export const AdminCinemaSection = () => {
         <h2 className="form-admin-heading">Chi nhánh, phòng và sơ đồ ghế</h2>
       </div>
 
-      <div className="admin-management-forms">
-        <form className="admin-management-form" onSubmit={saveTheatre}>
-          <h3>{theatreForm.theatreId ? "Sửa chi nhánh" : "Thêm chi nhánh"}</h3>
-          <input required placeholder="Tên chi nhánh" value={theatreForm.name} onChange={(e) => setTheatreForm({ ...theatreForm, name: e.target.value })} />
-          <input required placeholder="Khu vực" value={theatreForm.location} onChange={(e) => setTheatreForm({ ...theatreForm, location: e.target.value })} />
-          <textarea required placeholder="Địa chỉ chi tiết" value={theatreForm.locationDetails} onChange={(e) => setTheatreForm({ ...theatreForm, locationDetails: e.target.value })} />
-          <select value={theatreForm.status} onChange={(e) => setTheatreForm({ ...theatreForm, status: e.target.value })}>
-            <option value="active">Đang hoạt động</option>
-            <option value="inactive">Ngừng hoạt động</option>
-          </select>
-          <button className="btn-admin" disabled={saving}><FiSave /> Lưu chi nhánh</button>
-        </form>
-
-        <form className="admin-management-form" onSubmit={saveHall}>
-          <h3>{hallForm.hallId ? "Sửa phòng" : "Thêm phòng"}</h3>
-          <select required value={hallForm.theatreId} onChange={(e) => setHallForm({ ...hallForm, theatreId: e.target.value })}>
-            <option value="">Chọn chi nhánh</option>
-            {structure.map((theatre) => <option key={theatre.id} value={theatre.id}>{theatre.name}</option>)}
-          </select>
-          <input required placeholder="Tên phòng" value={hallForm.name} onChange={(e) => setHallForm({ ...hallForm, name: e.target.value })} />
-          <select value={hallForm.status} onChange={(e) => setHallForm({ ...hallForm, status: e.target.value })}>
-            <option value="active">Đang hoạt động</option>
-            <option value="inactive">Ngừng hoạt động</option>
-          </select>
-          <button className="btn-admin" disabled={saving}><FiPlus /> Lưu phòng</button>
-        </form>
+      <div className="admin-management-create-actions">
+        <button type="button" className="btn-admin" onClick={() => openTheatreForm()}><FiPlus /> Thêm chi nhánh</button>
+        <button type="button" className="btn-admin is-secondary" onClick={() => openHallForm()}><FiPlus /> Thêm phòng</button>
       </div>
 
       {loading ? <div className="admin-chart-loading"><ClipLoader color="#eb3656" /></div> : (
@@ -220,17 +238,29 @@ export const AdminCinemaSection = () => {
               <div className="admin-cinema-card-header">
                 <div><h3>{theatre.name}</h3><p>{theatre.location_details}</p></div>
                 <div className="admin-inline-actions">
-                  <button onClick={() => setTheatreForm({ theatreId: theatre.id, name: theatre.name, location: theatre.location, locationDetails: theatre.location_details, status: theatre.status })}><FiEdit3 /></button>
+                  <button onClick={() => openTheatreForm({ theatreId: theatre.id, name: theatre.name, location: theatre.location, locationDetails: theatre.location_details, status: theatre.status })}><FiEdit3 /></button>
                   <button onClick={() => removeTheatre(theatre.id)}><FiTrash2 /></button>
                 </div>
               </div>
               <div className="admin-hall-list">
                 {theatre.halls.map((hall) => (
                   <div className="admin-hall-row" key={hall.id}>
-                    <div><strong>{hall.name}</strong><small>{hall.total_seats} ghế · {hall.vip_seats} VIP · {hall.status === "active" ? "Hoạt động" : "Đã tắt"}</small></div>
+                    <div>
+                      <strong>{hall.name}</strong>
+                      <small>
+                        {hall.screen_type} · {hall.projection_capability === "BOTH" ? "2D & 3D" : hall.projection_capability} · {hall.total_seats} ghế · {hall.vip_seats} VIP · {hall.status === "active" ? "Hoạt động" : "Đã tắt"}
+                      </small>
+                    </div>
                     <div className="admin-inline-actions">
                       <button onClick={() => editLayout(hall)} title="Sơ đồ ghế"><FiGrid /></button>
-                      <button onClick={() => setHallForm({ hallId: hall.id, theatreId: hall.theatre_id, name: hall.name, status: hall.status })}><FiEdit3 /></button>
+                      <button onClick={() => openHallForm({
+                        hallId: hall.id,
+                        theatreId: hall.theatre_id,
+                        name: hall.name,
+                        screenType: hall.screen_type || "Tiêu chuẩn",
+                        projectionCapability: hall.projection_capability || "BOTH",
+                        status: hall.status,
+                      })}><FiEdit3 /></button>
                       <button onClick={() => removeHall(hall.id)}><FiTrash2 /></button>
                     </div>
                   </div>
@@ -275,6 +305,66 @@ export const AdminCinemaSection = () => {
               })}
             </div>
           </div>
+        </div>
+      ) : null}
+
+      {activeForm ? (
+        <div
+          className="admin-management-modal-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeManagementForm();
+          }}
+        >
+          {activeForm === "theatre" ? (
+            <form
+              className="admin-management-form admin-management-modal-card"
+              onSubmit={saveTheatre}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="admin-theatre-form-title"
+            >
+              <div className="admin-management-modal-header">
+                <div>
+                  <p className="admin-section-kicker">Chi nhánh</p>
+                  <h3 id="admin-theatre-form-title">{theatreForm.theatreId ? "Sửa chi nhánh" : "Thêm chi nhánh"}</h3>
+                </div>
+                <button type="button" className="admin-modal-close" onClick={closeManagementForm} aria-label="Đóng cửa sổ"><FiX /></button>
+              </div>
+              <label className="admin-management-field">Tên chi nhánh<input autoFocus required placeholder="Ví dụ: CGV Aeon Mall Tân Phú" value={theatreForm.name} onChange={(e) => setTheatreForm({ ...theatreForm, name: e.target.value })} /></label>
+              <label className="admin-management-field">Khu vực<input required placeholder="Ví dụ: TP. Hồ Chí Minh" value={theatreForm.location} onChange={(e) => setTheatreForm({ ...theatreForm, location: e.target.value })} /></label>
+              <label className="admin-management-field">Địa chỉ chi tiết<textarea required placeholder="Nhập số nhà, tên đường, phường và quận" value={theatreForm.locationDetails} onChange={(e) => setTheatreForm({ ...theatreForm, locationDetails: e.target.value })} /></label>
+              <label className="admin-management-field">Trạng thái<select value={theatreForm.status} onChange={(e) => setTheatreForm({ ...theatreForm, status: e.target.value })}><option value="active">Đang hoạt động</option><option value="inactive">Ngừng hoạt động</option></select></label>
+              <div className="admin-management-modal-actions">
+                <button type="button" className="btn-admin is-secondary" onClick={closeManagementForm} disabled={saving}>Hủy</button>
+                <button className="btn-admin" disabled={saving}><FiSave /> {saving ? "Đang lưu..." : "Lưu chi nhánh"}</button>
+              </div>
+            </form>
+          ) : (
+            <form
+              className="admin-management-form admin-management-modal-card"
+              onSubmit={saveHall}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="admin-hall-form-title"
+            >
+              <div className="admin-management-modal-header">
+                <div>
+                  <p className="admin-section-kicker">Phòng chiếu</p>
+                  <h3 id="admin-hall-form-title">{hallForm.hallId ? "Sửa phòng" : "Thêm phòng"}</h3>
+                </div>
+                <button type="button" className="admin-modal-close" onClick={closeManagementForm} aria-label="Đóng cửa sổ"><FiX /></button>
+              </div>
+              <label className="admin-management-field">Chi nhánh<select autoFocus required value={hallForm.theatreId} onChange={(e) => setHallForm({ ...hallForm, theatreId: e.target.value })}><option value="">Chọn chi nhánh</option>{structure.map((theatre) => <option key={theatre.id} value={theatre.id}>{theatre.name}</option>)}</select></label>
+              <label className="admin-management-field">Tên phòng<input required placeholder="Ví dụ: Cinema 01" value={hallForm.name} onChange={(e) => setHallForm({ ...hallForm, name: e.target.value })} /></label>
+              <label className="admin-management-field">Hạng phòng<select value={hallForm.screenType} onChange={(e) => setHallForm({ ...hallForm, screenType: e.target.value })}><option value="Tiêu chuẩn">Tiêu chuẩn</option><option value="Cao cấp">Cao cấp</option></select></label>
+              <label className="admin-management-field">Khả năng trình chiếu<select value={hallForm.projectionCapability} onChange={(e) => setHallForm({ ...hallForm, projectionCapability: e.target.value })}><option value="2D">Chỉ 2D</option><option value="3D">Chỉ 3D</option><option value="BOTH">Hỗ trợ 2D và 3D</option></select></label>
+              <label className="admin-management-field">Trạng thái<select value={hallForm.status} onChange={(e) => setHallForm({ ...hallForm, status: e.target.value })}><option value="active">Đang hoạt động</option><option value="inactive">Ngừng hoạt động</option></select></label>
+              <div className="admin-management-modal-actions">
+                <button type="button" className="btn-admin is-secondary" onClick={closeManagementForm} disabled={saving}>Hủy</button>
+                <button className="btn-admin" disabled={saving}><FiSave /> {saving ? "Đang lưu..." : "Lưu phòng"}</button>
+              </div>
+            </form>
+          )}
         </div>
       ) : null}
     </section>

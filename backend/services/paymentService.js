@@ -1,4 +1,5 @@
 const { PayOS } = require("@payos/node");
+const { randomInt } = require("crypto");
 
 const ONLINE_PAYMENT_WINDOW_MINUTES = 10;
 const COUNTER_HOLD_WINDOW_MINUTES = 30;
@@ -32,11 +33,14 @@ const createPaymentService = ({
 
   // Tạo ngày hiện tại theo định dạng dùng trong cơ sở dữ liệu.
   const getTodayDateKey = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: process.env.APP_TIMEZONE || "Asia/Ho_Chi_Minh",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(new Date());
+    const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+    return `${values.year}-${values.month}-${values.day}`;
   };
 
   // Đọc JSON của đơn PayOS an toàn, trả null nếu sai định dạng.
@@ -50,7 +54,7 @@ const createPaymentService = ({
 
   // Sinh mã đơn số nguyên dựa trên thời gian hiện tại.
   const generatePayOSOrderCode = () =>
-    Math.floor(Date.now() / 1000) * 1000 + Math.floor(Math.random() * 1000);
+    Date.now() * 100 + randomInt(0, 100);
 
   // Chuẩn hoá và loại bỏ mã ghế trùng hoặc không hợp lệ.
   const normalizeSeatIds = (seatIds) =>
@@ -105,6 +109,11 @@ const createPaymentService = ({
          AND expires_at IS NOT NULL
          AND expires_at <= NOW()`
     );
+    await queryDbAsync(
+      `DELETE SH FROM seat_hold SH
+       JOIN payos_orders PO ON PO.order_code = SH.order_code
+       WHERE SH.expires_at <= NOW() OR PO.status IN ('FAILED', 'EXPIRED', 'PAID_REVIEW')`
+    );
     await releaseExpiredRewardHolds?.();
     return result;
   };
@@ -126,29 +135,64 @@ const createPaymentService = ({
   const getHeldOrderSeatIds = async ({ hallId, movieId, showtimeId }) => {
     await expireStaleOrders();
     const rows = await queryDbAsync(
-      `SELECT order_code, status, payment_method, payload_json, expires_at
-       FROM payos_orders
-       WHERE status IN ('UNPAID', 'PENDING')
-         AND expires_at > NOW()`
+      `SELECT SH.seat_id
+       FROM seat_hold SH
+       JOIN payos_orders PO ON PO.order_code = SH.order_code
+       WHERE SH.hall_id = ? AND SH.showtime_id = ?
+         AND SH.expires_at > NOW() AND PO.status IN ('UNPAID', 'PENDING')`,
+      [Number(hallId), Number(showtimeId)]
     );
-    const heldSeatIds = new Set();
-  
-    rows.forEach((row) => {
-      const payload = parsePayOSOrderPayload(row.payload_json);
-      if (
-        !payload ||
-        Number(payload.userHallId) !== Number(hallId) ||
-        Number(payload.userMovieId) !== Number(movieId) ||
-        Number(payload.userShowtimeId) !== Number(showtimeId)
-      ) {
-        return;
-      }
-  
-      normalizeSeatIds(payload.seatIds).forEach((seatId) => heldSeatIds.add(seatId));
-    });
-  
-    return heldSeatIds;
+    return new Set(rows.map((row) => Number(row.seat_id)));
   };
+
+  const reserveSeatHolds = async ({ orderCode, email, payload, holdMinutes }) => {
+    const seatIds = normalizeSeatIds(payload?.seatIds);
+    if (!orderCode || !email || seatIds.length === 0) {
+      throw Object.assign(new Error("Dữ liệu giữ ghế không hợp lệ"), { statusCode: 400 });
+    }
+    const transaction = await withTransaction();
+    try {
+      await transaction.query(
+        `DELETE SH FROM seat_hold SH
+         JOIN payos_orders PO ON PO.order_code = SH.order_code
+         WHERE SH.expires_at <= NOW() OR PO.status IN ('FAILED', 'EXPIRED', 'PAID_REVIEW')`
+      );
+      for (const seatId of seatIds) {
+        const inserted = await transaction.query(
+          `INSERT INTO seat_hold
+            (order_code, showtime_id, hall_id, seat_id, customer_email, expires_at)
+           SELECT ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE)
+           FROM hallwise_seat HS
+           WHERE HS.hall_id = ? AND HS.seat_id = ? AND HS.is_active = 1
+             AND NOT EXISTS (
+               SELECT 1 FROM ticket T
+               WHERE T.showtimes_id = ? AND T.hall_id = ? AND T.seat_id = ?
+             )`,
+          [
+            Number(orderCode), Number(payload.userShowtimeId), Number(payload.userHallId),
+            seatId, email, Number(holdMinutes), Number(payload.userHallId), seatId,
+            Number(payload.userShowtimeId), Number(payload.userHallId), seatId,
+          ]
+        );
+        if (inserted.affectedRows !== 1) {
+          throw Object.assign(new Error("Một hoặc nhiều ghế đã được đặt"), { statusCode: 409 });
+        }
+      }
+      await transaction.commit();
+      return seatIds;
+    } catch (err) {
+      await transaction.rollback();
+      if (err.code === "ER_DUP_ENTRY") {
+        throw Object.assign(new Error("Một hoặc nhiều ghế đang được khách khác giữ"), { statusCode: 409 });
+      }
+      throw err;
+    } finally {
+      transaction.release();
+    }
+  };
+
+  const releaseSeatHolds = (orderCode, query = queryDbAsync) =>
+    query("DELETE FROM seat_hold WHERE order_code = ?", [Number(orderCode)]);
 
   // Kiểm tra suất, ghế và tính tổng tiền trước khi tạo đơn.
   const buildPaymentOrderPayload = async ({
@@ -225,7 +269,7 @@ const createPaymentService = ({
       };
     });
     const ticketSubtotal = seatPrices.reduce((sum, seat) => sum + seat.finalPrice, 0);
-    const comboPricing = await priceComboSelection(movieId, comboItems);
+    const comboPricing = await priceComboSelection(movieId, comboItems, show.theatre_id);
     const amount = ticketSubtotal + comboPricing.total;
   
     return {
@@ -249,7 +293,12 @@ const createPaymentService = ({
         amount,
         paymentMethod,
         movieName: show.movie_name,
+        movieImage: show.movie_image,
         hallName: show.hall_name,
+        theatreName: show.theatre_name,
+        theatreId: Number(show.theatre_id),
+        theatreAddress: show.theatre_address,
+        showType: show.show_type,
         showtimeDate: show.showtime_date,
         movieStartTime: show.movie_start_time,
       },
@@ -429,6 +478,18 @@ const createPaymentService = ({
         if (ticketResult.affectedRows === 0) {
           throw new Error("Suất chiếu đã ngưng bán hoặc ghế đã được đặt");
         }
+        await transactionQuery(
+          `UPDATE ticket T
+           JOIN hall H ON H.id = T.hall_id
+           JOIN theatre TH ON TH.id = H.theatre_id
+           LEFT JOIN hallwise_seat HS ON HS.hall_id = T.hall_id AND HS.seat_id = T.seat_id
+           LEFT JOIN seat S ON S.id = T.seat_id
+           SET T.seat_label_snapshot = COALESCE(HS.seat_label, S.name),
+               T.hall_name_snapshot = H.name,
+               T.theatre_name_snapshot = TH.name
+           WHERE T.id = ?`,
+          [ticketResult.insertId]
+        );
   
         ticketIds.push(ticketResult.insertId);
       }
@@ -445,6 +506,7 @@ const createPaymentService = ({
          WHERE order_code = ?`,
         [orderStatus, paymentId, JSON.stringify(ticketIds), orderCode]
       );
+      await transactionQuery("DELETE FROM seat_hold WHERE order_code = ?", [Number(orderCode)]);
   
       await transaction.commit();
       transaction.release();
@@ -478,6 +540,8 @@ const createPaymentService = ({
     generatePayOSOrderCode,
     normalizeSeatIds,
     getHeldOrderSeatIds,
+    reserveSeatHolds,
+    releaseSeatHolds,
     buildPaymentOrderPayload,
     finalizePaymentOrderTickets,
     orderHasExpired,

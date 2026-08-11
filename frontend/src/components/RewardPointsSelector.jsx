@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { FiGift } from "react-icons/fi";
 import { useSelector } from "react-redux";
-import { ClipLoader } from "react-spinners";
+import ClipLoader from "react-spinners/esm/ClipLoader.js";
 import { API_URL } from "../utils/apiUrl";
 
 const formatVND = (value) => `${Number(value || 0).toLocaleString("vi-VN")}₫`;
@@ -22,7 +22,6 @@ export const RewardPointsSelector = ({ grossAmount, value, onChange, onDiscountC
       try {
         const response = await axios.post(`${API_URL}/customerRewards`, {
           email: signedPerson.email,
-          password: signedPerson.password,
         });
         if (active) setRewardData(response.data);
       } catch (err) {
@@ -33,7 +32,7 @@ export const RewardPointsSelector = ({ grossAmount, value, onChange, onDiscountC
     };
     loadRewards();
     return () => { active = false; };
-  }, [signedPerson.email, signedPerson.password, signedPerson.person_type]);
+  }, [signedPerson.email, signedPerson.person_type]);
 
   const redeemValue = Number(rewardData?.config?.redeemValuePerPoint || 1000);
   const maxPercent = Number(rewardData?.config?.maximumRedemptionPercent || 50);

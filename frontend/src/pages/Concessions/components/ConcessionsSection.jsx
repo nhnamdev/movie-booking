@@ -4,7 +4,7 @@ import { FiCheckCircle, FiMapPin, FiMinus, FiPlus, FiShoppingBag } from "react-i
 import { GiPopcorn } from "react-icons/gi";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ClipLoader } from "react-spinners";
+import ClipLoader from "react-spinners/esm/ClipLoader.js";
 import { showLoginModal } from "../../../reducers/authSlice";
 import {
   concessionOrderCreated,
@@ -100,7 +100,6 @@ export const ConcessionsSection = () => {
         theatreId: Number(theatreId),
         items: selectedItems.map((item) => ({ comboId: item.id, quantity: item.quantity })),
         rewardPoints,
-        customerPassword: signedPerson.password,
       };
       if (paymentMethod === "Thanh toán tại rạp") {
         const response = await axios.post(

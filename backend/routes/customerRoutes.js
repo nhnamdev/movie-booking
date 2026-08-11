@@ -1,11 +1,10 @@
 const express = require("express");
 
-const createCustomerRoutes = (controller) => {
+const createCustomerRoutes = (controller, { allowRoles }) => {
   const router = express.Router();
 
-  router.post("/customerProfile", controller.customerProfile);
-  router.post("/customerPurchases", controller.customerPurchases);
-  router.post("/cancelOneTicket", controller.cancelOneTicket);
+  router.post("/customerProfile", ...allowRoles("Customer"), controller.customerProfile);
+  router.post("/customerPurchases", ...allowRoles("Customer"), controller.customerPurchases);
 
   return router;
 };

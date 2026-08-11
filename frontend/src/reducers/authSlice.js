@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  isAuthenticated: JSON.parse(localStorage.getItem("authStatus")) || false,
-  signedPerson: JSON.parse(localStorage.getItem("signedInPerson")) || {},
+  isAuthenticated: false,
+  authChecked: false,
+  signedPerson: {},
   signModalState: false,
   loginModalState: false,
 };
@@ -13,45 +14,25 @@ const authSlice = createSlice({
   reducers: {
     login(state, action) {
       state.isAuthenticated = true;
+      state.authChecked = true;
       state.signedPerson = action.payload;
-      // 1.2.3	Frontend tiếp tục lưu dữ liệu user vào localStorage
-      localStorage.setItem("signedInPerson", JSON.stringify(action.payload));
-      localStorage.setItem("authStatus", true);
     },
-
     logout(state) {
       state.isAuthenticated = false;
+      state.authChecked = true;
       state.signedPerson = {};
-
-      localStorage.removeItem("signedInPerson");
-      localStorage.removeItem("authStatus");
     },
-
-    showSignModal(state) {
-      state.signModalState = true;
-    },
-
-    showLoginModal(state) {
-      state.loginModalState = true;
-    },
-
-    hideSignModal(state) {
-      state.signModalState = false;
-    },
-
-    hideLoginModal(state) {
-      state.loginModalState = false;
-    },
+    finishAuthCheck(state) { state.authChecked = true; },
+    showSignModal(state) { state.signModalState = true; },
+    showLoginModal(state) { state.loginModalState = true; },
+    hideSignModal(state) { state.signModalState = false; },
+    hideLoginModal(state) { state.loginModalState = false; },
   },
 });
 
 export const {
-  login,
-  logout,
-  showSignModal,
-  showLoginModal,
-  hideLoginModal,
-  hideSignModal,
+  login, logout, finishAuthCheck, showSignModal, showLoginModal,
+  hideSignModal, hideLoginModal,
 } = authSlice.actions;
 
 export default authSlice.reducer;

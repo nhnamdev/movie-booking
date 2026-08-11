@@ -20,10 +20,14 @@ const createComboService = ({ queryDbAsync }) => {
       C.id,
       C.name,
       C.description,
-      C.base_price,
+      COALESCE(BC.price_override, C.base_price) AS base_price,
       COALESCE(MCP.discount_percent, 0) AS discount_percent,
       MCP.promotion_label
     FROM concession_combo C
+    JOIN branch_combo BC
+      ON BC.combo_id = C.id
+      AND BC.theatre_id = ?
+      AND BC.is_available = 1
     LEFT JOIN movie_combo_promotion MCP
       ON MCP.combo_id = C.id
       AND MCP.movie_id = ?
@@ -50,10 +54,16 @@ const createComboService = ({ queryDbAsync }) => {
     };
   };
 
-  const getMovieCombos = async (movieId) => {
+  const getMovieCombos = async (movieId, theatreId) => {
     const normalizedMovieId = Number(movieId);
+    const normalizedTheatreId = Number(theatreId);
     if (!Number.isInteger(normalizedMovieId) || normalizedMovieId <= 0) {
       const err = new Error("Mã phim không hợp lệ");
+      err.statusCode = 400;
+      throw err;
+    }
+    if (!Number.isInteger(normalizedTheatreId) || normalizedTheatreId <= 0) {
+      const err = new Error("Mã chi nhánh không hợp lệ");
       err.statusCode = 400;
       throw err;
     }
@@ -67,17 +77,21 @@ const createComboService = ({ queryDbAsync }) => {
       throw err;
     }
 
-    const rows = await queryDbAsync(`${comboPricingSql} ORDER BY C.id`, [normalizedMovieId]);
+    const rows = await queryDbAsync(`${comboPricingSql} ORDER BY C.id`, [
+      normalizedTheatreId,
+      normalizedMovieId,
+    ]);
     const combos = rows.map(toPricedCombo);
 
     return {
       movieId: normalizedMovieId,
+      theatreId: normalizedTheatreId,
       hasPromotion: combos.some((combo) => combo.is_promotional),
       combos,
     };
   };
 
-  const priceComboSelection = async (movieId, comboItems) => {
+  const priceComboSelection = async (movieId, comboItems, theatreId) => {
     if (!Array.isArray(comboItems)) {
       const err = new Error("Danh sách combo không hợp lệ");
       err.statusCode = 400;
@@ -110,7 +124,7 @@ const createComboService = ({ queryDbAsync }) => {
       };
     }
 
-    const catalog = await getMovieCombos(movieId);
+    const catalog = await getMovieCombos(movieId, theatreId);
     const comboById = new Map(catalog.combos.map((combo) => [combo.id, combo]));
 
     if (selection.some(({ comboId }) => !comboById.has(comboId))) {

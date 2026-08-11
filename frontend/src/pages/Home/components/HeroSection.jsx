@@ -48,16 +48,16 @@ export const HeroSection = () => {
 
           <div className="hero-proof-grid" aria-label="Điểm nổi bật">
             <div>
-              <strong>100.000+</strong>
-              <span>vé đã bán</span>
+              <strong>Nhiều chi nhánh</strong>
+              <span>chọn rạp phù hợp</span>
             </div>
             <div>
-              <strong>2D, 3D, IMAX</strong>
-              <span>nhiều định dạng chiếu</span>
+              <strong>2D và 3D</strong>
+              <span>phòng tiêu chuẩn, cao cấp</span>
             </div>
             <div>
-              <strong>Combo</strong>
-              <span>bắp nước và ưu đãi</span>
+              <strong>Điểm thưởng</strong>
+              <span>tích điểm theo đơn đã trả</span>
             </div>
           </div>
 

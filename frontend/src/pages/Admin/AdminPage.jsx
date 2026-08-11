@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,9 +9,11 @@ import {
   FaClipboardList,
   FaFilm,
   FaHome,
+  FaChartLine,
   FaSignOutAlt,
   FaUserCircle,
   FaUserTie,
+  FaGift,
 } from "react-icons/fa";
 import { GiPopcorn } from "react-icons/gi";
 import { logout } from "../../reducers/authSlice";
@@ -21,6 +24,9 @@ import { AdminOrdersSection } from "./components/AdminOrdersSection";
 import { AdminCinemaSection } from "./components/AdminCinemaSection";
 import { AdminComboSection } from "./components/AdminComboSection";
 import { AdminStaffSection } from "./components/AdminStaffSection";
+import { AdminMoviePerformanceSection } from "./components/AdminMoviePerformanceSection";
+import { API_URL } from "../../utils/apiUrl";
+import { AdminRewardSection } from "./components/AdminRewardSection";
 
 const adminTabs = [
   { id: "dashboard", label: "Tổng quan", icon: FaChartBar },
@@ -29,12 +35,13 @@ const adminTabs = [
   { id: "combos", label: "Combo bắp nước", icon: GiPopcorn },
   { id: "movies", label: "Quản lý phim", icon: FaFilm },
   { id: "showtimes", label: "Quản lý suất chiếu", icon: FaClock },
+  { id: "performance", label: "Hiệu suất phim", icon: FaChartLine },
+  { id: "rewards", label: "Điểm thưởng", icon: FaGift },
   { id: "staff", label: "Nhân viên", icon: FaUserTie },
 ];
 
 const staffTabs = [
   { id: "orders", label: "Đơn hàng", icon: FaClipboardList },
-  { id: "showtimes", label: "Quản lý suất chiếu", icon: FaClock },
 ];
 
 const AdminPage = () => {
@@ -48,7 +55,8 @@ const AdminPage = () => {
   const activeTabData = tabs.find((tab) => tab.id === activeTab) || tabs[0];
   const ActiveIcon = activeTabData.icon;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await axios.post(`${API_URL}/logout`).catch(() => {});
     dispatch(logout());
     navigate("/");
   };
@@ -128,6 +136,9 @@ const AdminPage = () => {
           {activeTab === "staff" && <AdminStaffSection />}
 
           {activeTab === "showtimes" && <AdminShownInModifySection />}
+
+          {activeTab === "performance" && <AdminMoviePerformanceSection />}
+          {activeTab === "rewards" && <AdminRewardSection />}
         </div>
       </main>
     </div>

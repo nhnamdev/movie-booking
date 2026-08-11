@@ -1,4 +1,6 @@
 // Quản lý tài khoản nhân viên; vai trò Staff không thể tự cấp hoặc đổi quyền.
+const bcrypt = require("bcryptjs");
+
 const createStaffManagementService = ({ queryDbAsync }) => {
   const normalizeText = (value, label, maxLength) => {
     const text = String(value || "").trim();
@@ -53,9 +55,18 @@ const createStaffManagementService = ({ queryDbAsync }) => {
           throw err;
         }
       }
+      const phoneDuplicate = await queryDbAsync(
+        "SELECT email FROM person WHERE phone_number = ? AND email <> ? LIMIT 1",
+        [normalizedPhone, currentEmail]
+      );
+      if (phoneDuplicate.length > 0) {
+        const err = new Error("Số điện thoại đã được sử dụng");
+        err.statusCode = 409;
+        throw err;
+      }
       const normalizedPassword = String(staffPassword || "").trim();
-      if (normalizedPassword && normalizedPassword.length < 6) {
-        const err = new Error("Mật khẩu nhân viên phải có ít nhất 6 ký tự");
+      if (normalizedPassword && (normalizedPassword.length < 8 || !/[A-Za-z]/.test(normalizedPassword) || !/\d/.test(normalizedPassword))) {
+        const err = new Error("Mật khẩu nhân viên phải có ít nhất 8 ký tự, gồm chữ và số");
         err.statusCode = 400;
         throw err;
       }
@@ -69,7 +80,7 @@ const createStaffManagementService = ({ queryDbAsync }) => {
       let passwordSql = "";
       if (normalizedPassword) {
         passwordSql = ", password = ?";
-        params.push(normalizedPassword);
+        params.push(await bcrypt.hash(normalizedPassword, 12));
       }
       params.push(currentEmail);
       await queryDbAsync(
@@ -82,14 +93,17 @@ const createStaffManagementService = ({ queryDbAsync }) => {
     }
 
     const normalizedPassword = normalizeText(staffPassword, "Mật khẩu", 100);
-    if (normalizedPassword.length < 6) {
-      const err = new Error("Mật khẩu nhân viên phải có ít nhất 6 ký tự");
+    if (normalizedPassword.length < 8 || !/[A-Za-z]/.test(normalizedPassword) || !/\d/.test(normalizedPassword)) {
+      const err = new Error("Mật khẩu nhân viên phải có ít nhất 8 ký tự, gồm chữ và số");
       err.statusCode = 400;
       throw err;
     }
-    const duplicate = await queryDbAsync("SELECT email FROM person WHERE email = ? LIMIT 1", [normalizedEmail]);
+    const duplicate = await queryDbAsync(
+      "SELECT email FROM person WHERE email = ? OR phone_number = ? LIMIT 1",
+      [normalizedEmail, normalizedPhone]
+    );
     if (duplicate.length > 0) {
-      const err = new Error("Email đã được sử dụng");
+      const err = new Error("Email hoặc số điện thoại đã được sử dụng");
       err.statusCode = 409;
       throw err;
     }
@@ -97,7 +111,7 @@ const createStaffManagementService = ({ queryDbAsync }) => {
       `INSERT INTO person
         (email, first_name, last_name, password, phone_number, account_balance, person_type, account_status)
        VALUES(?,?,?,?,?,0,'Staff',?)`,
-      [normalizedEmail, normalizedFirstName, normalizedLastName, normalizedPassword, normalizedPhone, normalizedStatus]
+      [normalizedEmail, normalizedFirstName, normalizedLastName, await bcrypt.hash(normalizedPassword, 12), normalizedPhone, normalizedStatus]
     );
     return normalizedEmail;
   };

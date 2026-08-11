@@ -29,15 +29,20 @@ const getShowtimeEndAt = ({ showtimeDate, movieStartTime, duration }) => {
   const durationMinutes = parseDurationMinutes(duration);
   if (!dateKey || !timeKey || durationMinutes <= 0) return null;
 
-  const startsAt = new Date(`${dateKey}T${timeKey}`);
+  const startsAt = new Date(`${dateKey}T${timeKey}${process.env.DB_TIMEZONE || "+07:00"}`);
   if (Number.isNaN(startsAt.getTime())) return null;
   return new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
+};
+
+const TICKET_PRICE_BY_ROOM = {
+  "Tiêu chuẩn": { "2D": 120000, "3D": 150000 },
+  "Cao cấp": { "2D": 150000, "3D": 180000 },
 };
 
 const createShowtimeAvailabilityService = ({ queryDbAsync }) => {
   const getMovieScreeningWindow = async (movieId, query = queryDbAsync) => {
     const rows = await query(
-      `SELECT id, name,
+      `SELECT id, name, duration,
         DATE_FORMAT(release_date, '%Y-%m-%d') AS release_date,
         DATE_FORMAT(end_date, '%Y-%m-%d') AS end_date
        FROM movie
@@ -46,6 +51,163 @@ const createShowtimeAvailabilityService = ({ queryDbAsync }) => {
       [movieId]
     );
     return rows[0] || null;
+  };
+
+  const assertNoShowtimeOverlap = async ({
+    movieId,
+    hallId,
+    showtimeDate,
+    movieStartTime,
+    excludeShowtimeId = null,
+    query = queryDbAsync,
+  }) => {
+    const movie = await getMovieScreeningWindow(movieId, query);
+    const durationMinutes = parseDurationMinutes(movie?.duration);
+    if (!movie || durationMinutes <= 0) {
+      const err = new Error("Thời lượng phim không hợp lệ, chưa thể xếp lịch");
+      err.statusCode = 409;
+      throw err;
+    }
+
+    const halls = await query(
+      `SELECT H.id, H.name, H.cleaning_buffer_minutes, T.opening_time, T.closing_time
+       FROM hall H JOIN theatre T ON T.id = H.theatre_id
+       WHERE H.id = ? LIMIT 1 FOR UPDATE`,
+      [hallId]
+    );
+    if (halls.length === 0) {
+      const err = new Error("Không tìm thấy phòng chiếu");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const hall = halls[0];
+    const startTime = String(movieStartTime).slice(0, 8);
+    const screeningEndMinutes = durationMinutes + Number(hall.cleaning_buffer_minutes || 15);
+    const operatingRows = await query(
+      `SELECT
+        TIME(?) >= TIME(?) AS opens_in_time,
+        TIME(TIMESTAMPADD(MINUTE, ?, TIMESTAMP(?, ?))) <= TIME(?) AS closes_in_time`,
+      [startTime, hall.opening_time, screeningEndMinutes, toDateKey(showtimeDate), startTime, hall.closing_time]
+    );
+    if (!operatingRows[0]?.opens_in_time || !operatingRows[0]?.closes_in_time) {
+      const err = new Error(`${hall.name} chỉ hoạt động trong khung ${String(hall.opening_time).slice(0, 5)} - ${String(hall.closing_time).slice(0, 5)}`);
+      err.statusCode = 409;
+      err.code = "OUTSIDE_THEATRE_HOURS";
+      throw err;
+    }
+
+    const conflicts = await query(
+      `SELECT
+        m.name AS movie_name,
+        h.name AS hall_name,
+        TIME_FORMAT(TIME(s.movie_start_time), '%H:%i') AS starts_at,
+        DATE_FORMAT(
+          TIMESTAMPADD(MINUTE, CAST(m.duration AS UNSIGNED) + ?, TIMESTAMP(s.showtime_date, s.movie_start_time)),
+          '%H:%i'
+        ) AS ends_at
+       FROM shown_in si
+       JOIN showtimes s ON s.id = si.showtime_id
+       JOIN movie m ON m.id = si.movie_id
+       JOIN hall h ON h.id = si.hall_id
+       WHERE si.hall_id = ?
+         AND s.showtime_date = ?
+         AND si.status = 'active'
+         AND s.status = 'active'
+         AND (? IS NULL OR s.id <> ?)
+         AND TIMESTAMP(?, ?) < TIMESTAMPADD(
+           MINUTE,
+           CAST(m.duration AS UNSIGNED) + ?,
+           TIMESTAMP(s.showtime_date, s.movie_start_time)
+         )
+         AND TIMESTAMPADD(MINUTE, ?, TIMESTAMP(?, ?)) > TIMESTAMP(s.showtime_date, s.movie_start_time)
+       ORDER BY s.movie_start_time ASC
+       LIMIT 1`,
+      [
+        Number(hall.cleaning_buffer_minutes || 15),
+        hallId,
+        toDateKey(showtimeDate),
+        excludeShowtimeId,
+        excludeShowtimeId,
+        toDateKey(showtimeDate),
+        startTime,
+        Number(hall.cleaning_buffer_minutes || 15),
+        screeningEndMinutes,
+        toDateKey(showtimeDate),
+        startTime,
+      ]
+    );
+
+    if (conflicts.length > 0) {
+      const conflict = conflicts[0];
+      const err = new Error(
+        `${conflict.hall_name} đã có phim "${conflict.movie_name}" từ ${conflict.starts_at} đến ${conflict.ends_at}`
+      );
+      err.statusCode = 409;
+      err.code = "SHOWTIME_OVERLAP";
+      throw err;
+    }
+  };
+
+  const assertHallSupportsShowtime = async ({
+    hallId,
+    showType,
+    screenType,
+    pricePerSeat,
+    query = queryDbAsync,
+  }) => {
+    const normalizedShowType = String(showType || "").toUpperCase();
+    const halls = await query(
+      `SELECT id, name, status, screen_type, projection_capability
+       FROM hall WHERE id = ? LIMIT 1`,
+      [hallId]
+    );
+    if (halls.length === 0) {
+      const err = new Error("Không tìm thấy phòng chiếu");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const hall = halls[0];
+    if (hall.status !== "active") {
+      const err = new Error(`${hall.name} đang ngừng hoạt động`);
+      err.statusCode = 409;
+      throw err;
+    }
+    if (!["2D", "3D"].includes(normalizedShowType)) {
+      const err = new Error("Định dạng suất chiếu chỉ có thể là 2D hoặc 3D");
+      err.statusCode = 400;
+      throw err;
+    }
+    if (
+      hall.projection_capability !== "BOTH" &&
+      hall.projection_capability !== normalizedShowType
+    ) {
+      const err = new Error(`${hall.name} không hỗ trợ định dạng ${normalizedShowType}`);
+      err.statusCode = 409;
+      err.code = "HALL_FORMAT_UNSUPPORTED";
+      throw err;
+    }
+    if (String(screenType || "") !== hall.screen_type) {
+      const err = new Error(`${hall.name} thuộc hạng ${hall.screen_type}, không phải ${screenType}`);
+      err.statusCode = 409;
+      err.code = "HALL_SCREEN_TYPE_MISMATCH";
+      throw err;
+    }
+
+    const expectedPrice = TICKET_PRICE_BY_ROOM[hall.screen_type]?.[normalizedShowType];
+    if (!expectedPrice || Number(pricePerSeat) !== expectedPrice) {
+      const err = new Error(
+        `Giá vé ${hall.screen_type} ${normalizedShowType} phải là ${Number(
+          expectedPrice || 0
+        ).toLocaleString("vi-VN")} VNĐ`
+      );
+      err.statusCode = 409;
+      err.code = "SHOWTIME_PRICE_MISMATCH";
+      throw err;
+    }
+
+    return { ...hall, show_type: normalizedShowType, price_per_seat: expectedPrice };
   };
 
   const assertMovieShowtimeDate = async ({ movieId, showtimeDate, query = queryDbAsync }) => {
@@ -77,9 +239,14 @@ const createShowtimeAvailabilityService = ({ queryDbAsync }) => {
       `SELECT
         S.price_per_seat,
         S.movie_start_time,
+        S.show_type,
         DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date,
         H.name AS hall_name,
+        TH.id AS theatre_id,
+        TH.name AS theatre_name,
+        TH.location_details AS theatre_address,
         M.name AS movie_name,
+        M.image_path AS movie_image,
         M.duration,
         DATE_FORMAT(M.end_date, '%Y-%m-%d') AS end_date
        FROM shown_in SI
@@ -130,6 +297,8 @@ const createShowtimeAvailabilityService = ({ queryDbAsync }) => {
     getShowtimeEndAt,
     getMovieScreeningWindow,
     assertMovieShowtimeDate,
+    assertNoShowtimeOverlap,
+    assertHallSupportsShowtime,
     assertShowtimeBookable,
   };
 };

@@ -1,8 +1,36 @@
 // Xử lý quản lý đơn hàng, phim, lịch chiếu và thống kê.
+const normalizeTrailerUrl = (value) => {
+  const rawUrl = String(value || "").trim();
+  if (!rawUrl) return null;
+
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(rawUrl);
+  } catch (_error) {
+    throw Object.assign(new Error("Link trailer không hợp lệ"), { statusCode: 400 });
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase().replace(/^www\./, "");
+  let videoId = "";
+  if (hostname === "youtu.be") {
+    videoId = parsedUrl.pathname.split("/").filter(Boolean)[0] || "";
+  } else if (["youtube.com", "m.youtube.com"].includes(hostname)) {
+    const segments = parsedUrl.pathname.split("/").filter(Boolean);
+    if (parsedUrl.pathname === "/watch") videoId = parsedUrl.searchParams.get("v") || "";
+    else if (["embed", "shorts", "live"].includes(segments[0])) videoId = segments[1] || "";
+  }
+
+  if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
+    throw Object.assign(new Error("Trailer phải là link video YouTube hợp lệ"), { statusCode: 400 });
+  }
+  return `https://www.youtube.com/watch?v=${videoId}`;
+};
+
 const createAdminController = (dependencies) => {
   const {
     db,
     queryDbAsync,
+    withTransaction,
     getPayOSClient,
     parsePayOSOrderPayload,
     generatePayOSOrderCode,
@@ -24,8 +52,12 @@ const createAdminController = (dependencies) => {
     roleAuthFailed,
     normalizeAdminList,
     assertMovieShowtimeDate,
+    assertNoShowtimeOverlap,
+    assertHallSupportsShowtime,
+    getMoviePerformance,
     toAdminOrder,
     uploadToR2,
+    deleteFromR2,
     generateFileName,
   } = dependencies;
 
@@ -55,6 +87,11 @@ const createAdminController = (dependencies) => {
         PO.amount,
         PO.customer_email,
         PO.payment_method,
+        PO.fulfillment_status,
+        PO.fulfilled_at,
+        PO.fulfilled_by,
+        PO.ticket_checked_in_at,
+        PO.ticket_checked_in_by,
         PA.payment_status,
         PO.payment_id,
         PO.ticket_ids_json,
@@ -152,6 +189,100 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  const adminOrderFulfillmentUpdate = async (req, res) => {
+    const orderCode = Number(req.body.orderCode);
+    const status = String(req.body.status || "").toUpperCase();
+    if (!orderCode || !["PREPARING", "READY", "PICKED_UP"].includes(status)) {
+      return res.status(400).json({ message: "Trạng thái giao bắp nước không hợp lệ" });
+    }
+    try {
+      const rows = await queryDb(
+        "SELECT status, fulfillment_status, payload_json FROM payos_orders WHERE order_code = ?",
+        [orderCode]
+      );
+      const order = rows[0];
+      const payload = parsePayOSOrderPayload(order?.payload_json) || {};
+      if (!order || order.status !== "PAID") {
+        return res.status(409).json({ message: "Chỉ xử lý bắp nước cho đơn đã thanh toán" });
+      }
+      if (!Array.isArray(payload.comboItems) || payload.comboItems.length === 0) {
+        return res.status(409).json({ message: "Đơn này không có bắp nước" });
+      }
+      const currentStatus = order.fulfillment_status || "PENDING";
+      const nextStatus = { PENDING: "PREPARING", PREPARING: "READY", READY: "PICKED_UP" }[currentStatus];
+      if (status === currentStatus) {
+        return res.json({ orderCode, fulfillmentStatus: currentStatus });
+      }
+      if (status !== nextStatus) {
+        return res.status(409).json({
+          message: `Không thể chuyển trạng thái giao bắp nước từ ${currentStatus} sang ${status}`,
+        });
+      }
+      await queryDb(
+        `UPDATE payos_orders SET fulfillment_status = ?,
+          fulfilled_at = CASE WHEN ? = 'PICKED_UP' THEN NOW() ELSE fulfilled_at END,
+          fulfilled_by = ? WHERE order_code = ?`,
+        [status, status, req.user.email, orderCode]
+      );
+      return res.json({ orderCode, fulfillmentStatus: status });
+    } catch (err) {
+      return res.status(500).json({ message: err.message || "Không thể cập nhật giao bắp nước" });
+    }
+  };
+
+  const adminTicketCheckIn = async (req, res) => {
+    const orderCode = Number(req.body.orderCode);
+    if (!orderCode) return res.status(400).json({ message: "Mã đơn không hợp lệ" });
+    try {
+      const rows = await queryDb(
+        `SELECT PO.status, PO.payment_id, PO.ticket_checked_in_at
+         FROM payos_orders PO WHERE PO.order_code = ? LIMIT 1`,
+        [orderCode]
+      );
+      const order = rows[0];
+      if (!order || order.status !== "PAID" || !order.payment_id) {
+        return res.status(409).json({ message: "Đơn chưa thanh toán hoặc không có vé" });
+      }
+      if (order.ticket_checked_in_at) {
+        return res.status(409).json({ message: "Vé của đơn này đã được check-in" });
+      }
+      const transaction = await withTransaction();
+      try {
+        const tickets = await transaction.query(
+          `SELECT T.id FROM ticket T
+           JOIN showtimes S ON S.id = T.showtimes_id
+           JOIN movie M ON M.id = T.movie_id
+           WHERE T.payment_id = ? AND T.ticket_status = 'ISSUED'
+             AND TIMESTAMP(S.showtime_date, S.movie_start_time) >= DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+             AND TIMESTAMP(S.showtime_date, S.movie_start_time) <= DATE_ADD(NOW(), INTERVAL 30 MINUTE)
+             AND TIMESTAMPADD(MINUTE, CAST(M.duration AS UNSIGNED), TIMESTAMP(S.showtime_date, S.movie_start_time)) > NOW()
+           FOR UPDATE`,
+          [order.payment_id]
+        );
+        if (tickets.length === 0) {
+          throw Object.assign(new Error("Vé không còn trong thời gian check-in hoặc đã được sử dụng"), { statusCode: 409 });
+        }
+        await transaction.query(
+          "UPDATE ticket SET ticket_status = 'CHECKED_IN', checked_in_at = NOW(), checked_in_by = ? WHERE payment_id = ?",
+          [req.user.email, order.payment_id]
+        );
+        await transaction.query(
+          "UPDATE payos_orders SET ticket_checked_in_at = NOW(), ticket_checked_in_by = ? WHERE order_code = ?",
+          [req.user.email, orderCode]
+        );
+        await transaction.commit();
+      } catch (err) {
+        await transaction.rollback();
+        throw err;
+      } finally {
+        transaction.release();
+      }
+      return res.json({ orderCode, checkedIn: true });
+    } catch (err) {
+      return res.status(err.statusCode || 500).json({ message: err.message || "Không thể check-in vé" });
+    }
+  };
+
   // Lấy danh sách phim kèm thể loại, đạo diễn và số vé.
   const adminMovies = (req, res) => {
   const { email, password } = req.body;
@@ -165,6 +296,7 @@ const createAdminController = (dependencies) => {
         m.id,
         m.name,
         m.image_path,
+        m.trailer_url,
         m.language,
         m.synopsis,
         m.rating,
@@ -207,6 +339,7 @@ const createAdminController = (dependencies) => {
     top_cast,
     release_date,
     end_date,
+    trailer_url,
   } = req.body;
   const genres = normalizeAdminList(req.body.genres);
   const directors = normalizeAdminList(req.body.directors);
@@ -224,31 +357,77 @@ const createAdminController = (dependencies) => {
     if (!Number.isInteger(Number(duration)) || Number(duration) <= 0) {
       return res.status(400).json({ message: "Thời lượng phim phải là số phút hợp lệ" });
     }
-
+    let normalizedTrailerUrl;
     try {
-      await queryDb("START TRANSACTION");
-      await queryDb(
-        `UPDATE movie
-         SET name = ?, image_path = ?, language = ?, synopsis = ?, rating = ?, duration = ?, top_cast = ?, release_date = ?, end_date = ?
-         WHERE id = ?`,
-        [name, image_path, language, synopsis, rating, duration, top_cast, release_date, end_date, movieId]
+      normalizedTrailerUrl = normalizeTrailerUrl(trailer_url);
+    } catch (err) {
+      return res.status(err.statusCode || 400).json({ message: err.message });
+    }
+
+    let transaction;
+    let previousImagePath = null;
+    try {
+      transaction = await withTransaction();
+      const previousRows = await transaction.query("SELECT image_path FROM movie WHERE id = ? FOR UPDATE", [movieId]);
+      previousImagePath = previousRows[0]?.image_path || null;
+      if (image_path !== previousImagePath && !String(image_path).startsWith("/media/movies/")) {
+        throw Object.assign(new Error("Ảnh phim mới phải được tải lên Cloudflare R2"), { statusCode: 400 });
+      }
+      const invalidSchedules = await transaction.query(
+        `SELECT COUNT(*) AS invalidCount FROM shown_in SI
+         JOIN showtimes S ON S.id = SI.showtime_id
+         WHERE SI.movie_id = ? AND SI.status = 'active'
+           AND (S.showtime_date < ? OR S.showtime_date > ?)`,
+        [movieId, release_date, end_date]
       );
-      await queryDb("DELETE FROM movie_genre WHERE movie_id = ?", [movieId]);
-      await queryDb("DELETE FROM movie_directors WHERE movie_id = ?", [movieId]);
+      if (Number(invalidSchedules[0].invalidCount) > 0) {
+        throw Object.assign(new Error("Khoảng công chiếu mới không bao phủ các suất đang hoạt động"), { statusCode: 409 });
+      }
+      await transaction.query(
+        `UPDATE movie
+         SET name = ?, image_path = ?, trailer_url = ?, language = ?, synopsis = ?, rating = ?, duration = ?, top_cast = ?, release_date = ?, end_date = ?
+         WHERE id = ?`,
+        [name, image_path, normalizedTrailerUrl, language, synopsis, rating, duration, top_cast, release_date, end_date, movieId]
+      );
+      await transaction.query("DELETE FROM movie_genre WHERE movie_id = ?", [movieId]);
+      await transaction.query("DELETE FROM movie_directors WHERE movie_id = ?", [movieId]);
 
       for (const genre of genres) {
-        await queryDb("INSERT INTO movie_genre(movie_id, genre) VALUES (?, ?)", [movieId, genre]);
+        await transaction.query("INSERT INTO movie_genre(movie_id, genre) VALUES (?, ?)", [movieId, genre]);
       }
 
       for (const director of directors) {
-        await queryDb("INSERT INTO movie_directors(movie_id, director) VALUES (?, ?)", [movieId, director]);
+        await transaction.query("INSERT INTO movie_directors(movie_id, director) VALUES (?, ?)", [movieId, director]);
       }
-
-      await queryDb("COMMIT");
+      const futureSchedules = await transaction.query(
+        `SELECT SI.hall_id, S.id, DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date, S.movie_start_time
+         FROM shown_in SI JOIN showtimes S ON S.id = SI.showtime_id
+         WHERE SI.movie_id = ? AND SI.status = 'active' AND S.status = 'active' AND S.showtime_date >= CURDATE()`,
+        [movieId]
+      );
+      for (const schedule of futureSchedules) {
+        await assertNoShowtimeOverlap({
+          movieId,
+          hallId: schedule.hall_id,
+          showtimeDate: schedule.showtime_date,
+          movieStartTime: schedule.movie_start_time,
+          excludeShowtimeId: schedule.id,
+          query: transaction.query,
+        });
+      }
+      await transaction.commit();
+      transaction.release();
+      transaction = null;
+      if (previousImagePath && previousImagePath !== image_path && previousImagePath.startsWith("/media/")) {
+        await deleteFromR2(previousImagePath).catch((error) => console.error("Delete old movie image error:", error.message));
+      }
       return res.json({ message: "Cập nhật phim thành công" });
     } catch (err) {
-      await queryDb("ROLLBACK").catch(() => {});
-      return res.status(500).json(err);
+      if (transaction) {
+        await transaction.rollback().catch(() => {});
+        transaction.release();
+      }
+      return res.status(err.statusCode || 500).json({ message: err.message || "Không thể cập nhật phim" });
     }
   });
 };
@@ -263,14 +442,27 @@ const createAdminController = (dependencies) => {
     if (!movieId) return res.status(400).json({ message: "Thiếu mã phim" });
 
     try {
+      const movieRows = await queryDb("SELECT image_path FROM movie WHERE id = ?", [movieId]);
       const ticketRows = await queryDb("SELECT COUNT(*) AS ticketCount FROM ticket WHERE movie_id = ?", [movieId]);
       if (ticketRows[0].ticketCount > 0) {
         return res.status(409).json({
           message: "Không thể xoá phim đã có vé để tránh mất lịch sử mua vé",
         });
       }
+      const scheduleRows = await queryDb(
+        "SELECT COUNT(*) AS scheduleCount FROM shown_in WHERE movie_id = ?",
+        [movieId]
+      );
+      if (Number(scheduleRows[0].scheduleCount) > 0) {
+        return res.status(409).json({
+          message: "Phim đang có suất chiếu. Hãy xoá các suất chưa có vé trước khi xoá phim",
+        });
+      }
 
       await queryDb("DELETE FROM movie WHERE id = ?", [movieId]);
+      if (movieRows[0]?.image_path?.startsWith("/media/")) {
+        await deleteFromR2(movieRows[0].image_path).catch((error) => console.error("Delete movie image error:", error.message));
+      }
       return res.json({ message: "Xoá phim thành công" });
     } catch (err) {
       return res.status(500).json(err);
@@ -279,69 +471,50 @@ const createAdminController = (dependencies) => {
 };
 
   // Thêm phim mới và trả về mã phim vừa tạo.
-  const adminMovieAdd = (req, res) => {
-  //admin revalidation
-  const email = req.body.email;
-  const password = req.body.password;
-  const sql0 = `SELECT * from person WHERE email = ? and password = ? and person_type = ?`;
-
-  const name = req.body.name;
-  const image_path = req.body.image_path;
-  const language = req.body.language;
-  const synopsis = req.body.synopsis;
-  const rating = req.body.rating;
-  const duration = req.body.duration;
-  const top_cast = req.body.top_cast;
-  const release_date = req.body.release_date;
-  const end_date = req.body.end_date;
-
-  if (!name || !image_path || !language || !synopsis || !rating || !duration || !top_cast || !release_date || !end_date) {
-    return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin phim" });
-  }
-  if (String(end_date) < String(release_date)) {
-    return res.status(400).json({ message: "Ngày kết thúc phải từ ngày phát hành trở đi" });
-  }
-  if (!Number.isInteger(Number(duration)) || Number(duration) <= 0) {
-    return res.status(400).json({ message: "Thời lượng phim phải là số phút hợp lệ" });
-  }
-
-  const sql1 = `Insert into movie (name,image_path,language,synopsis,rating,duration,top_cast,release_date,end_date)
-  values
-  (?,?,?,?,?,?,?,?,?)`;
-  const sql2 = "SELECT LAST_INSERT_ID() as last_id";
-
-  db.query(sql0, [email, password, "Admin"], (err, data) => {
-    if (err) return res.json(err);
-
-    if (data.length === 0) {
-      return res.status(404).json({ message: "Xin lỗi, bạn không phải là Admin!" });
+  const adminMovieAdd = async (req, res) => {
+    const { name, image_path, trailer_url, language, synopsis, rating, duration, top_cast, release_date, end_date } = req.body;
+    const genres = normalizeAdminList(req.body.genres);
+    const directors = normalizeAdminList(req.body.directors);
+    if (!name || !image_path || !language || !synopsis || !rating || !duration || !top_cast || !release_date || !end_date || genres.length === 0 || directors.length === 0) {
+      return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin phim, thể loại và đạo diễn" });
     }
-
-    db.query(
-        sql1,
-        [
-          name,
-          image_path,
-          language,
-          synopsis,
-          rating,
-          duration,
-          top_cast,
-          release_date,
-          end_date,
-        ],
-        (err1, data1) => {
-          if (err1) return res.json(err1);
-
-          db.query(sql2, (err2, data2) => {
-            if (err2) return res.json(err2);
-
-            return res.json(data2);
-          });
-        }
-    );
-  });
-};
+    if (!String(image_path).startsWith("/media/movies/")) {
+      return res.status(400).json({ message: "Ảnh phim phải được tải lên Cloudflare R2" });
+    }
+    if (String(end_date) < String(release_date)) {
+      return res.status(400).json({ message: "Ngày kết thúc phải từ ngày phát hành trở đi" });
+    }
+    if (!Number.isInteger(Number(duration)) || Number(duration) <= 0) {
+      return res.status(400).json({ message: "Thời lượng phim phải là số phút hợp lệ" });
+    }
+    let normalizedTrailerUrl;
+    try {
+      normalizedTrailerUrl = normalizeTrailerUrl(trailer_url);
+    } catch (err) {
+      return res.status(err.statusCode || 400).json({ message: err.message });
+    }
+    const transaction = await withTransaction();
+    try {
+      const result = await transaction.query(
+        `INSERT INTO movie (name,image_path,trailer_url,language,synopsis,rating,duration,top_cast,release_date,end_date)
+         VALUES (?,?,?,?,?,?,?,?,?,?)`,
+        [name, image_path, normalizedTrailerUrl, language, synopsis, rating, duration, top_cast, release_date, end_date]
+      );
+      for (const genre of genres) {
+        await transaction.query("INSERT INTO movie_genre(movie_id,genre) VALUES (?,?)", [result.insertId, genre]);
+      }
+      for (const director of directors) {
+        await transaction.query("INSERT INTO movie_directors(movie_id,director) VALUES (?,?)", [result.insertId, director]);
+      }
+      await transaction.commit();
+      return res.status(201).json([{ last_id: result.insertId }]);
+    } catch (err) {
+      await transaction.rollback();
+      return res.status(500).json({ message: err.message || "Không thể thêm phim" });
+    } finally {
+      transaction.release();
+    }
+  };
 
   // Đếm tổng số vé đã phát hành.
   const totalTickets = (req, res) => {
@@ -767,7 +940,7 @@ const createAdminController = (dependencies) => {
     );
     if (ticketRows[0]?.ticketCount > 0) {
       return res.status(409).json({
-        message: "Không thể đổi ngày lịch chiếu đã có vé. Hãy huỷ/ngưng bán lịch này và tạo lịch mới.",
+        message: "Không thể đổi ngày lịch chiếu đã có vé. Chỉ được ngừng bán lịch này và tạo lịch mới.",
       });
     }
 
@@ -897,7 +1070,8 @@ const createAdminController = (dependencies) => {
           name ASC
       `),
       queryDb(`
-        SELECT h.id, h.name, h.theatre_id, t.name AS theatre_name
+        SELECT h.id, h.name, h.theatre_id, h.screen_type,
+          h.projection_capability, t.name AS theatre_name
         FROM hall h
         JOIN theatre t ON h.theatre_id = t.id
         WHERE h.status = 'active' AND t.status = 'active'
@@ -939,6 +1113,8 @@ const createAdminController = (dependencies) => {
           si.hall_id,
           m.name AS movie_name,
           h.name AS hall_name,
+          h.screen_type AS hall_screen_type,
+          h.projection_capability,
           th.name AS theatre_name,
           s.movie_start_time,
           s.show_type,
@@ -968,6 +1144,8 @@ const createAdminController = (dependencies) => {
           si.hall_id,
           m.name,
           h.name,
+          h.screen_type,
+          h.projection_capability,
           th.name,
           s.movie_start_time,
           s.show_type,
@@ -1014,27 +1192,47 @@ const createAdminController = (dependencies) => {
     return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin suất chiếu" });
   }
 
+  let transaction;
   try {
     const isOperator = await requireOperator(email, password);
     if (!isOperator) return roleAuthFailed(res);
 
-    await assertMovieShowtimeDate({ movieId, showtimeDate, query: queryDb });
-    await queryDb("START TRANSACTION");
-    const insertResult = await queryDb(
+    transaction = await withTransaction();
+    await assertMovieShowtimeDate({ movieId, showtimeDate, query: transaction.query });
+    await assertHallSupportsShowtime({
+      hallId,
+      showType,
+      screenType,
+      pricePerSeat,
+      query: transaction.query,
+    });
+    await assertNoShowtimeOverlap({
+      movieId,
+      hallId,
+      showtimeDate,
+      movieStartTime,
+      query: transaction.query,
+    });
+    const insertResult = await transaction.query(
       `INSERT INTO showtimes (movie_start_time, show_type, screen_type, showtime_date, price_per_seat, status)
        VALUES (?, ?, ?, ?, ?, 'active')`,
       [movieStartTime, showType, screenType, showtimeDate, pricePerSeat]
     );
     const showtimeId = insertResult.insertId;
-    await queryDb(
+    await transaction.query(
       "INSERT INTO shown_in (movie_id, showtime_id, hall_id, status) VALUES (?, ?, ?, 'active')",
       [movieId, showtimeId, hallId]
     );
-    await queryDb("COMMIT");
+    await transaction.commit();
+    transaction.release();
+    transaction = null;
 
     return res.json({ success: true, showtimeId });
   } catch (err) {
-    await queryDb("ROLLBACK").catch(() => {});
+    if (transaction) {
+      await transaction.rollback();
+      transaction.release();
+    }
     if (err?.code === "ER_DUP_ENTRY") {
       return res.status(400).json({ message: "Suất chiếu này đã tồn tại" });
     }
@@ -1076,12 +1274,21 @@ const createAdminController = (dependencies) => {
     return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin suất chiếu" });
   }
 
+  let transaction;
   try {
     const isOperator = await requireOperator(email, password);
     if (!isOperator) return roleAuthFailed(res);
 
-    await assertMovieShowtimeDate({ movieId, showtimeDate, query: queryDb });
-    const ticketRows = await queryDb(
+    transaction = await withTransaction();
+    await assertMovieShowtimeDate({ movieId, showtimeDate, query: transaction.query });
+    await assertHallSupportsShowtime({
+      hallId,
+      showType,
+      screenType,
+      pricePerSeat,
+      query: transaction.query,
+    });
+    const ticketRows = await transaction.query(
       `SELECT COUNT(*) AS ticketCount
        FROM ticket
        WHERE movie_id = ? AND hall_id = ? AND showtimes_id = ?`,
@@ -1090,8 +1297,8 @@ const createAdminController = (dependencies) => {
     const changesSeatOwner =
       Number(originalMovieId) !== Number(movieId) ||
       Number(originalHallId) !== Number(hallId);
-    const currentRows = await queryDb(
-      "SELECT DATE_FORMAT(showtime_date, '%Y-%m-%d') AS showtime_date, movie_start_time, show_type, screen_type FROM showtimes WHERE id = ?",
+    const currentRows = await transaction.query(
+      "SELECT DATE_FORMAT(showtime_date, '%Y-%m-%d') AS showtime_date, movie_start_time, show_type, screen_type, price_per_seat FROM showtimes WHERE id = ? FOR UPDATE",
       [showtimeId]
     );
     const currentShowtime = currentRows[0];
@@ -1100,37 +1307,56 @@ const createAdminController = (dependencies) => {
       (String(currentShowtime.showtime_date).slice(0, 10) !== String(showtimeDate).slice(0, 10) ||
         String(currentShowtime.movie_start_time) !== String(movieStartTime) ||
         String(currentShowtime.show_type) !== String(showType) ||
-        String(currentShowtime.screen_type) !== String(screenType));
+        String(currentShowtime.screen_type) !== String(screenType) ||
+        Number(currentShowtime.price_per_seat) !== Number(pricePerSeat));
 
     if (ticketRows[0]?.ticketCount > 0 && changesSeatOwner) {
+      await transaction.rollback();
+      transaction.release();
+      transaction = null;
       return res.status(400).json({
         message: "Không thể đổi phim hoặc phòng của suất chiếu đã có vé",
       });
     }
     if (ticketRows[0]?.ticketCount > 0 && changesSoldSchedule) {
+      await transaction.rollback();
+      transaction.release();
+      transaction = null;
       return res.status(409).json({
-        message: "Không thể đổi ngày, giờ hoặc định dạng của suất đã có vé. Hãy huỷ/ngưng bán suất này và tạo suất mới.",
+        message: "Không thể đổi ngày, giờ, định dạng hoặc giá của suất đã có vé. Có thể ngừng bán suất và giữ nguyên toàn bộ vé.",
       });
     }
 
-    await queryDb("START TRANSACTION");
-    await queryDb(
+    await assertNoShowtimeOverlap({
+      movieId,
+      hallId,
+      showtimeDate,
+      movieStartTime,
+      excludeShowtimeId: showtimeId,
+      query: transaction.query,
+    });
+    await transaction.query(
       `UPDATE showtimes
        SET movie_start_time = ?, show_type = ?, screen_type = ?, showtime_date = ?, price_per_seat = ?
        WHERE id = ?`,
       [movieStartTime, showType, screenType, showtimeDate, pricePerSeat, showtimeId]
     );
-    await queryDb(
+    await transaction.query(
       `UPDATE shown_in
        SET movie_id = ?, hall_id = ?
        WHERE movie_id = ? AND hall_id = ? AND showtime_id = ?`,
       [movieId, hallId, originalMovieId, originalHallId, showtimeId]
     );
-    await queryDb("COMMIT");
+    await transaction.commit();
+    transaction.release();
+    transaction = null;
 
     return res.json({ success: true });
   } catch (err) {
-    await queryDb("ROLLBACK").catch(() => {});
+    if (transaction) {
+      await transaction.rollback();
+      transaction.release();
+    }
     if (err?.code === "ER_DUP_ENTRY") {
       return res.status(400).json({ message: "Suất chiếu này đã tồn tại" });
     }
@@ -1140,7 +1366,7 @@ const createAdminController = (dependencies) => {
   }
 };
 
-  // Xoá lịch phim chưa có vé hoặc huỷ mềm khi đã có vé.
+  // Chỉ xoá suất chưa bán vé; vé đã phát hành không được huỷ.
   const adminShowtimeDelete = async (req, res) => {
   const { email, password, movieId, hallId, showtimeId } = req.body;
 
@@ -1148,58 +1374,51 @@ const createAdminController = (dependencies) => {
     return res.status(400).json({ message: "Thiếu thông tin suất chiếu" });
   }
 
+  let transaction;
   try {
     const isOperator = await requireOperator(email, password);
     if (!isOperator) return roleAuthFailed(res);
 
-    const ticketRows = await queryDb(
+    transaction = await withTransaction();
+    const ticketRows = await transaction.query(
       `SELECT COUNT(*) AS ticketCount
        FROM ticket
-       WHERE movie_id = ? AND hall_id = ? AND showtimes_id = ?`,
+       WHERE movie_id = ? AND hall_id = ? AND showtimes_id = ? FOR UPDATE`,
       [movieId, hallId, showtimeId]
     );
-
-    await queryDb("START TRANSACTION");
     if (ticketRows[0]?.ticketCount > 0) {
-      await queryDb(
-        "UPDATE shown_in SET status = 'cancelled' WHERE movie_id = ? AND hall_id = ? AND showtime_id = ?",
+      await transaction.query(
+        "UPDATE shown_in SET status = 'sales_closed' WHERE movie_id = ? AND hall_id = ? AND showtime_id = ?",
         [movieId, hallId, showtimeId]
       );
-      const activeSlots = await queryDb(
-        "SELECT COUNT(*) AS slotCount FROM shown_in WHERE showtime_id = ? AND status = 'active'",
-        [showtimeId]
-      );
-      if (activeSlots[0]?.slotCount === 0) {
-        await queryDb("UPDATE showtimes SET status = 'cancelled' WHERE id = ?", [
-          showtimeId,
-        ]);
-      }
-      await queryDb("COMMIT");
-      return res.json({ success: true, cancelled: true });
+      await transaction.query("UPDATE showtimes SET status = 'sales_closed' WHERE id = ?", [showtimeId]);
+      await transaction.commit();
+      transaction.release();
+      transaction = null;
+      return res.json({ success: true, stopped: true });
     }
 
-    await queryDb(
+    await transaction.query(
       "DELETE FROM shown_in WHERE movie_id = ? AND hall_id = ? AND showtime_id = ?",
       [movieId, hallId, showtimeId]
     );
-
-    const remainingSlots = await queryDb(
+    const remainingSlots = await transaction.query(
       "SELECT COUNT(*) AS slotCount FROM shown_in WHERE showtime_id = ?",
       [showtimeId]
     );
-    const remainingTickets = await queryDb(
-      "SELECT COUNT(*) AS ticketCount FROM ticket WHERE showtimes_id = ?",
-      [showtimeId]
-    );
-    if (remainingSlots[0]?.slotCount === 0 && remainingTickets[0]?.ticketCount === 0) {
-      await queryDb("DELETE FROM showtimes WHERE id = ?", [showtimeId]);
+    if (remainingSlots[0]?.slotCount === 0) {
+      await transaction.query("DELETE FROM showtimes WHERE id = ?", [showtimeId]);
     }
-    await queryDb("COMMIT");
-
+    await transaction.commit();
+    transaction.release();
+    transaction = null;
     return res.json({ success: true });
   } catch (err) {
-    await queryDb("ROLLBACK").catch(() => {});
-    return res.status(500).json(err);
+    if (transaction) {
+      await transaction.rollback().catch(() => {});
+      transaction.release();
+    }
+    return res.status(err.statusCode || 500).json({ message: err.message || "Không thể xoá suất chiếu" });
   }
 };
 
@@ -1211,39 +1430,80 @@ const createAdminController = (dependencies) => {
     return res.status(400).json({ message: "Thiếu thông tin suất chiếu" });
   }
 
+  let transaction;
   try {
     const isOperator = await requireOperator(email, password);
     if (!isOperator) return roleAuthFailed(res);
 
-    const showtimeRows = await queryDb(
-      "SELECT DATE_FORMAT(showtime_date, '%Y-%m-%d') AS showtime_date FROM showtimes WHERE id = ? LIMIT 1",
+    transaction = await withTransaction();
+    const showtimeRows = await transaction.query(
+      "SELECT DATE_FORMAT(showtime_date, '%Y-%m-%d') AS showtime_date, movie_start_time FROM showtimes WHERE id = ? LIMIT 1 FOR UPDATE",
       [showtimeId]
     );
     if (showtimeRows.length === 0) {
+      await transaction.rollback();
+      transaction.release();
+      transaction = null;
       return res.status(404).json({ message: "Không tìm thấy suất chiếu" });
     }
     await assertMovieShowtimeDate({
       movieId,
       showtimeDate: showtimeRows[0].showtime_date,
-      query: queryDb,
+      query: transaction.query,
+    });
+    await assertNoShowtimeOverlap({
+      movieId,
+      hallId,
+      showtimeDate: showtimeRows[0].showtime_date,
+      movieStartTime: showtimeRows[0].movie_start_time,
+      excludeShowtimeId: showtimeId,
+      query: transaction.query,
     });
 
-    await queryDb("START TRANSACTION");
-    await queryDb("UPDATE showtimes SET status = 'active' WHERE id = ?", [
+    await transaction.query("UPDATE showtimes SET status = 'active' WHERE id = ?", [
       showtimeId,
     ]);
-    await queryDb(
+    await transaction.query(
       "UPDATE shown_in SET status = 'active' WHERE movie_id = ? AND hall_id = ? AND showtime_id = ?",
       [movieId, hallId, showtimeId]
     );
-    await queryDb("COMMIT");
+    await transaction.commit();
+    transaction.release();
+    transaction = null;
 
     return res.json({ success: true, restored: true });
   } catch (err) {
-    await queryDb("ROLLBACK").catch(() => {});
+    if (transaction) {
+      await transaction.rollback();
+      transaction.release();
+    }
     return res.status(err.statusCode || 500).json({
       message: err.message || "Không thể mở bán lại suất chiếu",
     });
+  }
+};
+
+  // Tổng hợp hiệu suất chiếu và tỷ lệ chuyển đổi thanh toán theo từng phim.
+  const adminMoviePerformance = async (req, res) => {
+  const { email, password } = req.body;
+  const dateFrom = req.body.dateFrom || null;
+  const dateTo = req.body.dateTo || null;
+  const validDate = (value) => value == null || /^\d{4}-\d{2}-\d{2}$/.test(String(value));
+
+  if (!validDate(dateFrom) || !validDate(dateTo)) {
+    return res.status(400).json({ message: "Khoảng ngày thống kê không hợp lệ" });
+  }
+  if (dateFrom && dateTo && dateFrom > dateTo) {
+    return res.status(400).json({ message: "Ngày bắt đầu phải trước ngày kết thúc" });
+  }
+
+  try {
+    const isAdmin = await requireAdmin(email, password);
+    if (!isAdmin) return adminAuthFailed(res);
+    return res.json(await getMoviePerformance({ dateFrom, dateTo }));
+  } catch (err) {
+    console.error("Movie performance error:", err);
+    return res.status(500).json({ message: "Không thể tải hiệu suất phim" });
   }
 };
 
@@ -1256,7 +1516,7 @@ const createAdminController = (dependencies) => {
     if (!isAdmin) return adminAuthFailed(res);
 
     const [totalRevenue, totalTickets, totalMovies, totalShowtimesToday, totalUsers, totalOrders] = await Promise.all([
-      queryDb("SELECT COALESCE(SUM(amount),0) AS value FROM payment"),
+      queryDb("SELECT COALESCE(SUM(amount),0) AS value FROM payment WHERE payment_status = 'PAID'"),
       queryDb("SELECT COUNT(*) AS value FROM ticket"),
       queryDb("SELECT COUNT(*) AS value FROM movie WHERE end_date IS NULL OR end_date >= CURDATE()"),
       queryDb(`SELECT COUNT(*) AS value FROM shown_in si JOIN showtimes s ON si.showtime_id = s.id WHERE s.showtime_date = CURDATE() AND si.status = 'active' AND s.status = 'active'`),
@@ -1287,23 +1547,12 @@ const createAdminController = (dependencies) => {
     if (!isAdmin) return adminAuthFailed(res);
 
     const revenueByDate = await queryDb(
-      `SELECT DATE(purchase_date) AS date, SUM(price) AS revenue
-       FROM ticket
-       WHERE purchase_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-       GROUP BY DATE(purchase_date)
+      `SELECT DATE(payment_time) AS date, SUM(amount) AS revenue
+       FROM payment
+       WHERE payment_status = 'PAID' AND payment_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+       GROUP BY DATE(payment_time)
        ORDER BY date ASC`
     );
-
-    if (revenueByDate.length === 0) {
-      const mockData = [];
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().slice(0, 10);
-        mockData.push({ date: dateStr, revenue: Math.floor(Math.random() * 5000000) + 500000 });
-      }
-      return res.json(mockData);
-    }
 
     return res.json(revenueByDate);
   } catch (err) {
@@ -1330,20 +1579,10 @@ const createAdminController = (dependencies) => {
     );
 
     const row = statusStats[0] || { paid: 0, pending: 0, failed: 0 };
-    const total = Number(row.paid) + Number(row.pending) + Number(row.failed);
-
-    if (total === 0) {
-      return res.json([
-        { name: "Đã thanh toán", value: 65 },
-        { name: "Chờ thanh toán", value: 20 },
-        { name: "Đã hủy", value: 15 },
-      ]);
-    }
-
     return res.json([
       { name: "Đã thanh toán", value: Number(row.paid) },
       { name: "Chờ thanh toán", value: Number(row.pending) },
-      { name: "Đã hủy", value: Number(row.failed) },
+      { name: "Lỗi hoặc hết hạn", value: Number(row.failed) },
     ]);
   } catch (err) {
     console.error("Order status stats error:", err);
@@ -1371,14 +1610,6 @@ const createAdminController = (dependencies) => {
        GROUP BY time_slot
        ORDER BY time_slot`
     );
-
-    if (timeStats.length === 0) {
-      return res.json([
-        { time: "Sáng (6h-12h)", bookings: 85 },
-        { time: "Chiều (12h-18h)", bookings: 120 },
-        { time: "Tối (18h-24h)", bookings: 210 },
-      ]);
-    }
 
     return res.json(timeStats.map(r => ({ time: r.time_slot, bookings: Number(r.bookings) })));
   } catch (err) {
@@ -1439,16 +1670,6 @@ const createAdminController = (dependencies) => {
        LIMIT 10`
     );
 
-    if (topMovies.length === 0) {
-      return res.json([
-        { id: 1, name: "Avengers: Endgame", image_path: "", rating: 8.7, tickets_sold: 120 },
-        { id: 2, name: "Inception", image_path: "", rating: 8.8, tickets_sold: 95 },
-        { id: 3, name: "Interstellar", image_path: "", rating: 8.6, tickets_sold: 88 },
-        { id: 4, name: "The Dark Knight", image_path: "", rating: 9.0, tickets_sold: 72 },
-        { id: 5, name: "Parasite", image_path: "", rating: 8.5, tickets_sold: 60 },
-      ]);
-    }
-
     return res.json(topMovies.map(r => ({
       id: r.id,
       name: r.name,
@@ -1490,9 +1711,22 @@ const createAdminController = (dependencies) => {
   }
 };
 
+  const adminMediaDelete = async (req, res) => {
+    try {
+      const mediaUrl = String(req.body.mediaUrl || "");
+      if (!mediaUrl.startsWith("/media/")) return res.status(400).json({ message: "Đường dẫn ảnh không hợp lệ" });
+      await deleteFromR2(mediaUrl);
+      return res.json({ success: true });
+    } catch (err) {
+      return res.status(500).json({ message: err.message || "Không thể xoá ảnh" });
+    }
+  };
+
   return {
     adminOrders,
     adminOrderStatusUpdate,
+    adminOrderFulfillmentUpdate,
+    adminTicketCheckIn,
     adminMovies,
     adminMovieUpdate,
     adminMovieDelete,
@@ -1501,14 +1735,13 @@ const createAdminController = (dependencies) => {
     totalPayment,
     totalCustomers,
     totalTicketPerMovie,
-    genreInsert,
-    directorInsert,
     adminShowtimeOptions,
     adminShowtimeSlots,
     adminShowtimeCreate,
     adminShowtimeUpdate,
     adminShowtimeDelete,
     adminShowtimeRestore,
+    adminMoviePerformance,
     adminDashboardStats,
     adminRevenueStats,
     adminOrderStatusStats,
@@ -1516,6 +1749,7 @@ const createAdminController = (dependencies) => {
     adminRecentOrders,
     adminTopMovies,
     adminUploadImage,
+    adminMediaDelete,
   };
 };
 

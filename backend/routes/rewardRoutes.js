@@ -1,9 +1,11 @@
 const express = require("express");
 
-const createRewardRoutes = (controller) => {
+const createRewardRoutes = (controller, { allowRoles }) => {
   const router = express.Router();
-  router.post("/customerRewards", controller.customerRewards);
-  router.post("/rewardQuote", controller.rewardQuote);
+  router.post("/customerRewards", ...allowRoles("Customer"), controller.customerRewards);
+  router.post("/rewardQuote", ...allowRoles("Customer"), controller.rewardQuote);
+  router.post("/adminRewardConfig", ...allowRoles("Admin"), controller.adminRewardConfig);
+  router.post("/adminRewardConfigUpdate", ...allowRoles("Admin"), controller.adminRewardConfigUpdate);
   return router;
 };
 

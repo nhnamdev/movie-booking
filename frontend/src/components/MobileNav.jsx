@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout, showLoginModal, showSignModal } from "../reducers/authSlice";
 import { toggleMenuState } from "../reducers/mobileNavSlice";
+import axios from "axios";
+import { API_URL } from "../utils/apiUrl";
 
 export const MobileNav = () => {
   const navigate = useNavigate();
@@ -110,7 +112,8 @@ export const MobileNav = () => {
           <li className="mobile-nav-list-item">
             <button
               className="mobile-nav-item"
-              onClick={() => {
+              onClick={async () => {
+                await axios.post(`${API_URL}/logout`).catch(() => {});
                 dispatch(logout());
                 dispatch(toggleMenuState());
               }}

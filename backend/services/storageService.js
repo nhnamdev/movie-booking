@@ -1,4 +1,4 @@
-const { GetObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
+const { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 
 const s3Client = new S3Client({
   region: "auto",
@@ -51,6 +51,12 @@ const getFromR2 = async (key) =>
     })
   );
 
+const deleteFromR2 = async (keyOrUrl) => {
+  const key = normalizeObjectKey(String(keyOrUrl || "").replace(/^.*\/media\//, ""));
+  await s3Client.send(new DeleteObjectCommand({ Bucket: R2_BUCKET, Key: key }));
+  return true;
+};
+
 // Tạo tên file duy nhất nhưng vẫn giữ phần mở rộng gốc.
 const generateFileName = (originalName) => {
   const ext = originalName.split(".").pop().toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
@@ -59,4 +65,4 @@ const generateFileName = (originalName) => {
   return `${timestamp}-${random}.${ext}`;
 };
 
-module.exports = { getFromR2, uploadToR2, generateFileName };
+module.exports = { getFromR2, uploadToR2, deleteFromR2, generateFileName };

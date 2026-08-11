@@ -33,18 +33,20 @@ CREATE TABLE `hall` (
   `id` int(11) NOT NULL,
   `name` varchar(10) DEFAULT NULL,
   `total_seats` int(11) DEFAULT NULL,
-  `theatre_id` int(11) NOT NULL
+  `theatre_id` int(11) NOT NULL,
+  `screen_type` varchar(30) NOT NULL DEFAULT 'Tiêu chuẩn',
+  `projection_capability` varchar(10) NOT NULL DEFAULT 'BOTH'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `hall` (`id`, `name`, `total_seats`, `theatre_id`) VALUES
-(1, 'Phòng 1', 48, 1),
-(2, 'Phòng 2', 48, 1),
-(3, 'Phòng 3', 48, 1),
-(4, 'Phòng 4', 48, 1),
-(5, 'Phòng 1', 48, 2),
-(6, 'Phòng 2', 48, 2),
-(7, 'Phòng 3', 48, 2),
-(8, 'Phòng 4', 48, 2);
+INSERT INTO `hall` (`id`, `name`, `total_seats`, `theatre_id`, `screen_type`, `projection_capability`) VALUES
+(1, 'Phòng 1', 48, 1, 'Tiêu chuẩn', 'BOTH'),
+(2, 'Phòng 2', 48, 1, 'Tiêu chuẩn', 'BOTH'),
+(3, 'Phòng 3', 48, 1, 'Tiêu chuẩn', 'BOTH'),
+(4, 'Phòng 4', 48, 1, 'Tiêu chuẩn', 'BOTH'),
+(5, 'Phòng 1', 48, 2, 'Tiêu chuẩn', 'BOTH'),
+(6, 'Phòng 2', 48, 2, 'Tiêu chuẩn', 'BOTH'),
+(7, 'Phòng 3', 48, 2, 'Tiêu chuẩn', 'BOTH'),
+(8, 'Phòng 4', 48, 2, 'Tiêu chuẩn', 'BOTH');
 
 CREATE TABLE `hallwise_seat` (
   `hall_id` int(11) NOT NULL,
@@ -440,15 +442,16 @@ INSERT INTO `hallwise_seat` (`hall_id`, `seat_id`) VALUES
 
 CREATE TABLE `movie` (
   `id` int(11) NOT NULL,
-  `name` varchar(50) DEFAULT NULL,
+  `name` varchar(200) DEFAULT NULL,
   `image_path` varchar(150) DEFAULT NULL,
-  `language` varchar(15) DEFAULT NULL,
+  `trailer_url` varchar(500) DEFAULT NULL,
+  `language` varchar(50) DEFAULT NULL,
   `synopsis` varchar(500) DEFAULT NULL,
   `rating` decimal(2,1) DEFAULT NULL,
   `duration` varchar(10) DEFAULT NULL,
   `audio_type` varchar(30) DEFAULT 'Phụ Đề',
   `age_rating` varchar(160) DEFAULT 'P: Phim dành cho khán giả mọi lứa tuổi',
-  `top_cast` varchar(30) DEFAULT NULL,
+  `top_cast` varchar(500) DEFAULT NULL,
   `release_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -465,7 +468,7 @@ INSERT INTO `movie` (`id`, `name`, `image_path`, `language`, `synopsis`, `rating
 
 CREATE TABLE `movie_directors` (
   `movie_id` int(11) NOT NULL,
-  `director` varchar(30) NOT NULL
+  `director` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `movie_directors` (`movie_id`, `director`) VALUES

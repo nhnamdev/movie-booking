@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { LocationSelector } from "../../../components/LocationSelector";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import HashLoader from "react-spinners/HashLoader";
+import HashLoader from "react-spinners/esm/HashLoader.js";
 import { useDispatch, useSelector } from "react-redux";
 import { showLoginModal } from "../../../reducers/authSlice";
-import { resetCart } from "../../../reducers/cartSlice";
+import { resetCart, setMovie, setShowDate, setShowDetail } from "../../../reducers/cartSlice";
 import { resolveMediaUrl } from "../../../utils/mediaUrl";
+import { FiPlayCircle, FiX } from "react-icons/fi";
+import { getYouTubeEmbedUrl } from "../../../utils/trailerUrl";
 
 export const MovieInfoSection = () => {
   const [movieData, setMovieData] = useState({});
@@ -14,6 +16,7 @@ export const MovieInfoSection = () => {
   const navigate = useNavigate();
   const [loading1, setLoading1] = useState(false);
   const [loading2, setLoading2] = useState(true);
+  const [trailerOpen, setTrailerOpen] = useState(false);
   const { id } = useParams();
   const movieDetailsId = Number(id);
 
@@ -22,6 +25,20 @@ export const MovieInfoSection = () => {
     (store) => store.authentication
   );
   const dispatch = useDispatch();
+  const trailerEmbedUrl = getYouTubeEmbedUrl(movieData.trailer_url);
+
+  useEffect(() => {
+    if (!trailerOpen) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setTrailerOpen(false);
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", closeOnEscape);
+      document.body.style.overflow = "";
+    };
+  }, [trailerOpen]);
 
   const override = {
     display: "block",
@@ -42,18 +59,20 @@ export const MovieInfoSection = () => {
         const formattedRelDate = new Date(
           movieDetailResponse.data[0].release_date
         ).toLocaleDateString("vi-VN");
-        const durationDetail1 = movieDetailResponse.data[0].duration.replace(
-          "h",
-          " giờ"
-        );
-        const duration = durationDetail1.replace("m", " phút");
+        const rawDuration = movieDetailResponse.data[0].duration;
+        const durationNumber = Number(rawDuration);
+        const duration = Number.isFinite(durationNumber) && durationNumber > 0
+          ? `${durationNumber} phút`
+          : "Chưa cập nhật";
         const ratingNumber = Number(movieDetailResponse.data[0].rating);
         const formattedMovieData = {
           ...movieDetailResponse.data[0],
           name: movieDetailResponse.data[0].name,
           duration,
           release_date: formattedRelDate,
-          rating: Number.isFinite(ratingNumber) ? ratingNumber.toFixed(1) : "Chưa có",
+          rating: Number.isFinite(ratingNumber) && ratingNumber > 0
+            ? ratingNumber.toFixed(1)
+            : "Chưa có",
         };
 
         setMovieData(formattedMovieData);
@@ -130,9 +149,12 @@ export const MovieInfoSection = () => {
             className="showtimes-startime-btn"
             onClick={() => {
               dispatch(resetCart());
-              isAuthenticated && signedPerson.person_type === "Customer"
-                ? navigate("/purchase")
-                : dispatch(showLoginModal());
+              if (isAuthenticated && signedPerson.person_type === "Customer") {
+                dispatch(setShowDate(showDate));
+                dispatch(setMovie(movieDetailsId));
+                dispatch(setShowDetail(`${singleTime.showtime_id},${singleTime.hall_id},${singleTime.price_per_seat}`));
+                navigate("/purchase");
+              } else dispatch(showLoginModal());
             }}
           >
             {singleTime.movie_start_time}
@@ -161,9 +183,12 @@ export const MovieInfoSection = () => {
             className="showtimes-startime-btn"
             onClick={() => {
               dispatch(resetCart());
-              isAuthenticated && signedPerson.person_type === "Customer"
-                ? navigate("/purchase")
-                : dispatch(showLoginModal());
+              if (isAuthenticated && signedPerson.person_type === "Customer") {
+                dispatch(setShowDate(showDate));
+                dispatch(setMovie(movieDetailsId));
+                dispatch(setShowDetail(`${singleTime.showtime_id},${singleTime.hall_id},${singleTime.price_per_seat}`));
+                navigate("/purchase");
+              } else dispatch(showLoginModal());
             }}
           >
             {singleTime.movie_start_time}
@@ -321,6 +346,17 @@ export const MovieInfoSection = () => {
                 <p className="movie-info-title">Diễn viên hàng đầu: </p>
                 <p>{movieData && movieData.top_cast}</p>
               </div>
+
+              {trailerEmbedUrl && (
+                <button
+                  className="movie-trailer-button"
+                  type="button"
+                  onClick={() => setTrailerOpen(true)}
+                >
+                  <FiPlayCircle />
+                  Xem trailer
+                </button>
+              )}
             </div>
           </div>
 
@@ -358,6 +394,38 @@ export const MovieInfoSection = () => {
               {showHtml2d}
             </div>
           )}
+        </div>
+      )}
+
+      {trailerOpen && trailerEmbedUrl && (
+        <div
+          className="movie-trailer-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Trailer phim ${movieData.name || ""}`}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setTrailerOpen(false);
+          }}
+        >
+          <div className="movie-trailer-dialog">
+            <div className="movie-trailer-header">
+              <div>
+                <span>TRAILER CHÍNH THỨC</span>
+                <h3>{movieData.name}</h3>
+              </div>
+              <button type="button" onClick={() => setTrailerOpen(false)} aria-label="Đóng trailer">
+                <FiX />
+              </button>
+            </div>
+            <div className="movie-trailer-frame">
+              <iframe
+                src={trailerEmbedUrl}
+                title={`Trailer phim ${movieData.name || ""}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

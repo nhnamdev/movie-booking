@@ -1,12 +1,15 @@
 import axios from "axios";
 import { resolveMediaUrl } from "../../../utils/mediaUrl";
 import { motion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FiCalendar,
+  FiChevronDown,
   FiClock,
   FiEdit3,
+  FiExternalLink,
   FiFilm,
+  FiPlayCircle,
   FiPlusCircle,
   FiRefreshCw,
   FiSave,
@@ -17,7 +20,7 @@ import {
   FiUsers,
   FiX,
 } from "react-icons/fi";
-import { ClipLoader } from "react-spinners";
+import ClipLoader from "react-spinners/esm/ClipLoader.js";
 import { useSelector } from "react-redux";
 import {
   adminErrorToast,
@@ -25,10 +28,12 @@ import {
   adminMovieToast,
   adminMovieUpdateToast,
 } from "../../../toasts/toast";
+import { getYouTubeVideoId } from "../../../utils/trailerUrl";
 
 const emptyMovieInfo = {
   movieName: "",
   imagePath: "",
+  trailerUrl: "",
   language: "",
   description: "",
   rating: "",
@@ -56,6 +61,7 @@ const toDateInput = (value) => {
 const toMovieForm = (movie) => ({
   movieName: movie.name || "",
   imagePath: movie.image_path || "",
+  trailerUrl: movie.trailer_url || "",
   language: movie.language || "",
   description: movie.synopsis || "",
   rating: movie.rating || "",
@@ -69,7 +75,9 @@ const toMovieForm = (movie) => ({
 
 const formatRating = (rating) => {
   const ratingNumber = Number(rating);
-  return Number.isFinite(ratingNumber) ? ratingNumber.toFixed(1) : "Chưa có";
+  return Number.isFinite(ratingNumber) && ratingNumber > 0
+    ? `${ratingNumber.toFixed(1)}/10`
+    : "Chưa có";
 };
 
 const movieCardMotion = {
@@ -92,24 +100,27 @@ export const AdminMovieAddSection = () => {
   const [imageFile, setImageFile] = useState(null);
   const [editImageFile, setEditImageFile] = useState(null);
   const [imageUploading, setImageUploading] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState({
+    showing: true,
+    upcoming: true,
+    ended: false,
+  });
   const fileInputRef = useRef(null);
   const editFileInputRef = useRef(null);
 
   const adminEmail = signedPerson?.email;
-  const adminPassword = signedPerson?.password;
   const adminPayload = {
     email: adminEmail,
-    password: adminPassword,
   };
 
   const fetchMovies = useCallback(async () => {
-    if (!adminEmail || !adminPassword) return;
+    if (!adminEmail) return;
 
     try {
       setMoviesLoading(true);
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/adminMovies`,
-        { email: adminEmail, password: adminPassword }
+        { email: adminEmail }
       );
       setMovies(response.data);
     } catch (err) {
@@ -117,11 +128,59 @@ export const AdminMovieAddSection = () => {
     } finally {
       setMoviesLoading(false);
     }
-  }, [adminEmail, adminPassword]);
+  }, [adminEmail]);
 
   useEffect(() => {
     fetchMovies();
   }, [fetchMovies]);
+
+  const movieGroups = useMemo(() => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const today = new Date(now.getTime() - offset).toISOString().slice(0, 10);
+    const groups = { showing: [], upcoming: [], ended: [] };
+
+    movies.forEach((movie) => {
+      const releaseDate = toDateInput(movie.release_date);
+      const endDate = toDateInput(movie.end_date);
+      if (endDate && endDate < today) groups.ended.push(movie);
+      else if (releaseDate && releaseDate > today) groups.upcoming.push(movie);
+      else groups.showing.push(movie);
+    });
+
+    groups.showing.sort((a, b) => toDateInput(a.end_date).localeCompare(toDateInput(b.end_date)));
+    groups.upcoming.sort((a, b) => toDateInput(a.release_date).localeCompare(toDateInput(b.release_date)));
+    groups.ended.sort((a, b) => toDateInput(b.end_date).localeCompare(toDateInput(a.end_date)));
+    return groups;
+  }, [movies]);
+
+  const movieSections = [
+    {
+      key: "showing",
+      title: "Phim đang chiếu",
+      label: "Đang chiếu",
+      description: "Các phim đang trong thời gian công chiếu và được ưu tiên quản lý.",
+      movies: movieGroups.showing,
+    },
+    {
+      key: "upcoming",
+      title: "Phim sắp chiếu",
+      label: "Sắp chiếu",
+      description: "Các phim có ngày phát hành sau hôm nay.",
+      movies: movieGroups.upcoming,
+    },
+    {
+      key: "ended",
+      title: "Phim đã kết thúc",
+      label: "Đã kết thúc",
+      description: "Danh mục lưu trữ phim đã qua ngày kết thúc công chiếu.",
+      movies: movieGroups.ended,
+    },
+  ];
+
+  const toggleMovieGroup = (groupKey) => {
+    setExpandedGroups((current) => ({ ...current, [groupKey]: !current[groupKey] }));
+  };
 
   const openAddMovieForm = () => {
     setEditingMovieId(null);
@@ -138,7 +197,6 @@ export const AdminMovieAddSection = () => {
     const formData = new FormData();
     formData.append("image", file);
     formData.append("email", adminEmail);
-    formData.append("password", adminPassword);
     formData.append("folder", "movies");
 
     const res = await axios.post(
@@ -165,6 +223,7 @@ export const AdminMovieAddSection = () => {
     ...adminPayload,
     name: formInfo.movieName.trim(),
     image_path: formInfo.imagePath.trim(),
+    trailer_url: formInfo.trailerUrl.trim(),
     language: formInfo.language.trim(),
     synopsis: formInfo.description.trim(),
     rating: formInfo.rating,
@@ -176,8 +235,13 @@ export const AdminMovieAddSection = () => {
     directors: splitList(formInfo.directors),
   });
 
-  const formIsValid = (formInfo) =>
-    Object.values(formInfo).every((value) => String(value).trim() !== "");
+  const formIsValid = (formInfo) => {
+    const requiredFields = [
+      "movieName", "imagePath", "language", "description", "rating", "duration",
+      "cast", "relDate", "endDate", "genres", "directors",
+    ];
+    return requiredFields.every((field) => String(formInfo[field] || "").trim() !== "");
+  };
 
   const movieAdd = async (e) => {
     e.preventDefault();
@@ -187,6 +251,8 @@ export const AdminMovieAddSection = () => {
       return;
     }
 
+    let uploadedImagePath = "";
+    let movieCreated = false;
     try {
       setLoading(true);
       let imagePath = movieInfo.imagePath;
@@ -194,6 +260,7 @@ export const AdminMovieAddSection = () => {
       if (imageFile) {
         setImageUploading(true);
         imagePath = await uploadMovieImage(imageFile);
+        uploadedImagePath = imagePath;
         setImageUploading(false);
       }
 
@@ -203,24 +270,9 @@ export const AdminMovieAddSection = () => {
         payload
       );
       const movieId = movieResponse.data && movieResponse.data[0].last_id;
+      movieCreated = Boolean(movieId);
 
       if (movieId) {
-        for (const genre of payload.genres) {
-          await axios.post(`${import.meta.env.VITE_API_URL}/genreInsert`, {
-            ...adminPayload,
-            movieId,
-            genre,
-          });
-        }
-
-        for (const director of payload.directors) {
-          await axios.post(`${import.meta.env.VITE_API_URL}/directorInsert`, {
-            ...adminPayload,
-            movieId,
-            director,
-          });
-        }
-
         adminMovieToast();
         setShowAddMovieForm(false);
         setMovieInfo(emptyMovieInfo);
@@ -228,6 +280,9 @@ export const AdminMovieAddSection = () => {
         await fetchMovies();
       }
     } catch (err) {
+      if (uploadedImagePath && !movieCreated) {
+        await axios.post(`${import.meta.env.VITE_API_URL}/adminMediaDelete`, { mediaUrl: uploadedImagePath }).catch(() => {});
+      }
       adminErrorToast(err?.response?.data?.message);
     } finally {
       setImageUploading(false);
@@ -254,6 +309,8 @@ export const AdminMovieAddSection = () => {
       return;
     }
 
+    let uploadedImagePath = "";
+    let movieUpdated = false;
     try {
       setLoading(true);
       let imagePath = editMovieInfo.imagePath;
@@ -261,6 +318,7 @@ export const AdminMovieAddSection = () => {
       if (editImageFile) {
         setImageUploading(true);
         imagePath = await uploadMovieImage(editImageFile);
+        uploadedImagePath = imagePath;
         setImageUploading(false);
       }
 
@@ -269,11 +327,17 @@ export const AdminMovieAddSection = () => {
         image_path: imagePath,
         movieId: editingMovieId,
       });
+      movieUpdated = true;
       adminMovieUpdateToast();
       cancelEdit();
       setEditImageFile(null);
       await fetchMovies();
     } catch (err) {
+      if (uploadedImagePath && !movieUpdated) {
+        await axios.post(`${import.meta.env.VITE_API_URL}/adminMediaDelete`, {
+          mediaUrl: uploadedImagePath,
+        }).catch(() => {});
+      }
       adminErrorToast(err?.response?.data?.message);
     } finally {
       setImageUploading(false);
@@ -345,6 +409,24 @@ export const AdminMovieAddSection = () => {
           value={formInfo.language}
           placeholder="Nhập ngôn ngữ"
         />
+      </div>
+
+      <div className="admin-trailer-field">
+        <p>Trailer YouTube:</p>
+        <input
+          name="trailerUrl"
+          onChange={onChange}
+          type="url"
+          value={formInfo.trailerUrl}
+          placeholder="https://www.youtube.com/watch?v=..."
+        />
+        <small>
+          {formInfo.trailerUrl
+            ? getYouTubeVideoId(formInfo.trailerUrl)
+              ? "Link trailer hợp lệ"
+              : "Hãy nhập đúng link video YouTube"
+            : "Có thể bổ sung trailer sau"}
+        </small>
       </div>
 
       <div>
@@ -511,17 +593,41 @@ export const AdminMovieAddSection = () => {
         </div>
       )}
 
-      {!moviesLoading && movies.length === 0 && (
-        <p className="admin-movie-empty">Chưa có phim trong hệ thống.</p>
-      )}
+      {!moviesLoading && (
+        <div className="admin-movie-catalog">
+          {movieSections.map((section) => (
+            <section className={`admin-movie-group admin-movie-group--${section.key}`} key={section.key}>
+              <button
+                type="button"
+                className="admin-movie-group-toggle"
+                onClick={() => toggleMovieGroup(section.key)}
+                aria-expanded={expandedGroups[section.key]}
+                aria-controls={`admin-movie-group-${section.key}`}
+              >
+                <span className="admin-movie-group-heading">
+                  <span className="admin-movie-group-dot" aria-hidden="true" />
+                  <span>
+                    <strong>{section.title}</strong>
+                    <small>{section.description}</small>
+                  </span>
+                </span>
+                <span className="admin-movie-group-summary">
+                  <span>{section.movies.length} phim</span>
+                  <FiChevronDown className={expandedGroups[section.key] ? "is-expanded" : ""} />
+                </span>
+              </button>
 
-      {!moviesLoading && movies.length > 0 && (
-        <motion.div layout className="admin-movie-grid">
-          {movies.map((movie) => (
+              {expandedGroups[section.key] ? (
+                <div id={`admin-movie-group-${section.key}`} className="admin-movie-group-content">
+                  {section.movies.length === 0 ? (
+                    <p className="admin-movie-group-empty">Chưa có phim trong danh mục này.</p>
+                  ) : (
+                    <motion.div layout className="admin-movie-grid">
+                      {section.movies.map((movie) => (
             <motion.article
               layout
               {...movieCardMotion}
-              className={`admin-movie-card ${
+              className={`admin-movie-card admin-movie-card--${section.key} ${
                 editingMovieId === movie.id ? "admin-movie-card--editing" : ""
               }`}
               key={movie.id}
@@ -564,21 +670,33 @@ export const AdminMovieAddSection = () => {
               ) : (
                 <div className="admin-movie-card-body">
                   <div>
-                    <h3>{movie.name}</h3>
+                    <div className="admin-movie-title-row">
+                      <h3>{movie.name}</h3>
+                      <span className={`admin-movie-lifecycle is-${section.key}`}>{section.label}</span>
+                    </div>
                     <p className="admin-movie-genre-line">
                       <FiTag />
                       {movie.genres || "Chưa có thể loại"}
                     </p>
                   </div>
                   <div className="admin-movie-meta">
-                    <span><FiStar />{formatRating(movie.rating)}/10</span>
-                    <span><FiClock />{movie.duration}</span>
+                    <span><FiStar />{formatRating(movie.rating)}</span>
+                    <span><FiClock />{movie.duration ? `${movie.duration} phút` : "Chưa cập nhật"}</span>
                     <span><FiCalendar />{toDateInput(movie.release_date)}</span>
                     <span><FiCalendar />Đến {toDateInput(movie.end_date)}</span>
                     <span><FiFilm />{movie.showtime_count || 0} suất chiếu</span>
                     <span><FiUsers />{movie.ticket_count || 0} vé</span>
                   </div>
                   <p className="admin-movie-description">{movie.synopsis}</p>
+                  <div className={`admin-movie-trailer-status ${movie.trailer_url ? "has-trailer" : ""}`}>
+                    <FiPlayCircle />
+                    <span>{movie.trailer_url ? "Đã có trailer" : "Chưa có trailer"}</span>
+                    {movie.trailer_url && (
+                      <a href={movie.trailer_url} target="_blank" rel="noreferrer">
+                        Xem <FiExternalLink />
+                      </a>
+                    )}
+                  </div>
                   <div className="admin-movie-actions">
                     <button
                       className="btn-admin"
@@ -601,8 +719,14 @@ export const AdminMovieAddSection = () => {
                 </div>
               )}
             </motion.article>
+                      ))}
+                    </motion.div>
+                  )}
+                </div>
+              ) : null}
+            </section>
           ))}
-        </motion.div>
+        </div>
       )}
     </section>
   );

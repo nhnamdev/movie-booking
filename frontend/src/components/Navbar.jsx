@@ -4,6 +4,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { logout, showLoginModal, showSignModal } from "../reducers/authSlice";
 import { toggleMenuState } from "../reducers/mobileNavSlice";
+import axios from "axios";
+import { API_URL } from "../utils/apiUrl";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -36,7 +38,8 @@ export const Navbar = () => {
   const LogoLink = pageName === "home" ? HashLink : Link;
   const logoTarget = pageName === "home" ? "#headerTop" : "/";
 
-  const handlelogout = () => {
+  const handlelogout = async () => {
+    await axios.post(`${API_URL}/logout`).catch(() => {});
     dispatch(logout());
   };
 

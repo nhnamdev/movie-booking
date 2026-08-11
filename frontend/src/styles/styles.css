@@ -2217,6 +2217,208 @@ header {
   border: 2px solid #ef5e78;
 }
 
+/* Nút chọn ngày và suất chiếu trong luồng đặt vé */
+.form-item-options {
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 0.4rem 0.2rem 1rem;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: #4b4e5a transparent;
+}
+
+.date-input-container {
+  flex: 0 0 9.6rem;
+  width: 9.6rem;
+  height: 9rem;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid #454957;
+  border-radius: 12px;
+  background: #252835;
+  scroll-snap-align: start;
+  touch-action: manipulation;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.date-input-container input,
+.time-input-container input {
+  inset: 0;
+  z-index: 2;
+  margin: 0;
+  touch-action: manipulation;
+}
+
+.form-date-detail,
+.form-time-detail {
+  pointer-events: none;
+  user-select: none;
+}
+
+.form-day {
+  margin-bottom: 0.5rem;
+  color: #aeb0b8;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.form-date-month {
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.form-date {
+  color: #f4f4f5;
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.form-month {
+  color: #aeb0b8;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.date-input-container:hover {
+  border-color: rgba(235, 54, 86, 0.72);
+  background: #2d303d;
+  box-shadow: 0 0.8rem 2rem rgba(8, 9, 14, 0.22);
+  transform: translateY(-0.2rem);
+}
+
+.date-input-container:focus-within,
+.time-input-container:focus-within {
+  outline: 2px solid rgba(235, 54, 86, 0.38);
+  outline-offset: 2px;
+}
+
+.date-input-container.is-selected {
+  border-color: #eb3656;
+  background: rgba(235, 54, 86, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(235, 54, 86, 0.28);
+}
+
+.date-input-container.is-selected .form-day,
+.date-input-container.is-selected .form-month {
+  color: #fda4b4;
+}
+
+.date-input-container.is-disabled,
+.time-input-container.is-disabled {
+  opacity: 0.48;
+}
+
+.date-input-container.is-disabled input,
+.time-input-container.is-disabled input {
+  cursor: not-allowed;
+}
+
+.form-hall-container {
+  gap: 0;
+  padding: 0 1.8rem;
+  border: 1px solid #3b3e4b;
+  border-radius: 12px;
+  background: #222531;
+}
+
+.form-options-hall {
+  gap: 2rem;
+  padding: 1.8rem 0;
+  border-bottom: 1px solid #3b3e4b;
+}
+
+.form-options-hall:last-child {
+  border-bottom: 0;
+}
+
+.form-picture-quality {
+  min-width: 0;
+  flex: 1;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-hall-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.form-hall-heading strong {
+  color: #f4f4f5;
+  font-size: 1.5rem;
+}
+
+.form-hall-heading span {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  color: #fda4b4;
+  background: rgba(235, 54, 86, 0.12);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.form-showtimes {
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.time-input-container {
+  width: 9rem;
+  min-height: 4.8rem;
+  border: 1px solid #565a68;
+  border-radius: 9px;
+  color: #f4f4f5;
+  background: #2d303d;
+  font-size: 1.4rem;
+  line-height: 1;
+  touch-action: manipulation;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.time-input-container:hover {
+  border: 1px solid rgba(235, 54, 86, 0.75);
+  background: #363945;
+  box-shadow: 0 0.8rem 1.8rem rgba(8, 9, 14, 0.2);
+  transform: translateY(-0.15rem);
+}
+
+.time-input-container.is-selected {
+  border-color: #eb3656;
+  color: #fff;
+  background: #eb3656;
+  box-shadow: 0 0.8rem 1.8rem rgba(235, 54, 86, 0.2);
+}
+
+.form-time-detail {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 4.6rem;
+  font-weight: 800;
+}
+
+.form-show-price {
+  flex: 0 0 auto;
+  color: #9fa1aa;
+  white-space: nowrap;
+}
+
+.form-show-price strong {
+  color: #f4f4f5;
+  font-size: 1.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .date-input-container,
+  .time-input-container {
+    transition: none;
+  }
+}
+
 /* seat selector */
 
 .theatre-screen {
@@ -2490,6 +2692,118 @@ header {
   font-weight: 600;
 }
 
+.movie-trailer-button {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  width: fit-content;
+  min-height: 4.6rem;
+  margin-top: 0.8rem;
+  padding: 1rem 1.8rem;
+  border: 1px solid #eb3656;
+  border-radius: 8px;
+  color: #fff;
+  background: #eb3656;
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.movie-trailer-button:hover {
+  background: #cf2947;
+  transform: translateY(-1px);
+}
+
+.movie-trailer-button:focus-visible,
+.movie-trailer-header button:focus-visible {
+  outline: 3px solid rgba(235, 54, 86, 0.35);
+  outline-offset: 3px;
+}
+
+.movie-trailer-button svg {
+  font-size: 2rem;
+}
+
+.movie-trailer-modal {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 2.4rem;
+  background: rgba(5, 7, 13, 0.88);
+  backdrop-filter: blur(8px);
+}
+
+.movie-trailer-dialog {
+  overflow: hidden;
+  width: min(96rem, 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: #151723;
+  box-shadow: 0 3rem 8rem rgba(0, 0, 0, 0.55);
+}
+
+.movie-trailer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.6rem 1.8rem;
+}
+
+.movie-trailer-header span {
+  color: #eb3656;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.movie-trailer-header h3 {
+  margin-top: 0.35rem;
+  color: #f3f4f6;
+  font-size: 1.8rem;
+  line-height: 1.3;
+}
+
+.movie-trailer-header button {
+  display: grid;
+  flex: 0 0 auto;
+  width: 4rem;
+  height: 4rem;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  color: #fff;
+  background: #252938;
+  font-size: 2.2rem;
+  cursor: pointer;
+}
+
+.movie-trailer-frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #05070d;
+}
+
+.movie-trailer-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+@media (max-width: 44em) {
+  .movie-trailer-modal { padding: 1.2rem; }
+  .movie-trailer-header { padding: 1.2rem 1.4rem; }
+  .movie-trailer-header h3 { font-size: 1.5rem; }
+  .movie-trailer-button { width: 100%; }
+}
+
 .movie-info-description-container {
   display: flex;
   flex-direction: column;
@@ -2687,21 +3001,6 @@ header {
   color: #ef5e78;
   letter-spacing: 0.5px;
 }
-.cancel-ticket-btn {
-  margin-top: 8px;
-  padding: 6px 12px;
-  background-color: #eb3656;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-.cancel-ticket-btn:hover {
-  background-color: #c72b48;
-}
-
-
 .purchase-date-time,
 .purchase-price-create {
   display: flex;

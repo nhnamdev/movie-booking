@@ -2,7 +2,7 @@ import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiEdit3, FiSave, FiUserPlus } from "react-icons/fi";
 import { useSelector } from "react-redux";
-import { ClipLoader } from "react-spinners";
+import ClipLoader from "react-spinners/esm/ClipLoader.js";
 import { adminErrorToast, adminShowninToast } from "../../../toasts/toast";
 import { API_URL } from "../../../utils/apiUrl";
 
@@ -22,8 +22,8 @@ export const AdminStaffSection = () => {
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
   const credentials = useMemo(
-    () => ({ email: signedPerson.email, password: signedPerson.password }),
-    [signedPerson.email, signedPerson.password]
+    () => ({ email: signedPerson.email }),
+    [signedPerson.email]
   );
 
   const loadStaff = useCallback(async () => {

@@ -14,7 +14,7 @@ import {
   FiTrash2,
   FiX,
 } from "react-icons/fi";
-import { ClipLoader } from "react-spinners";
+import ClipLoader from "react-spinners/esm/ClipLoader.js";
 import { adminErrorToast, adminShowtimeToast, adminShowninToast } from "../../../toasts/toast";
 
 const emptyShowtimeForm = {
@@ -27,6 +27,14 @@ const emptyShowtimeForm = {
   screenType: "Tiêu chuẩn",
   pricePerSeat: "120000",
 };
+
+const ticketPrices = {
+  "Tiêu chuẩn": { "2D": "120000", "3D": "150000" },
+  "Cao cấp": { "2D": "150000", "3D": "180000" },
+};
+
+const getTicketPrice = (screenType, showType) =>
+  ticketPrices[screenType]?.[showType] || "";
 
 const toDateInput = (value) => {
   if (!value) return "";
@@ -55,8 +63,11 @@ const toFormFromSlot = (slot, hall) => ({
   showtimeDate: toDateInput(slot.showtime_date),
   movieStartTime: slot.movie_start_time || "",
   showType: slot.show_type || "2D",
-  screenType: slot.screen_type || "Tiêu chuẩn",
-  pricePerSeat: String(slot.price_per_seat || ""),
+  screenType: hall?.screen_type || slot.screen_type || "Tiêu chuẩn",
+  pricePerSeat: getTicketPrice(
+    hall?.screen_type || slot.screen_type || "Tiêu chuẩn",
+    slot.show_type || "2D"
+  ),
 });
 
 export const AdminShownInModifySection = () => {
@@ -80,13 +91,12 @@ export const AdminShownInModifySection = () => {
   const adminPayload = useMemo(
     () => ({
       email: signedPerson?.email,
-      password: signedPerson?.password,
     }),
-    [signedPerson?.email, signedPerson?.password]
+    [signedPerson?.email]
   );
 
   const fetchOptions = useCallback(async () => {
-    if (!adminPayload.email || !adminPayload.password) return;
+    if (!adminPayload.email) return;
 
     try {
       const response = await axios.post(
@@ -102,7 +112,7 @@ export const AdminShownInModifySection = () => {
   }, [adminPayload]);
 
   const fetchSlots = useCallback(async () => {
-    if (!adminPayload.email || !adminPayload.password) return;
+    if (!adminPayload.email) return;
 
     try {
       setSlotsLoading(true);
@@ -244,11 +254,38 @@ export const AdminShownInModifySection = () => {
 
   const handleFormChange = (setter) => (e) => {
     const { name, value } = e.target;
-    setter((prev) => ({
-      ...prev,
-      [name]: value,
-      ...(name === "theatreId" ? { hallId: "" } : {}),
-    }));
+    setter((prev) => {
+      if (name === "theatreId") {
+        return {
+          ...prev,
+          theatreId: value,
+          hallId: "",
+          showType: "2D",
+          screenType: "Tiêu chuẩn",
+          pricePerSeat: getTicketPrice("Tiêu chuẩn", "2D"),
+        };
+      }
+      if (name === "hallId") {
+        const hall = halls.find((item) => String(item.id) === String(value));
+        const screenType = hall?.screen_type || "Tiêu chuẩn";
+        const showType = hall?.projection_capability === "3D" ? "3D" : "2D";
+        return {
+          ...prev,
+          hallId: value,
+          showType,
+          screenType,
+          pricePerSeat: getTicketPrice(screenType, showType),
+        };
+      }
+      if (name === "showType") {
+        return {
+          ...prev,
+          showType: value,
+          pricePerSeat: getTicketPrice(prev.screenType, value),
+        };
+      }
+      return { ...prev, [name]: value };
+    });
   };
 
   const formIsValid = (form) =>
@@ -329,12 +366,8 @@ export const AdminShownInModifySection = () => {
     const hasTickets = Number(slot.ticket_count || 0) > 0;
     const shouldDelete = window.confirm(
       hasTickets
-        ? `Huỷ/ngưng bán suất ${slot.movie_name} lúc ${slot.movie_start_time} ngày ${toVisualDate(
-            slot.showtime_date
-          )}? Vé đã đặt vẫn được giữ trong lịch sử.`
-        : `Xoá suất ${slot.movie_name} lúc ${slot.movie_start_time} ngày ${toVisualDate(
-            slot.showtime_date
-          )}?`
+        ? `Ngừng bán suất ${slot.movie_name} lúc ${slot.movie_start_time} ngày ${toVisualDate(slot.showtime_date)}? Toàn bộ vé đã phát hành vẫn có hiệu lực.`
+        : `Xoá suất ${slot.movie_name} lúc ${slot.movie_start_time} ngày ${toVisualDate(slot.showtime_date)}?`
     );
     if (!shouldDelete) return;
 
@@ -346,11 +379,7 @@ export const AdminShownInModifySection = () => {
         hallId: slot.hall_id,
         showtimeId: slot.showtime_id,
       });
-      adminShowninToast(
-        response.data?.cancelled
-          ? "Đã huỷ/ngưng bán suất chiếu và giữ nguyên vé đã đặt"
-          : "Xoá suất chiếu thành công"
-      );
+      adminShowninToast(response.data?.stopped ? "Đã ngừng bán suất; toàn bộ vé vẫn có hiệu lực" : "Xoá suất chiếu thành công");
       await refreshAll();
     } catch (err) {
       adminErrorToast(err?.response?.data?.message);
@@ -379,6 +408,7 @@ export const AdminShownInModifySection = () => {
 
   const renderShowtimeFields = (form, onChange) => {
     const selectedMovie = movies.find((movie) => Number(movie.id) === Number(form.movieId));
+    const selectedHall = halls.find((hall) => Number(hall.id) === Number(form.hallId));
     const availableHalls = halls.filter(
       (hall) => String(hall.theatre_id) === String(form.theatreId)
     );
@@ -422,7 +452,7 @@ export const AdminShownInModifySection = () => {
           <option value="">Chọn phòng</option>
           {availableHalls.map((hall) => (
             <option key={hall.id} value={hall.id}>
-              {hall.name}
+              {hall.name} · {hall.screen_type} · {hall.projection_capability === "BOTH" ? "2D & 3D" : hall.projection_capability}
             </option>
           ))}
         </select>
@@ -455,18 +485,15 @@ export const AdminShownInModifySection = () => {
       </div>
       <div>
         <label>Định dạng</label>
-        <select name="showType" value={form.showType} onChange={onChange}>
-          <option value="2D">2D</option>
-          <option value="3D">3D</option>
+        <select name="showType" value={form.showType} onChange={onChange} disabled={!selectedHall}>
+          {selectedHall?.projection_capability !== "3D" && <option value="2D">2D</option>}
+          {selectedHall?.projection_capability !== "2D" && <option value="3D">3D</option>}
         </select>
+        {selectedHall && <small className="admin-field-hint">Theo khả năng trình chiếu của {selectedHall.name}.</small>}
       </div>
       <div>
-        <label>Loại phòng</label>
-        <select name="screenType" value={form.screenType} onChange={onChange}>
-          <option value="Tiêu chuẩn">Tiêu chuẩn</option>
-          <option value="Cao cấp">Cao cấp</option>
-          <option value="IMAX">IMAX</option>
-        </select>
+        <label>Hạng phòng</label>
+        <input value={selectedHall ? form.screenType : ""} placeholder="Chọn phòng trước" readOnly />
       </div>
       <div>
         <label>Giá vé</label>
@@ -476,8 +503,9 @@ export const AdminShownInModifySection = () => {
           min="0"
           step="1000"
           value={form.pricePerSeat}
-          onChange={onChange}
+          readOnly
         />
+        <small className="admin-field-hint">Tự động theo bảng giá vé.</small>
       </div>
     </>
     );
@@ -652,13 +680,13 @@ export const AdminShownInModifySection = () => {
                               {hall.slots.map((slot) => {
                                 const currentKey = slotKey(slot);
                                 const isEditing = editingKey === currentKey;
-                                const isCancelled =
-                                  slot.slot_status === "cancelled" || slot.showtime_status === "cancelled";
-                                const hasEnded = !isCancelled && Number(slot.has_ended) === 1;
+                                const isStopped =
+                                  slot.slot_status !== "active" || slot.showtime_status !== "active";
+                                const hasEnded = !isStopped && Number(slot.has_ended) === 1;
                                 const hasTickets = Number(slot.ticket_count || 0) > 0;
                                 return (
                                   <article
-                                    className={`admin-showtime-slot${isCancelled ? " is-cancelled" : ""}${hasEnded ? " is-ended" : ""}${isEditing ? " is-editing" : ""}`}
+                                    className={`admin-showtime-slot${isStopped ? " is-cancelled" : ""}${hasEnded ? " is-ended" : ""}${isEditing ? " is-editing" : ""}`}
                                     key={currentKey}
                                   >
                                     {isEditing ? (
@@ -673,8 +701,8 @@ export const AdminShownInModifySection = () => {
                                       <>
                                         <div className="admin-showtime-slot-topline">
                                           <strong className="admin-showtime-slot-time">{toVisualTime(slot.movie_start_time)}</strong>
-                                          <span className={`admin-status-badge ${isCancelled ? "is-cancelled" : hasEnded ? "is-ended" : "is-active"}`}>
-                                            {isCancelled ? "Đã huỷ" : hasEnded ? "Đã kết thúc" : "Đang bán"}
+                                          <span className={`admin-status-badge ${isStopped ? "is-cancelled" : hasEnded ? "is-ended" : "is-active"}`}>
+                                            {isStopped ? "Ngừng bán" : hasEnded ? "Đã kết thúc" : "Đang bán"}
                                           </span>
                                         </div>
                                         <h4>{slot.movie_name}</h4>
@@ -686,11 +714,17 @@ export const AdminShownInModifySection = () => {
                                           <span>{slot.ticket_count || 0} vé</span>
                                         </div>
                                         <div className="admin-card-actions admin-showtime-slot-actions">
-                                          <button className="btn-admin admin-btn-secondary" type="button" onClick={() => startEditSlot(slot)} disabled={isCancelled || hasEnded}><FiEdit3 />Sửa</button>
-                                          {isCancelled ? (
+                                          <button className="btn-admin admin-btn-secondary" type="button" onClick={() => startEditSlot(slot)} disabled={isStopped || hasEnded}><FiEdit3 />Sửa</button>
+                                          {isStopped ? (
                                             <button className="btn-admin" type="button" onClick={() => handleRestoreShowtime(slot)} disabled={loading}><FiRotateCcw />Mở lại</button>
                                           ) : (
-                                            <button className="btn-admin admin-btn-danger" type="button" onClick={() => handleDeleteShowtime(slot)} disabled={loading}><FiTrash2 />{hasTickets ? "Huỷ" : "Xoá"}</button>
+                                            <button
+                                              className="btn-admin admin-btn-danger"
+                                              type="button"
+                                              onClick={() => handleDeleteShowtime(slot)}
+                                              disabled={loading}
+                                              title={hasTickets ? "Ngừng bán nhưng giữ nguyên toàn bộ vé" : "Xoá suất chiếu"}
+                                            ><FiTrash2 />{hasTickets ? "Ngừng bán" : "Xoá"}</button>
                                           )}
                                         </div>
                                       </>

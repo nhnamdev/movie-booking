@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Feature } from "./Feature";
-import HashLoader from "react-spinners/HashLoader";
+import HashLoader from "react-spinners/esm/HashLoader.js";
 
 export const Features = () => {
   const [featuresData, setFeaturesData] = useState([]);

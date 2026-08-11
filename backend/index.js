@@ -10,15 +10,12 @@ const createStaffManagementService = require("./services/staffManagementService"
 const createRewardService = require("./services/rewardService");
 const createAdminService = require("./services/adminService");
 const createShowtimeAvailabilityService = require("./services/showtimeAvailabilityService");
+const createMoviePerformanceService = require("./services/moviePerformanceService");
 const registrationLogService = require("./services/registrationLogService");
 const storageService = require("./services/storageService");
-const createLegacyEndpointGuard = require("./middleware/legacyEndpointGuard");
+const createAuthentication = require("./middleware/authentication");
+const { rateLimit } = require("express-rate-limit");
 const uploadImage = require("./middleware/uploadImage");
-
-console.log("ENV loaded:");
-console.log("DB_HOST =", process.env.DB_HOST);
-console.log("DB_PORT =", process.env.DB_PORT);
-console.log("DB_NAME =", process.env.DB_NAME);
 
 const port = process.env.PORT || 7000;
 const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/+$/, "");
@@ -37,6 +34,7 @@ const comboService = createComboService({ queryDbAsync: databaseService.query })
 const cinemaManagementService = createCinemaManagementService({
   queryDbAsync: databaseService.query,
   withTransaction: databaseService.withTransaction,
+  deleteFromR2: storageService.deleteFromR2,
 });
 const concessionService = createConcessionService({ queryDbAsync: databaseService.query });
 const staffManagementService = createStaffManagementService({
@@ -47,6 +45,9 @@ const rewardService = createRewardService({
   withTransaction: databaseService.withTransaction,
 });
 const showtimeAvailabilityService = createShowtimeAvailabilityService({
+  queryDbAsync: databaseService.query,
+});
+const moviePerformanceService = createMoviePerformanceService({
   queryDbAsync: databaseService.query,
 });
 const paymentService = createPaymentService({
@@ -67,6 +68,7 @@ const adminService = createAdminService({
 const dependencies = {
   db: databaseService.db,
   queryDbAsync: databaseService.query,
+  withTransaction: databaseService.withTransaction,
   frontendUrl,
   ...comboService,
   ...cinemaManagementService,
@@ -74,18 +76,28 @@ const dependencies = {
   ...staffManagementService,
   ...rewardService,
   ...showtimeAvailabilityService,
+  ...moviePerformanceService,
   ...paymentService,
   ...adminService,
   ...registrationLogService,
   ...storageService,
 };
 
-const legacyEndpointGuard = createLegacyEndpointGuard(adminService);
+const authentication = createAuthentication({ queryDbAsync: databaseService.query });
+Object.assign(dependencies, authentication);
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Bạn đã thử đăng nhập quá nhiều lần. Vui lòng thử lại sau." },
+});
 const app = createApp({
   dependencies,
-  legacyEndpointGuard,
   uploadImage,
   corsOrigins,
+  authentication,
+  loginLimiter,
 });
 
 if (require.main === module) {

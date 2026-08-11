@@ -1,7 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { showLoginModal } from "../reducers/authSlice";
-import { resetCart } from "../reducers/cartSlice";
 import { resolveMediaUrl } from "../utils/mediaUrl";
 
 export const CollectionCard = ({
@@ -16,16 +13,16 @@ export const CollectionCard = ({
   has_bookable_showtime,
 }) => {
   const navigate = useNavigate();
-  const { isAuthenticated, signedPerson } = useSelector(
-    (store) => store.authentication
-  );
-  const dispatch = useDispatch();
 
   const releaseDate = new Date(release_date).toLocaleDateString("vi-VN");
   const ratingNumber = Number(rating);
-  const displayRating = Number.isFinite(ratingNumber)
+  const displayRating = Number.isFinite(ratingNumber) && ratingNumber > 0
     ? ratingNumber.toFixed(1)
     : "Chưa có";
+  const durationNumber = Number(duration);
+  const displayDuration = Number.isFinite(durationNumber) && durationNumber > 0
+    ? `${durationNumber} phút`
+    : "Chưa cập nhật";
   const isUpcoming = screening_status === "upcoming";
   const bookingAvailable = !isUpcoming || Number(has_bookable_showtime) === 1;
 
@@ -133,7 +130,7 @@ export const CollectionCard = ({
               d="M256 128v144h96"
             />
           </svg>
-          <p className="category-value">{duration}</p>
+          <p className="category-value">{displayDuration}</p>
         </div>
       </div>
 
@@ -143,10 +140,7 @@ export const CollectionCard = ({
         onClick={(e) => {
           e.stopPropagation();
           if (!bookingAvailable) return;
-          dispatch(resetCart());
-          isAuthenticated && signedPerson.person_type === "Customer"
-            ? navigate("/purchase")
-            : dispatch(showLoginModal());
+          navigate(`/movieDetails/${id}`);
         }}
       >
         {isUpcoming ? (bookingAvailable ? "Đặt vé sớm" : "Chưa mở bán") : "Đặt vé"}

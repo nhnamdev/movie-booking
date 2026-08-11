@@ -1,0 +1,10 @@
+{
+  "name": "booking-cgv",
+  "private": true,
+  "scripts": {
+    "all": "concurrently --kill-others-on-fail --names BACKEND,FRONTEND --prefix-colors cyan,magenta \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

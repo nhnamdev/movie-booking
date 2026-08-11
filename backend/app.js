@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./swagger");
 
@@ -29,9 +31,10 @@ const createMediaRoutes = require("./routes/mediaRoutes");
 
 const createApp = ({
   dependencies,
-  legacyEndpointGuard,
   uploadImage,
   corsOrigins,
+  authentication,
+  loginLimiter,
 }) => {
   const app = express();
 
@@ -42,8 +45,10 @@ const createApp = ({
       credentials: true,
     })
   );
-  app.use(express.json());
+  app.use(helmet({ contentSecurityPolicy: false }));
+  app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true }));
+  app.use(cookieParser());
 
   app.get("/api-docs.json", (req, res) => res.json(swaggerDocument));
   app.use(
@@ -70,14 +75,14 @@ const createApp = ({
   app.use(createMediaRoutes(mediaController));
   app.use(createCatalogRoutes(catalogController));
   app.use(createBookingRoutes(bookingController));
-  app.use(createPaymentRoutes(paymentController, { legacyEndpointGuard }));
-  app.use(createAuthRoutes(authController));
-  app.use(createCustomerRoutes(customerController));
-  app.use(createAdminRoutes(adminController, { uploadImage }));
-  app.use(createCinemaManagementRoutes(cinemaManagementController));
-  app.use(createConcessionRoutes(concessionController));
-  app.use(createStaffManagementRoutes(staffManagementController));
-  app.use(createRewardRoutes(rewardController));
+  app.use(createPaymentRoutes(paymentController, { authentication }));
+  app.use(createAuthRoutes(authController, { ...authentication, loginLimiter }));
+  app.use(createCustomerRoutes(customerController, authentication));
+  app.use(createAdminRoutes(adminController, { uploadImage, authentication }));
+  app.use(createCinemaManagementRoutes(cinemaManagementController, authentication));
+  app.use(createConcessionRoutes(concessionController, authentication));
+  app.use(createStaffManagementRoutes(staffManagementController, authentication));
+  app.use(createRewardRoutes(rewardController, authentication));
 
   return app;
 };

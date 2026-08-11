@@ -8,7 +8,7 @@ import { LocationSelector } from "../../../components/LocationSelector";
 import { PayMethodSelector } from "./PayMethodSelector";
 import { ComboSelector } from "./ComboSelector";
 import { resolveMediaUrl } from "../../../utils/mediaUrl";
-import BarLoader from "react-spinners/BarLoader";
+import BarLoader from "react-spinners/esm/BarLoader.js";
 import { useDispatch, useSelector } from "react-redux";
 import {
   counterOrderCreated,
@@ -110,7 +110,6 @@ export const PurchaseSection = () => {
             userShowtimeId,
             comboItems: userComboItems,
             rewardPoints: userRewardPoints,
-            customerPassword: signedPerson.password,
           }
         );
 
@@ -134,7 +133,6 @@ export const PurchaseSection = () => {
           userShowtimeId,
           comboItems: userComboItems,
           rewardPoints: userRewardPoints,
-          customerPassword: signedPerson.password,
         }
       );
 

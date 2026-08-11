@@ -8,18 +8,17 @@ import {
 export const RevenueChart = () => {
   const { signedPerson } = useSelector((store) => store.authentication);
   const email = signedPerson?.email;
-  const password = signedPerson?.password;
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!email || !password) return;
+    if (!email) return;
 
     const fetchData = async () => {
       try {
         const res = await axios.post(
           `${import.meta.env.VITE_API_URL}/adminRevenueStats`,
-          { email, password }
+          { email }
         );
         setData(res.data);
       } catch (err) {
@@ -30,7 +29,7 @@ export const RevenueChart = () => {
     };
 
     fetchData();
-  }, [email, password]);
+  }, [email]);
 
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);

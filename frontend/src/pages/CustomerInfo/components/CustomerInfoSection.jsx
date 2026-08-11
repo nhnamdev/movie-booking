@@ -13,12 +13,18 @@ import { GiPopcorn } from "react-icons/gi";
 import { FiGift, FiTrendingDown, FiTrendingUp } from "react-icons/fi";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import HashLoader from "react-spinners/HashLoader";
+import HashLoader from "react-spinners/esm/HashLoader.js";
 import { resolveMediaUrl } from "../../../utils/mediaUrl";
 
 const paymentStatusLabels = {
   UNPAID: "Chưa thanh toán",
   PAID: "Đã thanh toán",
+};
+const fulfillmentStatusLabels = {
+  PENDING: "Chờ quầy tiếp nhận",
+  PREPARING: "Đang chuẩn bị",
+  READY: "Sẵn sàng nhận",
+  PICKED_UP: "Đã nhận",
 };
 
 export const CustomerInfoSection = () => {
@@ -43,7 +49,6 @@ export const CustomerInfoSection = () => {
           `${import.meta.env.VITE_API_URL}/customerProfile`,
           {
             email: signedPerson.email,
-            password: signedPerson.password,
           }
         );
         setCusProData(response.data[0]);
@@ -62,12 +67,8 @@ export const CustomerInfoSection = () => {
         );
         const purchases = Array.isArray(response.data) ? response.data : [];
         const formattedData = purchases.map((dataObj) => {
-          const purDate = new Date(dataObj.purchase_date).toLocaleDateString(
-            "vi-VN"
-          );
-          const showDate = new Date(dataObj.showtime_date).toLocaleDateString(
-            "vi-VN"
-          );
+          const purDate = dataObj.purchase_date ? new Date(dataObj.purchase_date).toLocaleDateString("vi-VN") : "--";
+          const showDate = dataObj.showtime_date ? new Date(`${dataObj.showtime_date}T00:00:00`).toLocaleDateString("vi-VN") : null;
           return {
             ...dataObj,
             showtime_date: showDate,
@@ -84,7 +85,7 @@ export const CustomerInfoSection = () => {
       try {
         const response = await axios.post(
           `${import.meta.env.VITE_API_URL}/customerRewards`,
-          { email: signedPerson.email, password: signedPerson.password }
+          { email: signedPerson.email }
         );
         setRewardData(response.data);
       } catch (err) {
@@ -96,37 +97,15 @@ export const CustomerInfoSection = () => {
 
     fetchData();
   }, [signedPerson]);
-  // Hàm hủy vé
-const cancelTicket = async (ticketId) => {
-  const confirmCancel = confirm("Bạn có chắc muốn hủy vé này không?");
-  if (!confirmCancel) return;
-
-  try {
-    const res = await axios.post(`${import.meta.env.VITE_API_URL}/cancelOneTicket`, {
-      ticketId: ticketId,
-    });
-
-    if (res.data.success) {
-      alert("Hủy vé thành công!");
-      // Cập nhật lại danh sách vé sau khi xóa
-      setCusTicketData((prev) => prev.filter(ticket => ticket.ticket_ids !== ticketId));
-    } else {
-      alert("Hủy vé thất bại: " + res.data.message);
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Đã xảy ra lỗi khi hủy vé.");
-  }
-};
-
-
   const purchaseHtml = cusTicketData.map((cusTicket, id) => {
     const paymentStatus = String(cusTicket.payment_status || "PAID").toUpperCase();
+    const isConcessionOrder = cusTicket.order_type === "CONCESSION";
+    const PurchaseWrapper = cusTicket.movie_id ? Link : "article";
 
     return (
-      <Link
+      <PurchaseWrapper
         key={id}
-        to={`/movieDetails/${cusTicket.movie_id}`}
+        {...(cusTicket.movie_id ? { to: `/movieDetails/${cusTicket.movie_id}` } : {})}
         className="purchase-history-item"
       >
         <div className="purchase-first-gap"></div>
@@ -136,28 +115,28 @@ const cancelTicket = async (ticketId) => {
           <div className="purchase-item-header">
             <h2>{cusTicket.movie_name}</h2>
 
-            <div className="purchase-show-quality">
+            {!isConcessionOrder ? <div className="purchase-show-quality">
               <HiOutlineTv size={18} />
               <p>{cusTicket.show_type}</p>
-            </div>
+            </div> : null}
           </div>
 
-          <div className="purchase-ticket-id">
+          {cusTicket.ticket_ids ? <div className="purchase-ticket-id">
             <HiOutlineTicket size={16} />
             <p className="ticket-id">Mã vé: {cusTicket.ticket_ids}</p>
-          </div>
+          </div> : null}
 
           <div className="purchase-hall-info">
             <HiOutlineMapPin size={18} />
             <p>
-              {cusTicket.theatre_name} &mdash; {cusTicket.hall_name}
+              {cusTicket.theatre_name}{cusTicket.hall_name ? ` - ${cusTicket.hall_name}` : ""}
             </p>
           </div>
 
-          <div className="purchase-seat">
+          {cusTicket.seat_numbers ? <div className="purchase-seat">
             <RiSofaLine size={20} />
             <p>{cusTicket.seat_numbers}</p>
-          </div>
+          </div> : null}
 
           {cusTicket.combo_items?.length ? (
             <div className="purchase-seat">
@@ -170,6 +149,13 @@ const cancelTicket = async (ticketId) => {
             </div>
           ) : null}
 
+          {cusTicket.combo_items?.length ? (
+            <div className="purchase-seat">
+              <GiPopcorn size={20} />
+              <p>{fulfillmentStatusLabels[cusTicket.fulfillment_status] || "Chờ quầy tiếp nhận"}</p>
+            </div>
+          ) : null}
+
           {cusTicket.reward_points_used > 0 ? (
             <div className="purchase-seat purchase-reward-line">
               <FiGift size={20} />
@@ -177,7 +163,7 @@ const cancelTicket = async (ticketId) => {
             </div>
           ) : null}
 
-          <div className="purchase-date-time">
+          {!isConcessionOrder ? <div className="purchase-date-time">
             <div className="purchase-tags">
               <HiCalendar size={20} />
               <strong>{cusTicket.showtime_date}</strong>
@@ -186,7 +172,7 @@ const cancelTicket = async (ticketId) => {
               <HiOutlineClock size={18} />
               <strong>{cusTicket.movie_start_time}</strong>
             </div>
-          </div>
+          </div> : null}
 
           <div className="purchase-price-create">
             <div className="purchase-tags">
@@ -209,15 +195,6 @@ const cancelTicket = async (ticketId) => {
               </p>
             </div>
 
-            <button
-              className="cancel-ticket-btn"
-              onClick={(e) => {
-                e.preventDefault(); // Ngăn mở trang khi bấm nút (vì đang trong <Link>)
-                cancelTicket(cusTicket.ticket_ids); // Gọi hàm hủy vé
-              }}
-            >
-              Hủy vé
-            </button>
           </div>
 
         </div>
@@ -228,11 +205,11 @@ const cancelTicket = async (ticketId) => {
         >
           <img
             className="purchase-item-img"
-            src={resolveMediaUrl(cusTicket.movie_image)}
+            src={resolveMediaUrl(cusTicket.movie_image || cusTicket.combo_items?.[0]?.imageUrl) || "/Images/features/food.webp"}
             alt={cusTicket.movie_name}
           />
         </div>
-      </Link>
+      </PurchaseWrapper>
     );
   });
 
@@ -275,8 +252,9 @@ const cancelTicket = async (ticketId) => {
               <div><small>Điểm đang giữ</small><strong>{rewardData.account.heldPoints.toLocaleString("vi-VN")}</strong></div>
               <div><small>Tổng đã nhận</small><strong>{rewardData.account.lifetimeEarned.toLocaleString("vi-VN")}</strong></div>
               <div><small>Tổng đã dùng</small><strong>{rewardData.account.lifetimeRedeemed.toLocaleString("vi-VN")}</strong></div>
+              {rewardData.account.lifetimeExpired > 0 ? <div><small>Đã hết hạn</small><strong>{rewardData.account.lifetimeExpired.toLocaleString("vi-VN")}</strong></div> : null}
             </div>
-            <p className="customer-reward-rule">Mỗi {Number(rewardData.config.earnAmountPerPoint).toLocaleString("vi-VN")}₫ thực trả nhận 1 điểm · 1 điểm giảm {Number(rewardData.config.redeemValuePerPoint).toLocaleString("vi-VN")}₫.</p>
+            <p className="customer-reward-rule">Mỗi {Number(rewardData.config.earnAmountPerPoint).toLocaleString("vi-VN")}₫ thực trả nhận 1 điểm · 1 điểm giảm {Number(rewardData.config.redeemValuePerPoint).toLocaleString("vi-VN")}₫{rewardData.config.pointExpiryDays ? ` · Điểm hết hạn sau ${rewardData.config.pointExpiryDays} ngày` : ""}.</p>
             <div className="customer-reward-history">
               <h4>Lịch sử điểm</h4>
               {rewardData.history.length ? rewardData.history.map((entry) => (
@@ -290,14 +268,14 @@ const cancelTicket = async (ticketId) => {
           </section>
         ) : <p className="customer-empty-status">Không thể tải thông tin điểm thưởng.</p>}
 
-        <h3 className="customer-info-heading">Lịch sử mua vé</h3>
+        <h3 className="customer-info-heading">Lịch sử mua hàng</h3>
         {loading2 ? (
           <HashLoader cssOverride={override} color="#eb3656" />
         ) : (
           <>
             {cusTicketData.length === 0 && (
               <p className="customer-empty-status">
-                Bạn chưa mua vé nào.
+                Bạn chưa có đơn hàng nào.
               </p>
             )}
             <div className="purchase-history-section">

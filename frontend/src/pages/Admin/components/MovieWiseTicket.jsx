@@ -5,17 +5,16 @@ import { useSelector } from "react-redux";
 export const MovieWiseTicket = () => {
   const { signedPerson } = useSelector((store) => store.authentication);
   const email = signedPerson?.email;
-  const password = signedPerson?.password;
   const [ticketData, setTicketData] = useState([]);
 
   useEffect(() => {
-    if (!email || !password) return;
+    if (!email) return;
 
     const fetchData = async () => {
       try {
         const response = await axios.post(
           `${import.meta.env.VITE_API_URL}/totalTicketPerMovie`,
-          { email, password }
+          { email }
         );
         setTicketData(response.data);
       } catch (err) {
@@ -24,7 +23,7 @@ export const MovieWiseTicket = () => {
     };
 
     fetchData();
-  }, [email, password]);
+  }, [email]);
 
   const ticketDataHtml = ticketData.map((ticket, idx) => {
     return (

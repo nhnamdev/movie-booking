@@ -4,8 +4,11 @@ import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Analytics } from "@vercel/analytics/react";
+import axios from "axios";
 
 import reduxStore from "./reduxStore.js";
+
+axios.defaults.withCredentials = true;
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -14,6 +17,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <App />
       </BrowserRouter>
     </Provider>
-    <Analytics />
+    {import.meta.env.PROD && <Analytics />}
   </React.StrictMode>
 );

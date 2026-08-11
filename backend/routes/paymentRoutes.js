@@ -1,14 +1,12 @@
 const express = require("express");
 
-const createPaymentRoutes = (controller, { legacyEndpointGuard }) => {
+const createPaymentRoutes = (controller, { authentication }) => {
   const router = express.Router();
+  const { allowRoles } = authentication;
 
-  router.post("/payment", legacyEndpointGuard, controller.payment);
-  router.post("/purchaseTicket", legacyEndpointGuard, controller.purchaseTicket);
-  router.post("/recentPurchase", legacyEndpointGuard, controller.recentPurchase);
-  router.post("/payos/create-payment-link", controller.payosCreatePaymentLink);
-  router.post("/counter-orders/create", controller.counterOrdersCreate);
-  router.post("/payos/confirm-return", controller.payosConfirmReturn);
+  router.post("/payos/create-payment-link", ...allowRoles("Customer"), controller.payosCreatePaymentLink);
+  router.post("/counter-orders/create", ...allowRoles("Customer"), controller.counterOrdersCreate);
+  router.post("/payos/confirm-return", ...allowRoles("Customer"), controller.payosConfirmReturn);
   router.post("/payos/webhook", controller.payosWebhook);
 
   return router;
