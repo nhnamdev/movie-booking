@@ -36,6 +36,11 @@ export const CollectionCard = ({
           className="home-movie-img"
           src={resolveMediaUrl(image_path)}
           alt={`Poster phim ${name}`}
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "/Images/movies/oppenheimer.webp";
+          }}
         />
       </div>
 

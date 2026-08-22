@@ -697,6 +697,9 @@ header {
 .home-movie-img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
   transition: all 0.3s;
 }
 
