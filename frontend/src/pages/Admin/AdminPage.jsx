@@ -29,9 +29,11 @@ import { AdminMoviePerformanceSection } from "./components/AdminMoviePerformance
 import { API_URL } from "../../utils/apiUrl";
 import { AdminRewardSection } from "./components/AdminRewardSection";
 import { AdminTicketPriceConfigSection } from "./components/AdminTicketPriceConfigSection";
+import { AdminConcessionPosSection } from "./components/AdminConcessionPosSection";
 
 const adminTabs = [
   { id: "dashboard", label: "Tổng quan", icon: FaChartBar },
+  { id: "pos-concessions", label: "Bán bắp nước", icon: GiPopcorn },
   { id: "orders", label: "Đơn hàng", icon: FaClipboardList },
   { id: "cinemas", label: "Chi nhánh & phòng", icon: FaBuilding },
   { id: "prices", label: "Cài đặt giá ghế", icon: FaMoneyBillWave },
@@ -44,7 +46,8 @@ const adminTabs = [
 ];
 
 const staffTabs = [
-  { id: "orders", label: "Đơn hàng", icon: FaClipboardList },
+  { id: "pos-concessions", label: "Bán bắp nước", icon: GiPopcorn },
+  { id: "orders", label: "Đơn hàng & Soát vé", icon: FaClipboardList },
 ];
 
 const AdminPage = () => {
@@ -127,6 +130,10 @@ const AdminPage = () => {
 
         <div className="admin-content">
           {activeTab === "dashboard" && <AdminDashboardPrimary />}
+
+          {activeTab === "pos-concessions" && (
+            <AdminConcessionPosSection onNavigateToOrders={() => setActiveTab("orders")} />
+          )}
 
           {activeTab === "movies" && <AdminMovieAddSection />}
 

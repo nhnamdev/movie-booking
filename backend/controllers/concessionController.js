@@ -1,4 +1,4 @@
-// Điều phối trang mua bắp nước và hai hình thức thanh toán.
+// Điều phối trang mua bắp nước và hai hình thức thanh toán (Khách hàng & POS Nhân viên).
 const createConcessionController = (dependencies) => {
   const {
     queryDbAsync,
@@ -6,12 +6,22 @@ const createConcessionController = (dependencies) => {
     buildConcessionOrderPayload,
     getPayOSClient,
     generatePayOSOrderCode,
+    finalizePaymentOrderTickets,
     frontendUrl,
     ONLINE_PAYMENT_WINDOW_MINUTES,
     COUNTER_HOLD_WINDOW_MINUTES,
     reserveRewardPoints,
     releaseRewardHold,
   } = dependencies;
+
+  const getEffectiveEmail = (req) => {
+    const raw = String(req.body.email || "").trim();
+    if (raw) return raw;
+    if (["Staff", "Admin"].includes(req.user?.person_type)) {
+      return `khachle_${Date.now()}@pos.cgv.vn`;
+    }
+    return req.user?.email || "";
+  };
 
   const catalog = async (req, res) => {
     try {
@@ -24,15 +34,16 @@ const createConcessionController = (dependencies) => {
   const createPayOSOrder = async (req, res) => {
     let orderCode;
     try {
+      const email = getEffectiveEmail(req);
       const orderData = await buildConcessionOrderPayload({
-        email: req.body.email,
+        email,
         theatreId: req.body.theatreId,
         items: req.body.items,
         paymentMethod: "PayOS",
       });
       orderCode = generatePayOSOrderCode();
       const reward = await reserveRewardPoints({
-        email: req.body.email,
+        email,
         password: req.body.customerPassword,
         orderCode,
         grossAmount: orderData.amount,
@@ -51,15 +62,23 @@ const createConcessionController = (dependencies) => {
         `INSERT INTO payos_orders
           (order_code, status, amount, customer_email, payload_json, payment_method, expires_at)
          VALUES (?, 'PENDING', ?, ?, ?, 'PayOS', DATE_ADD(NOW(), INTERVAL 10 MINUTE))`,
-        [orderCode, orderData.amount, req.body.email, JSON.stringify(orderData.payload)]
+        [orderCode, orderData.amount, email, JSON.stringify(orderData.payload)]
       );
 
       try {
+        const isOperator = ["Staff", "Admin"].includes(req.user?.person_type);
+        const cancelUrl = isOperator
+          ? `${frontendUrl}/admin?payosCancel=1&payosOrderCode=${orderCode}`
+          : `${frontendUrl}/bap-nuoc?payosCancel=1&payosOrderCode=${orderCode}`;
+        const returnUrl = isOperator
+          ? `${frontendUrl}/admin?payosOrderCode=${orderCode}`
+          : `${frontendUrl}/bap-nuoc?payosOrderCode=${orderCode}`;
+
         const paymentLink = await getPayOSClient().paymentRequests.create({
           orderCode,
           amount: orderData.amount,
           description: `CGV FOOD ${orderCode}`.slice(0, 25),
-          buyerEmail: req.body.email,
+          buyerEmail: email,
           items: reward.pointsUsed > 0 ? [{
             name: "Don bap nuoc sau giam diem",
             quantity: 1,
@@ -69,8 +88,8 @@ const createConcessionController = (dependencies) => {
             quantity: item.quantity,
             price: item.finalUnitPrice,
           })),
-          cancelUrl: `${frontendUrl}/bap-nuoc?payosCancel=1&payosOrderCode=${orderCode}`,
-          returnUrl: `${frontendUrl}/bap-nuoc?payosOrderCode=${orderCode}`,
+          cancelUrl,
+          returnUrl,
           expiredAt: Math.floor(Date.now() / 1000) + ONLINE_PAYMENT_WINDOW_MINUTES * 60,
         });
         await queryDbAsync(
@@ -102,15 +121,19 @@ const createConcessionController = (dependencies) => {
   const createCounterOrder = async (req, res) => {
     let orderCode;
     try {
+      const email = getEffectiveEmail(req);
+      const isOperator = ["Staff", "Admin"].includes(req.user?.person_type);
+      const isDirectPaid = Boolean(req.body.directPaid && isOperator);
+
       const orderData = await buildConcessionOrderPayload({
-        email: req.body.email,
+        email,
         theatreId: req.body.theatreId,
         items: req.body.items,
         paymentMethod: "Thanh toán tại rạp",
       });
       orderCode = generatePayOSOrderCode();
       const reward = await reserveRewardPoints({
-        email: req.body.email,
+        email,
         password: req.body.customerPassword,
         orderCode,
         grossAmount: orderData.amount,
@@ -125,12 +148,44 @@ const createConcessionController = (dependencies) => {
         amount: reward.payableAmount,
       };
       orderData.amount = reward.payableAmount;
+
       await queryDbAsync(
         `INSERT INTO payos_orders
           (order_code, status, amount, customer_email, payload_json, payment_method, expires_at)
          VALUES (?, 'UNPAID', ?, ?, ?, 'Thanh toán tại rạp', DATE_ADD(NOW(), INTERVAL 30 MINUTE))`,
-        [orderCode, orderData.amount, req.body.email, JSON.stringify(orderData.payload)]
+        [orderCode, orderData.amount, email, JSON.stringify(orderData.payload)]
       );
+
+      if (isDirectPaid) {
+        if (typeof finalizePaymentOrderTickets === "function") {
+          await finalizePaymentOrderTickets(orderCode, {
+            orderStatus: "PAID",
+            paymentStatus: "PAID",
+          });
+        } else {
+          await queryDbAsync(
+            "UPDATE payos_orders SET status = 'PAID' WHERE order_code = ?",
+            [orderCode]
+          );
+        }
+
+        await queryDbAsync(
+          `UPDATE payos_orders 
+           SET fulfillment_status = 'PREPARING', 
+               fulfilled_by = ? 
+           WHERE order_code = ?`,
+          [req.user?.email || "POS", orderCode]
+        );
+
+        return res.status(201).json({
+          orderCode,
+          status: "PAID",
+          fulfillmentStatus: "PREPARING",
+          reward,
+          message: "Thanh toán tiền mặt thành công. Đơn bắp nước đang được chuẩn bị!",
+        });
+      }
+
       const [created] = await queryDbAsync(
         "SELECT expires_at FROM payos_orders WHERE order_code = ?",
         [orderCode]
