@@ -1776,6 +1776,43 @@ const createAdminController = (dependencies) => {
     }
   };
 
+  const adminSeedCgvShowtimes = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      const isOperator = await requireOperator(email, password);
+      if (!isOperator) return roleAuthFailed(res);
+
+      const mysqlPromise = require("mysql2/promise");
+      const promiseConn = await mysqlPromise.createConnection({
+        host: process.env.DB_HOST,
+        port: Number(process.env.DB_PORT) || 3306,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        charset: "utf8mb4",
+        timezone: process.env.DB_TIMEZONE || "+07:00",
+      });
+      try {
+        const { seedCgvData } = require("../scripts/seedCgvSeptember2026");
+        await promiseConn.query("SET time_zone = ?", [process.env.DB_SESSION_TIMEZONE || "+07:00"]);
+        await promiseConn.beginTransaction();
+        const result = await seedCgvData(promiseConn);
+        await promiseConn.commit();
+        return res.json({
+          success: true,
+          message: `Đã seed thành công ${result.totalShowtimesCount} suất chiếu cho ${result.moviesCount} phim đến 10/09/2026!`,
+        });
+      } catch (seedErr) {
+        await promiseConn.rollback();
+        throw seedErr;
+      } finally {
+        await promiseConn.end();
+      }
+    } catch (err) {
+      return res.status(500).json({ message: err.message || "Không thể seed suất chiếu" });
+    }
+  };
+
   return {
     adminOrders,
     adminOrderStatusUpdate,
@@ -1806,6 +1843,7 @@ const createAdminController = (dependencies) => {
     adminMediaDelete,
     adminTicketPriceConfigs,
     adminTicketPriceConfigUpdate,
+    adminSeedCgvShowtimes,
   };
 };
 

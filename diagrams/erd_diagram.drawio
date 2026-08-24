@@ -125,6 +125,11 @@
         </mxCell>
 
 
+        <!-- 22. MovieReview (Associative Entity) -->
+        <mxCell id="ent_movie_review" value="MovieReview" style="shape=associativeEntity;whiteSpace=wrap;html=1;fontStyle=1;fontSize=12;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.5;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="1135" y="150" width="140" height="50" as="geometry" />
+        </mxCell>
+
         <!-- ==================== CROW'S FOOT RELATIONSHIPS ==================== -->
 
         <!-- 1. User (1) to (0..1) RewardAccount -->
@@ -304,6 +309,21 @@
               <mxPoint x="1005" y="645" />
             </Array>
           </mxGeometry>
+        </mxCell>
+
+        <!-- 22. User (1) to (0..N) MovieReview -->
+        <mxCell id="rel_u_rev" edge="1" parent="1" source="ent_user" target="ent_movie_review" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.5;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="145" y="40" />
+              <mxPoint x="1205" y="40" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 23. Movie (1) to (0..N) MovieReview -->
+        <mxCell id="rel_m_rev" edge="1" parent="1" source="ent_movie" target="ent_movie_review" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.5;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
       </root>

@@ -69,29 +69,91 @@ const buildMovieSchedule = (rows) => {
   }));
 };
 
-const TicketPriceTable = () => (
-  <div className="showtimes-price-panel">
-    <h2>BẢNG GIÁ VÉ</h2>
-    <div className="showtimes-price-grid">
-      <div>
-        <span>Tiêu chuẩn 2D</span>
-        <strong>120.000 VNĐ</strong>
-      </div>
-      <div>
-        <span>Tiêu chuẩn 3D</span>
-        <strong>150.000 VNĐ</strong>
-      </div>
-      <div>
-        <span>Cao cấp 2D</span>
-        <strong>150.000 VNĐ</strong>
-      </div>
-      <div>
-        <span>Cao cấp 3D</span>
-        <strong>180.000 VNĐ</strong>
-      </div>
+const TicketPriceTable = () => {
+  const [priceConfigs, setPriceConfigs] = useState([]);
+  const [loadingPrices, setLoadingPrices] = useState(true);
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        setLoadingPrices(true);
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/ticketPriceConfigs`
+        );
+        setPriceConfigs(res.data || []);
+      } catch (err) {
+        console.error("Không thể tải bảng giá vé từ DB:", err);
+      } finally {
+        setLoadingPrices(false);
+      }
+    };
+    fetchPrices();
+  }, []);
+
+  const formatPrice = (price) => {
+    return Number(price || 0).toLocaleString("vi-VN") + " VNĐ";
+  };
+
+  return (
+    <div className="showtimes-price-panel">
+      <h2>BẢNG GIÁ VÉ NIÊM YẾT CGV</h2>
+      <p className="showtimes-price-note">
+        * Giá vé áp dụng theo loại phòng chiếu, định dạng 2D/3D, loại ghế và thời điểm trong tuần.
+      </p>
+
+      {loadingPrices ? (
+        <div style={{ textAlign: "center", padding: "3.2rem", color: "#94a3b8", fontSize: "1.4rem" }}>
+          Đang tải bảng giá vé...
+        </div>
+      ) : priceConfigs.length > 0 ? (
+        <div className="showtimes-price-matrix-wrap">
+          {["Tiêu chuẩn", "Cao cấp"].map((room) => {
+            const roomConfigs = priceConfigs.filter((c) => c.room_type === room);
+            if (roomConfigs.length === 0) return null;
+
+            return (
+              <div key={room} className="showtimes-price-room-group">
+                <h3 className="showtimes-price-room-title">Phòng Chiếu {room}</h3>
+                <div className="showtimes-price-grid">
+                  {roomConfigs.map((cfg) => (
+                    <div key={cfg.id} className="showtimes-price-item">
+                      <span className="price-item-type">
+                        {cfg.show_type} • {cfg.seat_type === "VIP" ? "Ghế VIP" : "Ghế Thường"}
+                      </span>
+                      <span className="price-item-day">
+                        {cfg.day_type === "WEEKDAY" ? "Thứ 2 - Thứ 5" : "Cuối tuần (T6 - CN)"}
+                      </span>
+                      <strong className="price-item-value">{formatPrice(cfg.price)}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="showtimes-price-grid">
+          <div>
+            <span>Tiêu chuẩn 2D (Ngày thường)</span>
+            <strong>120.000 VNĐ</strong>
+          </div>
+          <div>
+            <span>Tiêu chuẩn 3D (Ngày thường)</span>
+            <strong>150.000 VNĐ</strong>
+          </div>
+          <div>
+            <span>Cao cấp 2D (Ngày thường)</span>
+            <strong>150.000 VNĐ</strong>
+          </div>
+          <div>
+            <span>Cao cấp 3D (Ngày thường)</span>
+            <strong>180.000 VNĐ</strong>
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 export const ShowTimesCollection = () => {
   const override = {

@@ -34,6 +34,7 @@ const createAdminRoutes = (controller, { uploadImage, authentication }) => {
   router.post("/adminMediaDelete", ...adminOnly, controller.adminMediaDelete);
   router.post("/adminTicketPriceConfigs", ...adminOnly, controller.adminTicketPriceConfigs);
   router.post("/adminTicketPriceConfigUpdate", ...adminOnly, controller.adminTicketPriceConfigUpdate);
+  router.post("/adminSeedCgvShowtimes", ...adminOnly, controller.adminSeedCgvShowtimes);
 
   return router;
 };

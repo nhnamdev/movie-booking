@@ -602,9 +602,8 @@ async function applySchemaMigrations(connection) {
        END
        WHERE expires_at IS NULL AND status IN ('UNPAID', 'PENDING')`
     );
-  }
-
   if (await tableExists(connection, "movie")) {
+    await query(connection, "ALTER TABLE movie MODIFY rating DECIMAL(3,1) DEFAULT NULL");
     await ensureColumn(connection, "movie", "end_date", "DATE DEFAULT NULL");
     await ensureColumn(connection, "movie", "trailer_url", "VARCHAR(500) DEFAULT NULL");
     await query(connection, "ALTER TABLE movie MODIFY name VARCHAR(200) DEFAULT NULL");
@@ -978,7 +977,87 @@ async function applySchemaMigrations(connection) {
       "ALTER TABLE person ADD UNIQUE KEY person_phone_unique (phone_number)"
     );
   }
-  console.log("Schema migration completed: person.phone_number is CHAR(10).");
+  await query(
+    connection,
+    `CREATE TABLE IF NOT EXISTS movie_review (
+      id INT NOT NULL AUTO_INCREMENT,
+      movie_id INT NOT NULL,
+      customer_email VARCHAR(100) NOT NULL,
+      rating DECIMAL(3,1) NOT NULL,
+      comment TEXT DEFAULT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY movie_review_user_unique (movie_id, customer_email),
+      KEY movie_review_movie_idx (movie_id),
+      KEY movie_review_customer_idx (customer_email),
+      CONSTRAINT movie_review_movie_fk FOREIGN KEY (movie_id) REFERENCES movie(id) ON DELETE CASCADE,
+      CONSTRAINT movie_review_customer_fk FOREIGN KEY (customer_email) REFERENCES person(email) ON DELETE CASCADE ON UPDATE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
+  );
+
+  await seedMovieReviews(connection);
+  console.log("Schema migration completed: person.phone_number is CHAR(10), movie_review is ready.");
+}
+
+async function seedMovieReviews(connection) {
+  if (!(await tableExists(connection, "movie_review"))) return;
+  const rows = await query(connection, "SELECT COUNT(*) AS reviewCount FROM movie_review");
+  if (Number(rows[0].reviewCount) > 0) return;
+
+  const sampleReviews = [
+    [1, "nam@gmail.com", 9.5, "Hình ảnh đồ họa đỉnh cao, âm nhạc quá đã tai! Xứng đáng là siêu phẩm hoạt hình xuất sắc."],
+    [1, "Belal123@gmail.com", 9.0, "Cốt truyện đa vũ trụ lôi cuốn và bất ngờ từ đầu đến cuối."],
+    [1, "farhan@gmail.com", 8.5, "Kỹ xảo và phong cách vẽ truyện tranh rất sáng tạo."],
+    [1, "sazin@gmail.com", 9.0, "Trải nghiệm rạp IMAX xem Người Nhện quá mãn nhãn."],
+    [1, "jon@alu.com", 8.0, "Nội dung hấp dẫn, các pha hành động chuyển động cực kỳ mượt mà."],
+
+    [2, "nam@gmail.com", 8.5, "Chris Hemsworth đánh đấm mãn nhãn, nhịp phim dồn dập từ đầu tới cuối."],
+    [2, "Belal123@gmail.com", 8.0, "Phim hành động kịch tính, những pha quay one-shot nghẹt thở."],
+    [2, "jon@potato.com", 7.5, "Hành động đỉnh cao nhưng cốt truyện hơi đơn giản."],
+    [2, "rahim123@gmail.com", 8.0, "Giải trí cực tốt cho những ai mê phim hành động bắn súng."],
+
+    [3, "sazin@gmail.com", 7.0, "Hài hước nhẹ nhàng, giải trí cuối tuần rất hợp với gia đình."],
+    [3, "neloy.saha456@gmail.com", 6.5, "Nhiều pha tấu hài vui vẻ của bộ đôi diễn viên chính."],
+    [3, "farhan@gmail.com", 7.5, "Phim trinh thám pha hài hước xem rất thư giãn."],
+
+    [4, "nam@gmail.com", 9.0, "Tom Cruise tự thực hiện các pha mạo hiểm quá đỉnh cao!"],
+    [4, "Jon@snow.com", 8.5, "Nhịp phim dồn dập nghẹt thở, âm nhạc thương hiệu quá hay."],
+    [4, "farhan@gmail.com", 8.5, "Xứng đáng là một trong những phần hay nhất của series."],
+    [4, "niaz@nafi.com", 9.0, "Kịch bản gay cấn, xem không rời mắt được phút nào."],
+
+    [5, "nam@gmail.com", 10.0, "Kiệt tác điện ảnh của Christopher Nolan! Âm thanh và diễn xuất của Cillian Murphy đỉnh cao."],
+    [5, "Belal123@gmail.com", 9.5, "Bộ phim lịch sử chính kịch sâu sắc và đầy tính triết lý."],
+    [5, "jon@alu.com", 9.0, "Màn thử nghiệm Trinity nín thở đến từng giây, âm thanh bùng nổ."],
+    [5, "niaz@nafi.com", 9.5, "Cực kỳ ấn tượng với chiều sâu tâm lý nhân vật và nhạc nền."],
+
+    [6, "sazin@gmail.com", 8.5, "Màu sắc tươi sáng, thông điệp ý nghĩa và diễn xuất của Margot Robbie rất tuyệt."],
+    [6, "rahim123@gmail.com", 8.0, "Nhạc phim cực kỳ bắt tai, bối cảnh dựng công phu."],
+    [6, "neloy.saha456@gmail.com", 8.0, "Phim giải trí tốt và có nhiều góc nhìn thú vị."]
+  ];
+
+  for (const [movieId, email, rating, comment] of sampleReviews) {
+    try {
+      await query(
+        connection,
+        `INSERT IGNORE INTO movie_review (movie_id, customer_email, rating, comment)
+         VALUES (?, ?, ?, ?)`,
+        [movieId, email, rating, comment]
+      );
+    } catch (e) {
+      console.warn("Could not insert sample review:", e.message);
+    }
+  }
+
+  await query(
+    connection,
+    `UPDATE movie m
+     SET m.rating = COALESCE(
+       (SELECT ROUND(AVG(r.rating), 1) FROM movie_review r WHERE r.movie_id = m.id),
+       m.rating
+     )`
+  );
+  console.log("Seed movie reviews imported and movie average ratings synchronized.");
 }
 
 async function run() {

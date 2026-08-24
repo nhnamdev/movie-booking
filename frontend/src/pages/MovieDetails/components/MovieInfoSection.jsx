@@ -10,7 +10,7 @@ import { resolveMediaUrl } from "../../../utils/mediaUrl";
 import { FiPlayCircle, FiX } from "react-icons/fi";
 import { getYouTubeEmbedUrl } from "../../../utils/trailerUrl";
 
-export const MovieInfoSection = () => {
+export const MovieInfoSection = ({ onMovieLoaded, ratingOverride, totalReviewsOverride }) => {
   const [movieData, setMovieData] = useState({});
   const [showtimesData, setShowtimesData] = useState([]);
   const navigate = useNavigate();
@@ -19,6 +19,16 @@ export const MovieInfoSection = () => {
   const [trailerOpen, setTrailerOpen] = useState(false);
   const { id } = useParams();
   const movieDetailsId = Number(id);
+
+  useEffect(() => {
+    if (ratingOverride !== undefined && ratingOverride !== null) {
+      setMovieData((prev) => ({
+        ...prev,
+        rating: Number(ratingOverride) > 0 ? Number(ratingOverride).toFixed(1) : "Chưa có",
+        total_reviews: totalReviewsOverride !== undefined ? totalReviewsOverride : prev.total_reviews,
+      }));
+    }
+  }, [ratingOverride, totalReviewsOverride]);
 
   const userLocation = useSelector((store) => store.currentLocation);
   const { isAuthenticated, signedPerson } = useSelector(
@@ -56,28 +66,40 @@ export const MovieInfoSection = () => {
           }
         );
 
-        const formattedRelDate = new Date(
-          movieDetailResponse.data[0].release_date
-        ).toLocaleDateString("vi-VN");
-        const rawDuration = movieDetailResponse.data[0].duration;
+        if (!movieDetailResponse?.data || !Array.isArray(movieDetailResponse.data) || movieDetailResponse.data.length === 0 || !movieDetailResponse.data[0]) {
+          setMovieData(null);
+          return;
+        }
+
+        const rawMovie = movieDetailResponse.data[0];
+        const formattedRelDate = rawMovie.release_date
+          ? new Date(rawMovie.release_date).toLocaleDateString("vi-VN")
+          : "Chưa cập nhật";
+        const rawDuration = rawMovie.duration;
         const durationNumber = Number(rawDuration);
         const duration = Number.isFinite(durationNumber) && durationNumber > 0
           ? `${durationNumber} phút`
           : "Chưa cập nhật";
-        const ratingNumber = Number(movieDetailResponse.data[0].rating);
+        const ratingNumber = Number(rawMovie.rating);
+        const totalReviews = Number(rawMovie.total_reviews || 0);
         const formattedMovieData = {
-          ...movieDetailResponse.data[0],
-          name: movieDetailResponse.data[0].name,
+          ...rawMovie,
+          name: rawMovie.name || "Phim",
           duration,
           release_date: formattedRelDate,
+          total_reviews: totalReviews,
           rating: Number.isFinite(ratingNumber) && ratingNumber > 0
             ? ratingNumber.toFixed(1)
             : "Chưa có",
         };
 
         setMovieData(formattedMovieData);
+        if (onMovieLoaded) {
+          onMovieLoaded(formattedMovieData);
+        }
       } catch (err) {
         console.error(err);
+        setMovieData(null);
       } finally {
         setLoading1(false);
       }
@@ -211,6 +233,11 @@ export const MovieInfoSection = () => {
     <div className="section-movie-info container">
       {loading1 ? (
         <HashLoader cssOverride={override} size={60} color="#eb3656" />
+      ) : !movieData ? (
+        <div style={{ textAlign: "center", padding: "6rem 2rem", color: "#94a3b8" }}>
+          <h2 style={{ color: "#f8fafc", fontSize: "2.4rem", marginBottom: "1rem" }}>Không tìm thấy thông tin phim</h2>
+          <p style={{ fontSize: "1.5rem" }}>Phim này có thể chưa được cập nhật hoặc đã ngừng chiếu.</p>
+        </div>
       ) : (
         <>
           <div className="movie-info-grid-container">
@@ -251,7 +278,7 @@ export const MovieInfoSection = () => {
                 <p>{movieData && movieData.language}</p>
               </div>
 
-              <div className="movie-info-small-container ">
+              <div className="movie-info-small-container movie-info-rating-container">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="movie-info-icon"
@@ -259,7 +286,12 @@ export const MovieInfoSection = () => {
                 >
                   <path d="M394 480a16 16 0 01-9.39-3L256 383.76 127.39 477a16 16 0 01-24.55-18.08L153 310.35 23 221.2a16 16 0 019-29.2h160.38l48.4-148.95a16 16 0 0130.44 0l48.4 149H480a16 16 0 019.05 29.2L359 310.35l50.13 148.53A16 16 0 01394 480z" />
                 </svg>
-                <p>{movieData.rating}/10</p>
+                <p>
+                  <strong>{movieData.rating}/10</strong>
+                  {movieData.total_reviews > 0 && (
+                    <span className="movie-info-review-count"> ({movieData.total_reviews} đánh giá)</span>
+                  )}
+                </p>
               </div>
 
               <div className="movie-info-small-container ">

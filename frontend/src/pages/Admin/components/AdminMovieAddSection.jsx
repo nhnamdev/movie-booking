@@ -440,7 +440,7 @@ export const AdminMovieAddSection = () => {
       </div>
 
       <div>
-        <p>Điểm xếp hạng (10):</p>
+        <p>Điểm xếp hạng tham khảo (1 - 10):</p>
         <input
           name="rating"
           onChange={onChange}
@@ -449,8 +449,11 @@ export const AdminMovieAddSection = () => {
           max="10"
           step="0.1"
           value={formInfo.rating}
-          placeholder="Nhập điểm xếp hạng"
+          placeholder="Điểm khởi tạo (ví dụ: 8.5)"
         />
+        <small style={{ color: "#94a3b8", fontSize: "1.15rem", marginTop: "0.4rem", display: "block" }}>
+          * Điểm sẽ tự động tính theo trung bình cộng đánh giá thực tế của khán giả khi có lượt đánh giá.
+        </small>
       </div>
 
       <div>

@@ -73,7 +73,7 @@ const createApp = ({
   const mediaController = createMediaController(dependencies);
 
   app.use(createMediaRoutes(mediaController));
-  app.use(createCatalogRoutes(catalogController));
+  app.use(createCatalogRoutes(catalogController, authentication));
   app.use(createBookingRoutes(bookingController));
   app.use(createPaymentRoutes(paymentController, { authentication }));
   app.use(createAuthRoutes(authController, { ...authentication, loginLimiter }));

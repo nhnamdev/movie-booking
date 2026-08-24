@@ -1492,19 +1492,48 @@ header {
 }
 
 .showtimes-price-panel {
-  max-width: 86rem;
+  max-width: 96rem;
   margin: 0 auto;
-  padding: 2.4rem;
+  padding: 3.2rem 2.4rem;
   border: 1px solid rgba(230, 230, 232, 0.12);
-  border-radius: 8px;
+  border-radius: 1.4rem;
   background-color: #1a1d2c;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .showtimes-price-panel h2 {
-  margin-bottom: 2rem;
-  color: #e6e6e8;
-  font-size: 2.4rem;
+  margin-bottom: 0.6rem;
+  color: #f8fafc;
+  font-size: 2.6rem;
+  font-weight: 800;
   text-align: center;
+}
+
+.showtimes-price-note {
+  color: #94a3b8;
+  font-size: 1.35rem;
+  text-align: center;
+  margin-bottom: 2.8rem;
+}
+
+.showtimes-price-matrix-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2.8rem;
+}
+
+.showtimes-price-room-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.showtimes-price-room-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fbbf24;
+  padding-left: 0.4rem;
+  border-left: 4px solid #e11d48;
 }
 
 .showtimes-price-grid {
@@ -1513,21 +1542,51 @@ header {
   gap: 1.2rem;
 }
 
-.showtimes-price-grid div {
+.showtimes-price-grid div,
+.showtimes-price-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.4rem;
-  border-radius: 8px;
+  padding: 1.4rem 1.8rem;
+  border-radius: 1rem;
   background-color: #222638;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   color: #e6e6e8;
-  font-size: 1.5rem;
+  font-size: 1.45rem;
+  transition: all 0.2s ease;
 }
 
+.showtimes-price-item:hover {
+  background-color: #282d42;
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.price-item-type {
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.price-item-day {
+  font-size: 1.25rem;
+  color: #94a3b8;
+  margin-left: auto;
+  margin-right: 1.2rem;
+}
+
+.price-item-value,
 .showtimes-price-grid strong {
   color: #ef5e78;
+  font-size: 1.6rem;
+  font-weight: 800;
   white-space: nowrap;
+}
+
+@media (max-width: 48em) {
+  .showtimes-price-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 64em) {
@@ -4957,3 +5016,749 @@ header {
     grid-template-columns: 1fr 7rem;
   }
 }
+
+/* ==========================================================================
+   CGV MOVIE REVIEWS & RATING SECTION
+   ========================================================================== */
+
+.movie-info-review-count {
+  margin-left: 0.4rem;
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.cgv-reviews-section {
+  padding: 4.8rem 2.4rem;
+  background: linear-gradient(180deg, rgba(17, 20, 31, 0.95) 0%, rgba(13, 16, 26, 1) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cgv-reviews-container {
+  max-width: 114rem;
+  margin: 0 auto;
+}
+
+.cgv-reviews-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 3.2rem;
+  flex-wrap: wrap;
+}
+
+.cgv-reviews-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 1.2rem;
+  margin-bottom: 0.8rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  border-radius: 9999px;
+}
+
+.cgv-reviews-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin-bottom: 0.6rem;
+  line-height: 1.25;
+}
+
+.cgv-reviews-subtitle {
+  font-size: 1.4rem;
+  color: #94a3b8;
+  max-width: 60rem;
+  line-height: 1.5;
+}
+
+.cgv-review-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  padding: 1.2rem 2.4rem;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cgv-review-btn-primary:hover {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.5);
+}
+
+.cgv-review-btn-primary.small {
+  padding: 0.8rem 1.6rem;
+  font-size: 1.3rem;
+  margin-top: 1.2rem;
+}
+
+/* Rating Summary Scoreboard */
+.cgv-rating-summary-card {
+  display: grid;
+  grid-template-columns: 28rem 1fr;
+  gap: 3.2rem;
+  padding: 3.2rem;
+  background: rgba(26, 30, 46, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.6rem;
+  backdrop-filter: blur(12px);
+  margin-bottom: 3.6rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.cgv-summary-score-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-right: 3.2rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cgv-score-number-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.cgv-score-big {
+  font-size: 5.6rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #fbbf24;
+  letter-spacing: -0.03em;
+  text-shadow: 0 2px 10px rgba(251, 191, 36, 0.3);
+}
+
+.cgv-score-max {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.cgv-score-stars-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.cgv-summary-star {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.cgv-summary-star.full {
+  color: #fbbf24;
+}
+
+.cgv-summary-star.half {
+  color: #fbbf24;
+  opacity: 0.65;
+}
+
+.cgv-summary-star.empty {
+  color: #475569;
+}
+
+.cgv-score-count-text {
+  font-size: 1.3rem;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.cgv-verified-viewer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 9999px;
+}
+
+/* Breakdown column */
+.cgv-summary-breakdown-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.2rem;
+}
+
+.cgv-breakdown-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 0.4rem;
+}
+
+.cgv-breakdown-row {
+  display: grid;
+  grid-template-columns: 18rem 1fr 8rem;
+  align-items: center;
+  gap: 1.4rem;
+}
+
+.cgv-breakdown-label {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: #cbd5e1;
+}
+
+.cgv-breakdown-bar-bg {
+  height: 0.9rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.cgv-breakdown-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cgv-breakdown-bar-fill.level-5 {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+}
+
+.cgv-breakdown-bar-fill.level-4 {
+  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+}
+
+.cgv-breakdown-bar-fill.level-3 {
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+}
+
+.cgv-breakdown-bar-fill.level-2 {
+  background: linear-gradient(90deg, #f97316 0%, #fb923c 100%);
+}
+
+.cgv-breakdown-bar-fill.level-1 {
+  background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+}
+
+.cgv-breakdown-percent {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: right;
+}
+
+/* Review Form Box */
+.cgv-review-form-wrapper {
+  padding: 2.8rem;
+  background: #1e2337;
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  border-radius: 1.6rem;
+  margin-bottom: 3.6rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  animation: cgvFadeInDown 0.3s ease-out;
+}
+
+@keyframes cgvFadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cgv-review-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.6rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cgv-review-form-header h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.cgv-review-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  border-radius: 0.6rem;
+  transition: all 0.2s;
+}
+
+.cgv-review-close-btn:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.cgv-interactive-rating-box {
+  margin-bottom: 2rem;
+}
+
+.cgv-rating-input-label {
+  display: block;
+  font-size: 1.45rem;
+  color: #e2e8f0;
+  margin-bottom: 1rem;
+}
+
+.cgv-rating-input-label strong {
+  font-size: 1.8rem;
+  color: #fbbf24;
+  margin-left: 0.4rem;
+}
+
+.cgv-rating-tagline {
+  font-size: 1.35rem;
+  color: #94a3b8;
+  margin-left: 0.8rem;
+  font-weight: 500;
+}
+
+.cgv-star-rating-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+.cgv-star-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 4.8rem;
+  height: 5.4rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.8rem;
+  color: #64748b;
+  font-size: 2.2rem;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.cgv-star-number {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-top: -0.2rem;
+}
+
+.cgv-star-btn:hover,
+.cgv-star-btn.active {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.5);
+  color: #fbbf24;
+  transform: scale(1.08);
+}
+
+.cgv-review-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+}
+
+.cgv-review-input-group label {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.cgv-review-input-group textarea {
+  width: 100%;
+  padding: 1.4rem 1.6rem;
+  background: rgba(13, 16, 26, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  color: #f8fafc;
+  font-size: 1.45rem;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 10rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cgv-review-input-group textarea:focus {
+  border-color: #f43f5e;
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.2);
+}
+
+.cgv-char-count {
+  align-self: flex-end;
+  font-size: 1.2rem;
+  color: #64748b;
+}
+
+.cgv-review-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.cgv-form-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-left: auto;
+}
+
+.cgv-btn-cancel-review {
+  padding: 1rem 1.8rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cgv-btn-cancel-review:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.cgv-btn-submit-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 2.2rem;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+  border: none;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cgv-btn-submit-review:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4);
+}
+
+.cgv-btn-delete-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 1.6rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cgv-btn-delete-review:hover:not(:disabled) {
+  background: rgba(244, 63, 94, 0.25);
+  color: #ffffff;
+}
+
+/* Reviews Feed & Cards */
+.cgv-feed-header {
+  margin-bottom: 2rem;
+}
+
+.cgv-feed-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.cgv-reviews-loading,
+.cgv-reviews-empty {
+  text-align: center;
+  padding: 4.8rem 2rem;
+  background: rgba(26, 30, 46, 0.5);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 1.4rem;
+  color: #94a3b8;
+}
+
+.cgv-empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.cgv-reviews-empty h4 {
+  font-size: 1.8rem;
+  color: #f1f5f9;
+  margin-bottom: 0.6rem;
+}
+
+.cgv-reviews-empty p {
+  font-size: 1.4rem;
+  color: #94a3b8;
+  margin-bottom: 1.6rem;
+}
+
+.cgv-reviews-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.cgv-review-card {
+  padding: 2.2rem;
+  background: #1c2033;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.2rem;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.cgv-review-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-2px);
+}
+
+.cgv-review-card.own-review {
+  border-color: rgba(244, 63, 94, 0.4);
+  background: #20243b;
+}
+
+.cgv-review-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.4rem;
+  margin-bottom: 1.4rem;
+}
+
+.cgv-review-user-info {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.cgv-user-avatar {
+  width: 4.4rem;
+  height: 4.4rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e11d48 0%, #7c3aed 100%);
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.cgv-user-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.cgv-user-name-line {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.cgv-user-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.cgv-own-badge {
+  padding: 0.2rem 0.8rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.15);
+  border-radius: 9999px;
+}
+
+.cgv-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #34d399;
+}
+
+.cgv-review-rating-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.cgv-card-stars {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.cgv-star-icon {
+  color: #fbbf24;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.cgv-card-score {
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: #fbbf24;
+}
+
+.cgv-card-score-scale {
+  font-size: 1.25rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.cgv-review-time {
+  font-size: 1.2rem;
+  color: #64748b;
+}
+
+.cgv-review-comment-body {
+  margin-bottom: 1rem;
+}
+
+.cgv-review-comment-body p {
+  font-size: 1.45rem;
+  color: #cbd5e1;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.cgv-review-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cgv-card-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+  transition: all 0.2s;
+}
+
+.cgv-card-action-btn.edit {
+  color: #60a5fa;
+}
+
+.cgv-card-action-btn.edit:hover {
+  background: rgba(96, 165, 250, 0.15);
+}
+
+.cgv-card-action-btn.delete {
+  color: #f87171;
+}
+
+.cgv-card-action-btn.delete:hover {
+  background: rgba(248, 113, 113, 0.15);
+}
+
+/* Responsive Media Queries */
+@media (max-width: 52em) {
+  .cgv-rating-summary-card {
+    grid-template-columns: 1fr;
+    gap: 2.4rem;
+    padding: 2.4rem;
+  }
+
+  .cgv-summary-score-col {
+    padding-right: 0;
+    border-right: none;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .cgv-breakdown-row {
+    grid-template-columns: 15rem 1fr 7rem;
+  }
+}
+
+@media (max-width: 36em) {
+  .cgv-reviews-section {
+    padding: 3.2rem 1.6rem;
+  }
+
+  .cgv-reviews-title {
+    font-size: 2.2rem;
+  }
+
+  .cgv-breakdown-row {
+    grid-template-columns: 12rem 1fr 6rem;
+    gap: 0.8rem;
+  }
+
+  .cgv-breakdown-label {
+    font-size: 1.15rem;
+  }
+
+  .cgv-star-btn {
+    width: 3.8rem;
+    height: 4.6rem;
+    font-size: 1.8rem;
+  }
+
+  .cgv-star-number {
+    font-size: 1rem;
+  }
+
+  .cgv-score-big {
+    font-size: 4.4rem;
+  }
+}
+

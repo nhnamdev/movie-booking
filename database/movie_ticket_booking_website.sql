@@ -880,6 +880,7 @@ ALTER TABLE `movie_genre`
 ALTER TABLE `payment`
   ADD CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`customer_email`) REFERENCES `person` (`email`);
 
+
 ALTER TABLE `shown_in`
   ADD CONSTRAINT `shown_in_ibfk_1` FOREIGN KEY (`movie_id`) REFERENCES `movie` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `shown_in_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE,
@@ -891,4 +892,21 @@ ALTER TABLE `ticket`
   ADD CONSTRAINT `ticket_ibfk_3` FOREIGN KEY (`seat_id`) REFERENCES `seat` (`id`),
   ADD CONSTRAINT `ticket_ibfk_4` FOREIGN KEY (`hall_id`) REFERENCES `hall` (`id`),
   ADD CONSTRAINT `ticket_ibfk_5` FOREIGN KEY (`movie_id`) REFERENCES `movie` (`id`);
+
+CREATE TABLE IF NOT EXISTS `movie_review` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `movie_id` INT(11) NOT NULL,
+  `customer_email` VARCHAR(100) NOT NULL,
+  `rating` DECIMAL(3,1) NOT NULL,
+  `comment` TEXT DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `movie_review_user_unique` (`movie_id`, `customer_email`),
+  KEY `movie_review_movie_idx` (`movie_id`),
+  KEY `movie_review_customer_idx` (`customer_email`),
+  CONSTRAINT `movie_review_movie_fk` FOREIGN KEY (`movie_id`) REFERENCES `movie` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `movie_review_customer_fk` FOREIGN KEY (`customer_email`) REFERENCES `person` (`email`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 COMMIT;

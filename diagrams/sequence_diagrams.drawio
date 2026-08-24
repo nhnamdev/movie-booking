@@ -1,0 +1,594 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <!-- ==================== 1. SD_UC001 ==================== -->
+  <diagram id="sd-uc001" name="SD_UC001_DangNhap">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="u_sd1" value=":Người dùng" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="60" width="120" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_u_sd1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="u_sd1">
+          <mxGeometry x="55" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_sd1" value=":Giao diện Web (React)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fe_sd1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="fe_sd1">
+          <mxGeometry x="75" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="be_sd1" value=":Backend Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="60" width="140" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be_sd1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="be_sd1">
+          <mxGeometry x="65" y="150" width="10" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="db_sd1" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db_sd1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="db_sd1">
+          <mxGeometry x="75" y="200" width="10" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_1" value="1. Mở Modal &amp; nhập email, password" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_u_sd1" target="act_fe_sd1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="160" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m1_2" value="2. Gửi POST /login (email, password)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd1" target="act_be_sd1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="230" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m1_3" value="3. SELECT FROM person WHERE email = ?" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd1" target="act_db_sd1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="280" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m1_4" value="4. Trả về thông tin user &amp; password hash" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db_sd1" target="act_be_sd1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="340" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m1_5" value="5. Bcrypt compare, cấp HttpOnly Cookie &amp; trả JSON user" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd1" target="act_fe_sd1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="420" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m1_6" value="6. Lưu Redux State, đóng Modal &amp; hiển thị thông báo thành công" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd1" target="act_u_sd1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="490" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== 2. SD_UC002 ==================== -->
+  <diagram id="sd-uc002" name="SD_UC002_DangKy">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="u_sd2" value=":Khách vãng lai" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="60" width="120" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_u_sd2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="u_sd2">
+          <mxGeometry x="55" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_sd2" value=":Giao diện Web (React)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fe_sd2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="fe_sd2">
+          <mxGeometry x="75" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="be_sd2" value=":Backend Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="60" width="140" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be_sd2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="be_sd2">
+          <mxGeometry x="65" y="150" width="10" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="db_sd2" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db_sd2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="db_sd2">
+          <mxGeometry x="75" y="200" width="10" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_1" value="1. Nhập thông tin đăng ký (email, tên, pass, phone)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_u_sd2" target="act_fe_sd2">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="160" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m2_2" value="2. POST /registration (payload)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd2" target="act_be_sd2">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="220" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m2_3" value="3. Check email/phone &amp; INSERT INTO person, reward_account" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd2" target="act_db_sd2">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="270" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m2_4" value="4. Trả về kết quả ghi nhận thành công" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db_sd2" target="act_be_sd2">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="350" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m2_5" value="5. Tự động cấp session cookie &amp; phản hồi 201 Created" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd2" target="act_fe_sd2">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="420" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m2_6" value="6. Hiển thị thông báo chào mừng thành viên mới" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd2" target="act_u_sd2">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="490" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== 3. SD_UC003 ==================== -->
+  <diagram id="sd-uc003" name="SD_UC003_QuanLyTaiKhoan">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="u_sd3" value=":Khách hàng" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="60" width="120" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_u_sd3" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="u_sd3">
+          <mxGeometry x="55" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_sd3" value=":Giao diện Web (React)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fe_sd3" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="fe_sd3">
+          <mxGeometry x="75" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="be_sd3" value=":Backend Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="60" width="140" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be_sd3" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="be_sd3">
+          <mxGeometry x="65" y="150" width="10" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="db_sd3" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db_sd3" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="db_sd3">
+          <mxGeometry x="75" y="200" width="10" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_1" value="1. Nhấn xem Hồ sơ cá nhân (/customer)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_u_sd3" target="act_fe_sd3">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="160" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m3_2" value="2. POST /customerProfile &amp; POST /customerRewards" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd3" target="act_be_sd3">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="220" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m3_3" value="3. SELECT FROM person, reward_account, reward_point_ledger" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd3" target="act_db_sd3">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="270" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m3_4" value="4. Trả về thông tin cá nhân &amp; lịch sử điểm thưởng" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db_sd3" target="act_be_sd3">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="340" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m3_5" value="5. Phản hồi JSON dữ liệu hồ sơ" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd3" target="act_fe_sd3">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="420" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m3_6" value="6. Hiển thị hồ sơ, thẻ thành viên và lịch sử giao dịch điểm" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd3" target="act_u_sd3">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="490" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== 4. SD_UC004 ==================== -->
+  <diagram id="sd-uc004" name="SD_UC004_TraCuuPhimLichChieu">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="u_sd4" value=":Người dùng" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="60" width="120" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_u_sd4" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="u_sd4">
+          <mxGeometry x="55" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_sd4" value=":Giao diện Web (React)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fe_sd4" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="fe_sd4">
+          <mxGeometry x="75" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="be_sd4" value=":Backend Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="60" width="140" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be_sd4" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="be_sd4">
+          <mxGeometry x="65" y="150" width="10" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="db_sd4" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db_sd4" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="db_sd4">
+          <mxGeometry x="75" y="200" width="10" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="m4_1" value="1. Chọn rạp &amp; ngày chiếu trên giao diện" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_u_sd4" target="act_fe_sd4">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="160" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m4_2" value="2. POST /uniqueMovies (theatreId, userDate)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd4" target="act_be_sd4">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="220" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m4_3" value="3. SELECT phim, suất chiếu JOIN movie, showtimes, shown_in" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd4" target="act_db_sd4">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="270" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m4_4" value="4. Trả về danh sách phim &amp; khung giờ chiếu" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db_sd4" target="act_be_sd4">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="340" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m4_5" value="5. Phản hồi JSON danh sách lịch chiếu" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd4" target="act_fe_sd4">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="420" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m4_6" value="6. Hiển thị poster, trailer, nhãn tuổi &amp; các nút giờ chiếu" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd4" target="act_u_sd4">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="490" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== 5. SD_UC005 ==================== -->
+  <diagram id="sd-uc005" name="SD_UC005_DatVeChonGhe">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="u_sd5" value=":Khách hàng" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="60" width="120" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_u_sd5" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="u_sd5">
+          <mxGeometry x="55" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_sd5" value=":Giao diện Web (React)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fe_sd5" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="fe_sd5">
+          <mxGeometry x="75" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="be_sd5" value=":Backend Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="60" width="140" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be_sd5" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="be_sd5">
+          <mxGeometry x="65" y="150" width="10" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="db_sd5" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db_sd5" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="db_sd5">
+          <mxGeometry x="75" y="200" width="10" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="m5_1" value="1. Chọn khung giờ chiếu &amp; click chọn ghế trên sơ đồ" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_u_sd5" target="act_fe_sd5">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="160" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m5_2" value="2. POST /seats (showtimeId, hallId, movieId)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd5" target="act_be_sd5">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="220" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m5_3" value="3. Query hallwise_seat, LEFT JOIN ticket &amp; seat_hold" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd5" target="act_db_sd5">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="270" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m5_4" value="4. Trả về trạng thái ghế (trống, đang giữ, đã bán)" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db_sd5" target="act_be_sd5">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="340" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m5_5" value="5. Phản hồi ma trận ghế kèm giá phụ thu" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd5" target="act_fe_sd5">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="420" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m5_6" value="6. Hiển thị sơ đồ ghế và tính tổng tiền vé real-time" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd5" target="act_u_sd5">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="490" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== 6. SD_UC006 ==================== -->
+  <diagram id="sd-uc006" name="SD_UC006_DatMuaBapNuoc">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="u_sd6" value=":Khách hàng" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="60" width="120" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_u_sd6" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="u_sd6">
+          <mxGeometry x="55" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_sd6" value=":Giao diện Web (React)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fe_sd6" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="fe_sd6">
+          <mxGeometry x="75" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="be_sd6" value=":Backend Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="60" width="140" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be_sd6" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="be_sd6">
+          <mxGeometry x="65" y="150" width="10" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="db_sd6" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db_sd6" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="db_sd6">
+          <mxGeometry x="75" y="200" width="10" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="m6_1" value="1. Chuyển bước chọn bắp nước / vào /bap-nuoc" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_u_sd6" target="act_fe_sd6">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="160" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m6_2" value="2. POST /movieCombos (movieId, theatreId)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd6" target="act_be_sd6">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="220" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m6_3" value="3. Query concession_combo, branch_combo &amp; movie_combo_promotion" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd6" target="act_db_sd6">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="270" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m6_4" value="4. Trả về combo &amp; phần trăm chiết khấu giảm giá" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db_sd6" target="act_be_sd6">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="340" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m6_5" value="5. Phản hồi danh mục bắp nước" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd6" target="act_fe_sd6">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="420" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m6_6" value="6. Hiển thị menu combo, hình ảnh R2 &amp; giá ưu đãi" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd6" target="act_u_sd6">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="490" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== 7. SD_UC007 ==================== -->
+  <diagram id="sd-uc007" name="SD_UC007_ApDungDiemThuong">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="u_sd7" value=":Khách hàng" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="60" width="120" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_u_sd7" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="u_sd7">
+          <mxGeometry x="55" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_sd7" value=":Giao diện Web (React)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fe_sd7" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="fe_sd7">
+          <mxGeometry x="75" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="be_sd7" value=":Backend Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="60" width="140" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be_sd7" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="be_sd7">
+          <mxGeometry x="65" y="150" width="10" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="db_sd7" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db_sd7" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="db_sd7">
+          <mxGeometry x="75" y="200" width="10" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="m7_1" value="1. Nhập số điểm muốn đổi tại bước thanh toán" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_u_sd7" target="act_fe_sd7">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="160" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m7_2" value="2. POST /rewardQuote (grossAmount, requestedPoints)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd7" target="act_be_sd7">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="220" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m7_3" value="3. Query reward_account &amp; reward_config" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd7" target="act_db_sd7">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="270" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m7_4" value="4. Trả về available_points &amp; config tỷ lệ đổi" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db_sd7" target="act_be_sd7">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="340" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m7_5" value="5. Tính maxPoints, discountAmount (1đ = 1000đ, max 50%)" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd7" target="act_fe_sd7">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="420" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m7_6" value="6. Giảm trừ trực tiếp trên tổng đơn hàng" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd7" target="act_u_sd7">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="490" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== 8. SD_UC008 ==================== -->
+  <diagram id="sd-uc008" name="SD_UC008_ThanhToanPayOS">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="s_u8" value=":Khách hàng" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="60" width="120" height="680" as="geometry" />
+        </mxCell>
+        <mxCell id="act_u8" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="s_u8">
+          <mxGeometry x="55" y="70" width="10" height="580" as="geometry" />
+        </mxCell>
+        <mxCell id="s_fe8" value=":Giao diện Web (React)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="60" width="160" height="680" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fe8" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="s_fe8">
+          <mxGeometry x="75" y="70" width="10" height="580" as="geometry" />
+        </mxCell>
+        <mxCell id="s_be8" value=":Backend Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="60" width="140" height="680" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be8" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="s_be8">
+          <mxGeometry x="65" y="140" width="10" height="490" as="geometry" />
+        </mxCell>
+        <mxCell id="s_db8" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="790" y="60" width="150" height="680" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db8" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="s_db8">
+          <mxGeometry x="70" y="180" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="s_payos8" value=":Cổng PayOS" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="60" width="130" height="680" as="geometry" />
+        </mxCell>
+        <mxCell id="act_payos8" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="s_payos8">
+          <mxGeometry x="60" y="270" width="10" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="sm8_1" value="1. Chọn ghế, bắp nước, điểm thưởng &amp; ấn Thanh toán" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_u8" target="act_fe8">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="240" y="150" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="sm8_2" value="2. POST /payos/create-payment-link" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe8" target="act_be8">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="500" y="210" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="sm8_3" value="3. INSERT INTO seat_hold &amp; reward_point_hold" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be8" target="act_db8">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="750" y="260" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="sm8_4" value="4. Gọi PayOS API tạo VietQR link (orderCode, 10 phút)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be8" target="act_payos8">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="850" y="340" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="sm8_5" value="5. Trả về checkoutUrl &amp; QR code" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_payos8" target="act_be8">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="850" y="390" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="sm8_6" value="6. Trả về giao diện thanh toán kèm đồng hồ đếm ngược" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be8" target="act_fe8">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="500" y="440" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="sm8_7" value="7. Khách hàng quét mã VietQR chuyển khoản thành công" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_u8" target="act_payos8">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="600" y="490" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="sm8_8" value="8. Webhook gửi tín hiệu thanh toán thành công" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_payos8" target="act_be8">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="850" y="550" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="sm8_9" value="9. MySQL Transaction: Cập nhật PAID, tạo vé, ghi sổ cái điểm" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be8" target="act_db8">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="750" y="600" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="sm8_10" value="10. Trả về kết quả thành công &amp; xuất vé điện tử" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be8" target="act_fe8">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="500" y="650" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="sm8_11" value="11. Hiển thị vé điện tử &amp; mã QR check-in cho khách" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe8" target="act_u8">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="240" y="690" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== 9. SD_UC009 ==================== -->
+  <diagram id="sd-uc009" name="SD_UC009_XemLichSuMuaVe">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="u_sd9" value=":Khách hàng" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="60" width="120" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_u_sd9" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="u_sd9">
+          <mxGeometry x="55" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_sd9" value=":Giao diện Web (React)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fe_sd9" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="fe_sd9">
+          <mxGeometry x="75" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="be_sd9" value=":Backend Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="60" width="140" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be_sd9" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="be_sd9">
+          <mxGeometry x="65" y="150" width="10" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="db_sd9" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db_sd9" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="db_sd9">
+          <mxGeometry x="75" y="200" width="10" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="m9_1" value="1. Chọn xem Lịch sử mua vé" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_u_sd9" target="act_fe_sd9">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="160" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m9_2" value="2. POST /customerPurchases" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd9" target="act_be_sd9">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="220" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m9_3" value="3. SELECT FROM ticket JOIN shown_in, movie, theatre, hall" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd9" target="act_db_sd9">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="270" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m9_4" value="4. Trả về danh sách vé điện tử &amp; trạng thái check-in" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db_sd9" target="act_be_sd9">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="340" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m9_5" value="5. Phản hồi JSON danh sách vé" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd9" target="act_fe_sd9">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="420" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m9_6" value="6. Hiển thị danh sách vé điện tử kèm mã QR check-in" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd9" target="act_u_sd9">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="490" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== 10. SD_UC010 ==================== -->
+  <diagram id="sd-uc010" name="SD_UC010_SoatVeVaBapNuocPOS">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="u_sd10" value=":Nhân viên (Staff)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="60" width="120" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_u_sd10" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="u_sd10">
+          <mxGeometry x="55" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_sd10" value=":Giao diện Web (React)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fe_sd10" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="fe_sd10">
+          <mxGeometry x="75" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="be_sd10" value=":Backend Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="60" width="140" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be_sd10" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="be_sd10">
+          <mxGeometry x="65" y="150" width="10" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="db_sd10" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db_sd10" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="db_sd10">
+          <mxGeometry x="75" y="200" width="10" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="m10_1" value="1. Quét mã / Nhập orderCode &amp; nhấn Check-in vé" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_u_sd10" target="act_fe_sd10">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="160" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m10_2" value="2. POST /adminTicketCheckIn (orderCode)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd10" target="act_be_sd10">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="220" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m10_3" value="3. UPDATE ticket SET ticket_status='CHECKED_IN', checked_in_at=NOW()" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd10" target="act_db_sd10">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="270" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m10_4" value="4. Trả về kết quả cập nhật" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db_sd10" target="act_be_sd10">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="340" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m10_5" value="5. Phản hồi JSON xác nhận soát vé thành công" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd10" target="act_fe_sd10">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="420" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m10_6" value="6. Hiển thị thông báo vé hợp lệ, cho phép khách vào phòng" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd10" target="act_u_sd10">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="490" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ==================== 11. SD_UC011 ==================== -->
+  <diagram id="sd-uc011" name="SD_UC011_QuanTriDieuPhoiLichChieu">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="u_sd11" value=":Quản trị viên (Admin)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="60" width="130" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_u_sd11" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="u_sd11">
+          <mxGeometry x="60" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_sd11" value=":Giao diện Web (React)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fe_sd11" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="fe_sd11">
+          <mxGeometry x="75" y="70" width="10" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="be_sd11" value=":Backend Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="60" width="140" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be_sd11" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="be_sd11">
+          <mxGeometry x="65" y="150" width="10" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="db_sd11" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="60" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db_sd11" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="db_sd11">
+          <mxGeometry x="75" y="200" width="10" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="m11_1" value="1. Nhập phim, phòng, ngày, giờ chiếu &amp; nhấn Tạo suất" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_u_sd11" target="act_fe_sd11">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="160" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m11_2" value="2. POST /adminShowtimeCreate (payload)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd11" target="act_be_sd11">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="220" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m11_3" value="3. Kiểm tra xung đột giờ chiếu + 15p dọn phòng trong MySQL" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd11" target="act_db_sd11">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="270" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m11_4" value="4. INSERT INTO showtimes, shown_in" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db_sd11" target="act_be_sd11">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="800" y="340" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m11_5" value="5. Phản hồi JSON kết quả tạo lịch chiếu thành công" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_be_sd11" target="act_fe_sd11">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="420" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m11_6" value="6. Cập nhật bảng danh sách suất chiếu trên Admin UI" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_fe_sd11" target="act_u_sd11">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="280" y="490" /></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

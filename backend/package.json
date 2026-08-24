@@ -7,6 +7,7 @@
     "migrate": "node migrate.js",
     "seed:movies:august-2026": "node scripts/seedAugust2026Movies.js",
     "seed:showtimes": "node scripts/seedShowtimes.js",
+    "seed:cgv:september-2026": "node scripts/seedCgvSeptember2026.js",
     "dev": "nodemon index.js",
     "start": "node index.js"
   },

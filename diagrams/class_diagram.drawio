@@ -1,0 +1,302 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="cgv-class-diagram" name="CGV_Class_Diagram">
+    <mxGraphModel dx="2691" dy="1170" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cls_user" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=28;fillColor=#ffffff;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="310" width="280" x="1260" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_title" parent="cls_user" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=1;fontSize=13;" value="Person" vertex="1">
+          <mxGeometry height="28" width="280" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_attrs" parent="cls_user" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;strokeColor=#000000;borderBottom=1;" value="+ email: String&#xa;+ firstName: String&#xa;+ lastName: String&#xa;+ password: String&#xa;+ phoneNumber: String&#xa;+ accountBalance: int&#xa;+ personType: String&#xa;+ accountStatus: String" vertex="1">
+          <mxGeometry height="132" width="280" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_line" parent="cls_user" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="280" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_methods" parent="cls_user" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="+ login(email: String, pass: String): boolean&#xa;+ register(email: String, name: String, ...): void&#xa;+ logout(): void&#xa;+ getProfile(): Person&#xa;+ updateProfile(name: String, phone: String): void&#xa;+ changePassword(oldPass: String, newPass: String): void" vertex="1">
+          <mxGeometry height="142" width="280" y="168" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_reward" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=28;fillColor=#ffffff;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="230" width="250" x="1280" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_reward_title" parent="cls_reward" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;" value="RewardAccount" vertex="1">
+          <mxGeometry height="28" width="250" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_reward_attrs" parent="cls_reward" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ customerEmail: String&#xa;+ availablePoints: int&#xa;+ heldPoints: int&#xa;+ lifetimeEarned: int&#xa;+ lifetimeRedeemed: int&#xa;+ lifetimeExpired: int" vertex="1">
+          <mxGeometry height="98" width="250" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_reward_line" parent="cls_reward" style="line;strokeWidth=1;fillColor=none;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="250" y="126" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_reward_methods" parent="cls_reward" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ getAvailableBalance(): int&#xa;+ holdPoints(points: int, orderCode: long): void&#xa;+ settlePoints(orderCode: long): void&#xa;+ releasePoints(orderCode: long): void" vertex="1">
+          <mxGeometry height="96" width="250" y="134" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ledger" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=28;fillColor=#ffffff;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="210" width="250" x="1280" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ledger_title" parent="cls_ledger" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;" value="RewardPointLedger" vertex="1">
+          <mxGeometry height="28" width="250" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ledger_attrs" parent="cls_ledger" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ id: long&#xa;+ customerEmail: String&#xa;+ orderCode: long&#xa;+ entryType: String&#xa;+ pointsDelta: int&#xa;+ balanceAfter: int&#xa;+ expiresAt: Date" vertex="1">
+          <mxGeometry height="110" width="250" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ledger_line" parent="cls_ledger" style="line;strokeWidth=1;fillColor=none;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="250" y="138" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ledger_methods" parent="cls_ledger" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ recordTransaction(type: String, delta: int): void&#xa;+ getLedgerHistory(email: String): List&lt;Ledger&gt;" vertex="1">
+          <mxGeometry height="64" width="250" y="146" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_order" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=28;fillColor=#ffffff;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="310" width="270" x="840" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_order_title" parent="cls_order" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;" value="PayOSOrder" vertex="1">
+          <mxGeometry height="28" width="270" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_order_attrs" parent="cls_order" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ id: int&#xa;+ orderCode: long&#xa;+ paymentLinkId: String&#xa;+ checkoutUrl: String&#xa;+ amount: int&#xa;+ customerEmail: String&#xa;+ paymentMethod: String&#xa;+ status: String&#xa;+ fulfillmentStatus: String&#xa;+ expiresAt: Date" vertex="1">
+          <mxGeometry height="152" width="270" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_order_line" parent="cls_order" style="line;strokeWidth=1;fillColor=none;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="270" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_order_methods" parent="cls_order" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ createOrder(payload: JSON): PayOSOrder&#xa;+ verifyWebhook(data: JSON): boolean&#xa;+ cancelOrder(orderCode: long): void&#xa;+ updateFulfillment(status: String): void&#xa;+ getOrderDetail(orderCode: long): PayOSOrder" vertex="1">
+          <mxGeometry height="122" width="270" y="188" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=28;fillColor=#ffffff;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="250" width="260" x="840" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_title" parent="cls_ticket" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;" value="Ticket" vertex="1">
+          <mxGeometry height="28" width="260" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_attrs" parent="cls_ticket" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ id: int&#xa;+ price: int&#xa;+ purchaseDate: Date&#xa;+ seatId: int&#xa;+ hallId: int&#xa;+ movieId: int&#xa;+ showtimesId: int&#xa;+ ticketStatus: String&#xa;+ seatLabelSnapshot: String" vertex="1">
+          <mxGeometry height="138" width="260" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_line" parent="cls_ticket" style="line;strokeWidth=1;fillColor=none;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="260" y="166" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_methods" parent="cls_ticket" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ issueTicket(orderCode: long): Ticket&#xa;+ checkInTicket(staffEmail: String): boolean&#xa;+ getCustomerTickets(email: String): List&lt;Ticket&gt;" vertex="1">
+          <mxGeometry height="76" width="260" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_hold" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=28;fillColor=#ffffff;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="190" width="260" x="840" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_hold_title" parent="cls_hold" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;" value="SeatHold" vertex="1">
+          <mxGeometry height="28" width="260" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_hold_attrs" parent="cls_hold" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ id: long&#xa;+ orderCode: long&#xa;+ showtimeId: int&#xa;+ hallId: int&#xa;+ seatId: int&#xa;+ customerEmail: String&#xa;+ expiresAt: Date" vertex="1">
+          <mxGeometry height="110" width="260" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_hold_line" parent="cls_hold" style="line;strokeWidth=1;fillColor=none;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="260" y="138" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_hold_methods" parent="cls_hold" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ holdSeats(seats: List&lt;int&gt;, orderCode: long): boolean&#xa;+ releaseExpiredHolds(): int" vertex="1">
+          <mxGeometry height="44" width="260" y="146" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_combo" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=28;fillColor=#ffffff;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="200" width="270" x="840" y="1030" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_combo_title" parent="cls_combo" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;" value="ConcessionCombo" vertex="1">
+          <mxGeometry height="28" width="270" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_combo_attrs" parent="cls_combo" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ id: int&#xa;+ name: String&#xa;+ description: String&#xa;+ category: String&#xa;+ imageUrl: String&#xa;+ basePrice: int&#xa;+ isActive: boolean" vertex="1">
+          <mxGeometry height="110" width="270" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_combo_line" parent="cls_combo" style="line;strokeWidth=1;fillColor=none;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="270" y="138" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_combo_methods" parent="cls_combo" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ getCombos(): List&lt;ConcessionCombo&gt;&#xa;+ getPromotions(movieId: int): List&lt;Promo&gt;&#xa;+ calculateDiscountPrice(movieId: int): int" vertex="1">
+          <mxGeometry height="54" width="270" y="146" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_showtime" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=28;fillColor=#ffffff;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="260" width="270" x="460" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_showtime_title" parent="cls_showtime" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;" value="Showtime" vertex="1">
+          <mxGeometry height="28" width="270" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_showtime_attrs" parent="cls_showtime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ id: int&#xa;+ movieId: int&#xa;+ hallId: int&#xa;+ movieStartTime: Time&#xa;+ showtimeDate: Date&#xa;+ showType: String&#xa;+ pricePerSeat: int&#xa;+ status: String" vertex="1">
+          <mxGeometry height="126" width="270" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_showtime_line" parent="cls_showtime" style="line;strokeWidth=1;fillColor=none;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="270" y="154" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_showtime_methods" parent="cls_showtime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ getShowtimes(movieId: int, date: Date): List&#xa;+ createShowtime(st: Showtime): boolean&#xa;+ checkScheduleConflict(hallId: int, time: Time): bool&#xa;+ getAvailableSeatsCount(): int" vertex="1">
+          <mxGeometry height="98" width="270" y="162" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_movie" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=28;fillColor=#ffffff;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="280" width="270" x="460" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_movie_title" parent="cls_movie" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;" value="Movie" vertex="1">
+          <mxGeometry height="28" width="270" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_movie_attrs" parent="cls_movie" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ id: int&#xa;+ name: String&#xa;+ imagePath: String&#xa;+ trailerUrl: String&#xa;+ duration: int&#xa;+ rating: double&#xa;+ releaseDate: Date&#xa;+ audioType: String&#xa;+ ageRating: String" vertex="1">
+          <mxGeometry height="138" width="270" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_movie_line" parent="cls_movie" style="line;strokeWidth=1;fillColor=none;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="270" y="166" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_movie_methods" parent="cls_movie" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ getMovies(): List&lt;Movie&gt;&#xa;+ getMovieDetail(id: int): Movie&#xa;+ addMovie(movie: Movie): void&#xa;+ updateMovie(id: int): void&#xa;+ getGenres(): List&lt;String&gt;&#xa;+ getDirectors(): List&lt;String&gt;" vertex="1">
+          <mxGeometry height="106" width="270" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_hall" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=28;fillColor=#ffffff;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="230" width="260" x="80" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_hall_title" parent="cls_hall" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;" value="Hall" vertex="1">
+          <mxGeometry height="28" width="260" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_hall_attrs" parent="cls_hall" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ id: int&#xa;+ name: String&#xa;+ totalSeats: int&#xa;+ theatreId: int&#xa;+ screenType: String&#xa;+ projectionCapability: String&#xa;+ cleaningBufferMinutes: int" vertex="1">
+          <mxGeometry height="110" width="260" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_hall_line" parent="cls_hall" style="line;strokeWidth=1;fillColor=none;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="260" y="138" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_hall_methods" parent="cls_hall" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ getHallsByTheatre(theatreId: int): List&lt;Hall&gt;&#xa;+ getSeatLayout(hallId: int): List&lt;HallwiseSeat&gt;&#xa;+ updateCleaningBuffer(minutes: int): void" vertex="1">
+          <mxGeometry height="84" width="260" y="146" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_seat" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=28;fillColor=#ffffff;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="230" width="260" x="80" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_seat_title" parent="cls_seat" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;" value="HallwiseSeat" vertex="1">
+          <mxGeometry height="28" width="260" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_seat_attrs" parent="cls_seat" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ hallId: int&#xa;+ seatId: int&#xa;+ seatLabel: String&#xa;+ rowIndex: int&#xa;+ columnIndex: int&#xa;+ seatType: String&#xa;+ priceSurcharge: int&#xa;+ isActive: boolean" vertex="1">
+          <mxGeometry height="126" width="260" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_seat_line" parent="cls_seat" style="line;strokeWidth=1;fillColor=none;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="260" y="154" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_seat_methods" parent="cls_seat" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ checkAvailability(showtimeId: int): boolean&#xa;+ getSeatPrice(basePrice: int): int&#xa;+ toggleActive(): void" vertex="1">
+          <mxGeometry height="68" width="260" y="162" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_theatre" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=28;fillColor=#ffffff;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="258" width="260" x="460" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_theatre_title" parent="cls_theatre" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;" value="Theatre" vertex="1">
+          <mxGeometry height="28" width="260" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_theatre_attrs" parent="cls_theatre" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ id: int&#xa;+ name: String&#xa;+ location: String&#xa;+ locationDetails: String&#xa;+ openingTime: Time&#xa;+ closingTime: Time&#xa;+ status: String" vertex="1">
+          <mxGeometry height="110" width="260" y="56" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_theatre_line" parent="cls_theatre" style="line;strokeWidth=1;fillColor=none;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="260" y="166" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_theatre_methods" parent="cls_theatre" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;" value="+ getTheatres(): List&lt;Theatre&gt;&#xa;+ addTheatre(theatre: Theatre): void&#xa;+ updateTheatre(id: int): void&#xa;+ getFeatures(): List&lt;Feature&gt;" vertex="1">
+          <mxGeometry height="84" width="260" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_p_r" edge="1" parent="1" source="cls_user" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#000000;strokeWidth=1.2;endArrow=none;" target="cls_reward">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1400" y="380" as="sourcePoint" />
+            <mxPoint x="1400" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_p_r_s" connectable="0" parent="rel_p_r" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_p_r_t" connectable="0" parent="rel_p_r" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="0.8" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_r_l" edge="1" parent="1" source="cls_reward" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#000000;strokeWidth=1.2;endArrow=none;" target="cls_ledger">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_r_l_s" connectable="0" parent="rel_r_l" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_r_l_t" connectable="0" parent="rel_r_l" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;fontSize=11;" value="1..*" vertex="1">
+          <mxGeometry relative="1" x="0.8" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_p_o" edge="1" parent="1" source="cls_user" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#000000;strokeWidth=1.2;endArrow=none;" target="cls_order">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_p_o_s" connectable="0" parent="rel_p_o" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_p_o_t" connectable="0" parent="rel_p_o" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" value="1..*" vertex="1">
+          <mxGeometry relative="1" x="0.8" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_o_t" edge="1" parent="1" source="cls_order" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#000000;strokeWidth=1.2;endArrow=none;" target="cls_ticket">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_o_t_s" connectable="0" parent="rel_o_t" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_o_t_t" connectable="0" parent="rel_o_t" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;fontSize=11;" value="1..*" vertex="1">
+          <mxGeometry relative="1" x="0.8" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_o_h" edge="1" parent="1" source="cls_order" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#000000;strokeWidth=1.2;endArrow=none;" target="cls_hold">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1150" y="240" />
+              <mxPoint x="1150" y="885" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_o_h_s" connectable="0" parent="rel_o_h" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.9" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_o_h_t" connectable="0" parent="rel_o_h" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;fontSize=11;" value="0..*" vertex="1">
+          <mxGeometry relative="1" x="0.9" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_o_c" edge="1" parent="1" source="cls_order" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#000000;strokeWidth=1.2;endArrow=none;" target="cls_combo">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1190" y="240" />
+              <mxPoint x="1190" y="1130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_o_c_s" connectable="0" parent="rel_o_c" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.9" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_o_c_t" connectable="0" parent="rel_o_c" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;fontSize=11;" value="0..*" vertex="1">
+          <mxGeometry relative="1" x="0.9" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_st_t" edge="1" parent="1" source="cls_showtime" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#000000;strokeWidth=1.2;endArrow=none;" target="cls_ticket">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_st_t_s" connectable="0" parent="rel_st_t" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_st_t_t" connectable="0" parent="rel_st_t" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" value="1..*" vertex="1">
+          <mxGeometry relative="1" x="0.8" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_m_st" edge="1" parent="1" source="cls_movie" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#000000;strokeWidth=1.2;endArrow=none;" target="cls_showtime">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_m_st_s" connectable="0" parent="rel_m_st" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=top;fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_m_st_t" connectable="0" parent="rel_m_st" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=11;" value="1..*" vertex="1">
+          <mxGeometry relative="1" x="0.8" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_th_h" edge="1" parent="1" source="cls_theatre" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#000000;strokeWidth=1.2;endArrow=none;" target="cls_hall">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_th_h_s" connectable="0" parent="rel_th_h" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_th_h_t" connectable="0" parent="rel_th_h" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;fontSize=11;" value="1..*" vertex="1">
+          <mxGeometry relative="1" x="0.8" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_h_s" edge="1" parent="1" source="cls_hall" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#000000;strokeWidth=1.2;endArrow=none;" target="cls_seat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_h_s_s" connectable="0" parent="rel_h_s" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_h_s_t" connectable="0" parent="rel_h_s" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;fontSize=11;" value="1..*" vertex="1">
+          <mxGeometry relative="1" x="0.8" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_h_st" edge="1" parent="1" source="cls_hall" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#000000;strokeWidth=1.2;endArrow=none;" target="cls_showtime">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_h_st_s" connectable="0" parent="rel_h_st" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_h_st_t" connectable="0" parent="rel_h_st" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" value="1..*" vertex="1">
+          <mxGeometry relative="1" x="0.8" y="-10" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
