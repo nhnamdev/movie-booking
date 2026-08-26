@@ -1,0 +1,155 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="sd-uc006-standalone" name="SD_UC006_DatMuaBapNuoc">
+    <mxGraphModel dx="2917" dy="950" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ll_user" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" value=":Khách hàng" vertex="1">
+          <mxGeometry height="700" width="120" x="50" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_user" parent="ll_user" style="html=1;points=[];perimeter=orthogonalPerimeter;" value="" vertex="1">
+          <mxGeometry height="610" width="10" x="55" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_view" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" value=":ComboSelector&#xa;(React View)" vertex="1">
+          <mxGeometry height="700" width="150" x="230" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_view" parent="ll_view" style="html=1;points=[];perimeter=orthogonalPerimeter;" value="" vertex="1">
+          <mxGeometry height="610" width="10" x="70" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_ctrl" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" value=":bookingController&#xa;(Controller)" vertex="1">
+          <mxGeometry height="700" width="150" x="430" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_ctrl" parent="ll_ctrl" style="html=1;points=[];perimeter=orthogonalPerimeter;" value="" vertex="1">
+          <mxGeometry height="570" width="10" x="70" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_svc" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" value=":comboService&#xa;(Business Logic)" vertex="1">
+          <mxGeometry height="700" width="140" x="630" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_svc" parent="ll_svc" style="html=1;points=[];perimeter=orthogonalPerimeter;" value="" vertex="1">
+          <mxGeometry height="230" width="10" x="65" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_combo" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" value=":ConcessionCombo&#xa;(Domain Class)" vertex="1">
+          <mxGeometry height="700" width="140" x="820" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_combo" parent="ll_combo" style="html=1;points=[];perimeter=orthogonalPerimeter;" value="" vertex="1">
+          <mxGeometry height="150" width="10" x="65" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_db" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" value=":Database (MySQL)" vertex="1">
+          <mxGeometry height="700" width="140" x="1010" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db" parent="ll_db" style="html=1;points=[];perimeter=orthogonalPerimeter;" value="" vertex="1">
+          <mxGeometry height="100" width="10" x="65" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_1" edge="1" parent="1" source="act_user" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_view" value="1. Chuyển bước chọn bắp nước trên quy trình đặt vé">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="120" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_2" edge="1" parent="1" source="act_view" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_ctrl" value="2. POST /movieCombos { movieId, theatreId }">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_3" edge="1" parent="1" source="act_ctrl" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="ll_svc" value="3. getMovieCombos(movieId, theatreId)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="580" y="180" />
+              <mxPoint x="650" y="180" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_4" edge="1" parent="1" source="act_svc" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" value="4. getCombos(theatreId, movieId)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="760" y="205" />
+            </Array>
+            <mxPoint x="880" y="205" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_5" edge="1" parent="1" source="act_combo" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_db" value="5. SELECT C.*, BC.price_override, MCP.discount_percent FROM concession_combo">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="960" y="230" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_6" edge="1" parent="1" source="act_db" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_combo" value="6. Trả về danh sách combo, giá rạp &amp; ưu đãi theo phim">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="960" y="260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_7" edge="1" parent="1" source="act_combo" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_svc" value="7. Dữ liệu combo thô">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="760" y="285" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_8" edge="1" parent="1" source="act_svc" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;" target="act_svc" value="8. toPricedCombo(): Tính final_price = base_price * (1 - discount%) &amp; gán nhãn ưu đãi">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="305" />
+              <mxPoint x="720" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_9" edge="1" parent="1" source="act_svc" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_ctrl" value="9. Trả về { movieId, theatreId, combos[] }">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="580" y="355" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_10" edge="1" parent="1" source="act_ctrl" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_view" value="10. Phản hồi JSON danh sách combo bắp nước">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="385" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_11" edge="1" parent="1" source="act_view" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_user" value="11. Hiển thị menu bắp nước (Hình ảnh, Mô tả, Giá gốc, Giá giảm &amp; Nút tăng giảm)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_12" edge="1" parent="1" source="act_user" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_view" value="12. Nhấp nút &#39;+&#39; / &#39;-&#39; chọn số lượng combo (vd: 1 My Combo)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="475" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_13" edge="1" parent="1" source="act_view" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;" target="act_view" value="13. Dispatch setComboItems(): Cập nhật giỏ hàng &amp; cộng dồn tổng tiền đơn hàng">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="505" />
+              <mxPoint x="360" y="535" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_14" edge="1" parent="1" source="act_view" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_user" value="14. Cập nhật số lượng combo đã chọn &amp; tổng thanh toán tạm tính">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="565" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_15" edge="1" parent="1" source="act_user" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_view" value="15. Nhấn &#39;Tiếp tục&#39; chuyển sang bước Áp dụng điểm thưởng &amp; Thanh toán (UC_007, UC_008)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="620" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

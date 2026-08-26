@@ -1,0 +1,157 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="ad-uc008-standalone" name="AD_UC008_ThanhToanPayOS">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ==================== SWIMLANES ==================== -->
+        <!-- Lane 1: Khách hàng -->
+        <mxCell id="lane_user" value="Khách hàng" style="swimlane;" vertex="1" parent="1">
+          <mxGeometry x="100" y="50" width="280" height="920" as="geometry" />
+        </mxCell>
+
+        <!-- Start State -->
+        <mxCell id="node_start" value="" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="lane_user">
+          <mxGeometry x="125" y="30" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u8_review_order" value="Kiểm tra thông tin đơn hàng &amp; chọn PayOS (VietQR)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="65" y="90" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u8_click_pay" value="Nhấn nút &quot;Thanh toán ngay&quot;" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="70" y="195" width="140" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u8_scan_qr" value="Quét mã VietQR trên App ngân hàng &amp; chuyển khoản" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="65" y="420" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u8_view_tickets" value="Nhận thông báo thành công &amp; vé điện tử kèm mã QR check-in" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="60" y="750" width="160" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- End State -->
+        <mxCell id="node_end" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="lane_user">
+          <mxGeometry x="125" y="855" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 1 Internal Connections -->
+        <mxCell id="edge_start" edge="1" parent="lane_user" source="node_start" target="u8_review_order" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_review_click" edge="1" parent="lane_user" source="u8_review_order" target="u8_click_pay" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_tickets_end" edge="1" parent="lane_user" source="u8_view_tickets" target="node_end" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 2: Hệ thống & Cổng PayOS -->
+        <mxCell id="lane_sys" value="Hệ thống (Web, Server &amp; PayOS)" style="swimlane;startSize=23;" vertex="1" parent="1">
+          <mxGeometry x="380" y="50" width="370" height="920" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s8_hold_seats" value="Tạo giữ ghế (seat_hold) &amp; giữ điểm thưởng trong 10 phút" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="105" y="190" width="160" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s8_create_paylink" value="Gọi API PayOS: Khởi tạo liên kết thanh toán (orderCode, số tiền, QR)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="105" y="300" width="160" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s8_show_qr_timer" value="Hiển thị mã VietQR &amp; đồng hồ đếm ngược 10:00" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="105" y="418" width="160" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s8_receive_webhook" value="Nhận Webhook PayOS xác nhận chuyển khoản" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="105" y="520" width="160" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: Paid on time? -->
+        <mxCell id="s8_check_paid" value="Thanh toán thành công?" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;" vertex="1" parent="lane_sys">
+          <mxGeometry x="125" y="605" width="120" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s8_expired_cancel" value="Hủy giữ ghế, hoàn điểm giữ &amp; báo giao dịch hết hạn" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="200" y="700" width="150" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s8_db_transaction" value="Chạy MySQL Transaction: PAID đơn hàng, tạo vé (Ticket), ghi sổ điểm &amp; gửi email" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="90" y="750" width="190" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 2 Internal Connections -->
+        <mxCell id="edge_hold_paylink" edge="1" parent="lane_sys" source="s8_hold_seats" target="s8_create_paylink" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_paylink_qr" edge="1" parent="lane_sys" source="s8_create_paylink" target="s8_show_qr_timer" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_webhook_check" edge="1" parent="lane_sys" source="s8_receive_webhook" target="s8_check_paid" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_paid_yes" edge="1" parent="lane_sys" source="s8_check_paid" target="s8_db_transaction" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_paid_yes" value="Đúng" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="lane_sys">
+          <mxGeometry x="185" y="695" width="35" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_paid_no" edge="1" parent="lane_sys" source="s8_check_paid" target="s8_expired_cancel" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="275" y="640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_paid_no" value="Sai" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="lane_sys">
+          <mxGeometry x="250" y="620" width="35" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CROSS-LANE CONNECTIONS ==================== -->
+        <!-- 1. Click pay -> Hold seats -->
+        <mxCell id="e_click_hold" edge="1" parent="1" source="u8_click_pay" target="s8_hold_seats" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 2. Show QR -> Scan QR -->
+        <mxCell id="e_show_scan" edge="1" parent="1" source="s8_show_qr_timer" target="u8_scan_qr" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3. Scan QR -> Receive Webhook -->
+        <mxCell id="e_scan_webhook" edge="1" parent="1" source="u8_scan_qr" target="s8_receive_webhook" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="240" y="590" />
+              <mxPoint x="430" y="590" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 4. Cancel -> Review order -->
+        <mxCell id="e_cancel_review" edge="1" parent="1" source="s8_expired_cancel" target="u8_review_order" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="740" y="780" />
+              <mxPoint x="740" y="165" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. DB Transaction -> View tickets -->
+        <mxCell id="e_trans_view" edge="1" parent="1" source="s8_db_transaction" target="u8_view_tickets" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

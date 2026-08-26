@@ -57,7 +57,7 @@ async function createDatabaseIfAllowed() {
   } catch (error) {
     console.warn(
       `Could not create database automatically (${error.code || error.message}). ` +
-        "Continuing with the existing database connection."
+      "Continuing with the existing database connection."
     );
   } finally {
     if (serverConnection) serverConnection.end();
@@ -602,32 +602,32 @@ async function applySchemaMigrations(connection) {
        END
        WHERE expires_at IS NULL AND status IN ('UNPAID', 'PENDING')`
     );
-  if (await tableExists(connection, "movie")) {
-    await query(connection, "ALTER TABLE movie MODIFY rating DECIMAL(3,1) DEFAULT NULL");
-    await ensureColumn(connection, "movie", "end_date", "DATE DEFAULT NULL");
-    await ensureColumn(connection, "movie", "trailer_url", "VARCHAR(500) DEFAULT NULL");
-    await query(connection, "ALTER TABLE movie MODIFY name VARCHAR(200) DEFAULT NULL");
-    await query(connection, "ALTER TABLE movie MODIFY language VARCHAR(50) DEFAULT NULL");
-    await query(connection, "ALTER TABLE movie MODIFY top_cast VARCHAR(500) DEFAULT NULL");
-    await ensureColumn(
-      connection,
-      "movie",
-      "audio_type",
-      "VARCHAR(30) DEFAULT 'Phụ Đề'"
-    );
-    await ensureColumn(
-      connection,
-      "movie",
-      "age_rating",
-      "VARCHAR(160) DEFAULT 'P: Phim dành cho khán giả mọi lứa tuổi'"
-    );
-    await query(
-      connection,
-      "UPDATE movie SET audio_type = COALESCE(NULLIF(audio_type, ''), 'Phụ Đề'), age_rating = COALESCE(NULLIF(age_rating, ''), 'P: Phim dành cho khán giả mọi lứa tuổi')"
-    );
-    await query(
-      connection,
-      `UPDATE movie
+    if (await tableExists(connection, "movie")) {
+      await query(connection, "ALTER TABLE movie MODIFY rating DECIMAL(3,1) DEFAULT NULL");
+      await ensureColumn(connection, "movie", "end_date", "DATE DEFAULT NULL");
+      await ensureColumn(connection, "movie", "trailer_url", "VARCHAR(500) DEFAULT NULL");
+      await query(connection, "ALTER TABLE movie MODIFY name VARCHAR(200) DEFAULT NULL");
+      await query(connection, "ALTER TABLE movie MODIFY language VARCHAR(50) DEFAULT NULL");
+      await query(connection, "ALTER TABLE movie MODIFY top_cast VARCHAR(500) DEFAULT NULL");
+      await ensureColumn(
+        connection,
+        "movie",
+        "audio_type",
+        "VARCHAR(30) DEFAULT 'Phụ Đề'"
+      );
+      await ensureColumn(
+        connection,
+        "movie",
+        "age_rating",
+        "VARCHAR(160) DEFAULT 'P: Phim dành cho khán giả mọi lứa tuổi'"
+      );
+      await query(
+        connection,
+        "UPDATE movie SET audio_type = COALESCE(NULLIF(audio_type, ''), 'Phụ Đề'), age_rating = COALESCE(NULLIF(age_rating, ''), 'P: Phim dành cho khán giả mọi lứa tuổi')"
+      );
+      await query(
+        connection,
+        `UPDATE movie
        SET duration = CASE
          WHEN LOWER(duration) REGEXP '^[0-9]+h[0-9]+m$' THEN
            CAST(SUBSTRING_INDEX(LOWER(duration), 'h', 1) AS UNSIGNED) * 60 +
@@ -636,10 +636,10 @@ async function applySchemaMigrations(connection) {
            CAST(REPLACE(LOWER(duration), 'h', '') AS UNSIGNED) * 60
          ELSE duration
        END`
-    );
-    await query(
-      connection,
-      `UPDATE movie m
+      );
+      await query(
+        connection,
+        `UPDATE movie m
        LEFT JOIN (
          SELECT si.movie_id, MAX(s.showtime_date) AS latest_showtime_date
          FROM shown_in si
@@ -651,58 +651,58 @@ async function applySchemaMigrations(connection) {
          COALESCE(schedule.latest_showtime_date, m.release_date)
        )
        WHERE m.end_date IS NULL`
-    );
-    await normalizeSeedMovieMetadata(connection);
-    await normalizeSeedMoviePeople(connection);
-  }
+      );
+      await normalizeSeedMovieMetadata(connection);
+      await normalizeSeedMoviePeople(connection);
+    }
 
-  if (await tableExists(connection, "showtimes")) {
-    await ensureColumn(
-      connection,
-      "showtimes",
-      "screen_type",
-      "VARCHAR(30) DEFAULT 'Tiêu chuẩn'"
-    );
-    await ensureColumn(
-      connection,
-      "showtimes",
-      "status",
-      "VARCHAR(20) DEFAULT 'active'"
-    );
-    await query(
-      connection,
-      "UPDATE showtimes SET screen_type = COALESCE(NULLIF(screen_type, ''), 'Tiêu chuẩn')"
-    );
-    await query(
-      connection,
-      "UPDATE showtimes SET status = 'active' WHERE status IS NULL OR status = ''"
-    );
-    await query(
-      connection,
-      "UPDATE showtimes SET screen_type = 'Tiêu chuẩn' WHERE screen_type = 'Standard'"
-    );
-    await query(
-      connection,
-      "UPDATE showtimes SET screen_type = 'Cao cấp' WHERE screen_type = 'Deluxe'"
-    );
-    await normalizeSeedShowtimes(connection);
-  }
+    if (await tableExists(connection, "showtimes")) {
+      await ensureColumn(
+        connection,
+        "showtimes",
+        "screen_type",
+        "VARCHAR(30) DEFAULT 'Tiêu chuẩn'"
+      );
+      await ensureColumn(
+        connection,
+        "showtimes",
+        "status",
+        "VARCHAR(20) DEFAULT 'active'"
+      );
+      await query(
+        connection,
+        "UPDATE showtimes SET screen_type = COALESCE(NULLIF(screen_type, ''), 'Tiêu chuẩn')"
+      );
+      await query(
+        connection,
+        "UPDATE showtimes SET status = 'active' WHERE status IS NULL OR status = ''"
+      );
+      await query(
+        connection,
+        "UPDATE showtimes SET screen_type = 'Tiêu chuẩn' WHERE screen_type = 'Standard'"
+      );
+      await query(
+        connection,
+        "UPDATE showtimes SET screen_type = 'Cao cấp' WHERE screen_type = 'Deluxe'"
+      );
+      await normalizeSeedShowtimes(connection);
+    }
 
-  if (await tableExists(connection, "shown_in")) {
-    await ensureColumn(
-      connection,
-      "shown_in",
-      "status",
-      "VARCHAR(20) DEFAULT 'active'"
-    );
-    await query(
-      connection,
-      "UPDATE shown_in SET status = 'active' WHERE status IS NULL OR status = ''"
-    );
-    await splitSharedShowtimes(connection);
-    await query(
-      connection,
-      `UPDATE showtimes S
+    if (await tableExists(connection, "shown_in")) {
+      await ensureColumn(
+        connection,
+        "shown_in",
+        "status",
+        "VARCHAR(20) DEFAULT 'active'"
+      );
+      await query(
+        connection,
+        "UPDATE shown_in SET status = 'active' WHERE status IS NULL OR status = ''"
+      );
+      await splitSharedShowtimes(connection);
+      await query(
+        connection,
+        `UPDATE showtimes S
        JOIN shown_in SI ON SI.showtime_id = S.id
        JOIN hall H ON H.id = SI.hall_id
        SET S.screen_type = H.screen_type,
@@ -710,75 +710,75 @@ async function applySchemaMigrations(connection) {
              WHEN H.projection_capability IN ('2D', '3D') THEN H.projection_capability
              ELSE S.show_type
            END`
-    );
-    await query(
-      connection,
-      `UPDATE shown_in SI
+      );
+      await query(
+        connection,
+        `UPDATE shown_in SI
        JOIN showtimes S ON S.id = SI.showtime_id
        JOIN movie M ON M.id = SI.movie_id
        SET SI.status = 'inactive', S.status = 'inactive'
        WHERE S.showtime_date < M.release_date
           OR (M.end_date IS NOT NULL AND S.showtime_date > M.end_date)`
-    );
-    await query(connection, "UPDATE shown_in SET status = 'inactive' WHERE status = 'cancelled'");
-    await query(connection, "UPDATE showtimes SET status = 'inactive' WHERE status = 'cancelled'");
-  }
+      );
+      await query(connection, "UPDATE shown_in SET status = 'inactive' WHERE status = 'cancelled'");
+      await query(connection, "UPDATE showtimes SET status = 'inactive' WHERE status = 'cancelled'");
+    }
 
-  if (await tableExists(connection, "payment")) {
+    if (await tableExists(connection, "payment")) {
+      await ensureColumn(
+        connection,
+        "payment",
+        "payment_status",
+        "VARCHAR(20) NOT NULL DEFAULT 'PAID'"
+      );
+      await query(
+        connection,
+        "UPDATE payment SET payment_status = 'PAID' WHERE payment_status IS NULL OR payment_status = ''"
+      );
+      await query(
+        connection,
+        "UPDATE payment SET method = 'Thanh toán tại rạp' WHERE method IN ('Cash', 'Tiền mặt', 'Tại quầy')"
+      );
+    }
+
+    if (await tableExists(connection, "movie_directors")) {
+      await query(
+        connection,
+        "ALTER TABLE movie_directors MODIFY director VARCHAR(200) NOT NULL"
+      );
+    }
+
+    if (!(await tableExists(connection, "person"))) return;
+
     await ensureColumn(
       connection,
-      "payment",
-      "payment_status",
-      "VARCHAR(20) NOT NULL DEFAULT 'PAID'"
+      "person",
+      "account_status",
+      "VARCHAR(20) NOT NULL DEFAULT 'active'"
     );
     await query(
       connection,
-      "UPDATE payment SET payment_status = 'PAID' WHERE payment_status IS NULL OR payment_status = ''"
+      "UPDATE person SET account_status = 'active' WHERE account_status IS NULL OR account_status = ''"
     );
-    await query(
-      connection,
-      "UPDATE payment SET method = 'Thanh toán tại rạp' WHERE method IN ('Cash', 'Tiền mặt', 'Tại quầy')"
-    );
-  }
+    await hashLegacyPasswords(connection);
 
-  if (await tableExists(connection, "movie_directors")) {
-    await query(
-      connection,
-      "ALTER TABLE movie_directors MODIFY director VARCHAR(200) NOT NULL"
-    );
-  }
-
-  if (!(await tableExists(connection, "person"))) return;
-
-  await ensureColumn(
-    connection,
-    "person",
-    "account_status",
-    "VARCHAR(20) NOT NULL DEFAULT 'active'"
-  );
-  await query(
-    connection,
-    "UPDATE person SET account_status = 'active' WHERE account_status IS NULL OR account_status = ''"
-  );
-  await hashLegacyPasswords(connection);
-
-  if (await tableExists(connection, "hall")) {
-    await ensureColumn(connection, "hall", "cleaning_buffer_minutes", "INT NOT NULL DEFAULT 15");
-  }
-  if (await tableExists(connection, "theatre")) {
-    await ensureColumn(connection, "theatre", "opening_time", "TIME DEFAULT '08:00:00'");
-    await ensureColumn(connection, "theatre", "closing_time", "TIME DEFAULT '23:59:00'");
-  }
-  if (await tableExists(connection, "ticket")) {
-    await ensureColumn(connection, "ticket", "ticket_status", "VARCHAR(20) NOT NULL DEFAULT 'ISSUED'");
-    await ensureColumn(connection, "ticket", "checked_in_at", "DATETIME DEFAULT NULL");
-    await ensureColumn(connection, "ticket", "checked_in_by", "VARCHAR(100) DEFAULT NULL");
-    await ensureColumn(connection, "ticket", "seat_label_snapshot", "VARCHAR(20) DEFAULT NULL");
-    await ensureColumn(connection, "ticket", "hall_name_snapshot", "VARCHAR(100) DEFAULT NULL");
-    await ensureColumn(connection, "ticket", "theatre_name_snapshot", "VARCHAR(100) DEFAULT NULL");
-    await query(
-      connection,
-      `UPDATE ticket T
+    if (await tableExists(connection, "hall")) {
+      await ensureColumn(connection, "hall", "cleaning_buffer_minutes", "INT NOT NULL DEFAULT 15");
+    }
+    if (await tableExists(connection, "theatre")) {
+      await ensureColumn(connection, "theatre", "opening_time", "TIME DEFAULT '08:00:00'");
+      await ensureColumn(connection, "theatre", "closing_time", "TIME DEFAULT '23:59:00'");
+    }
+    if (await tableExists(connection, "ticket")) {
+      await ensureColumn(connection, "ticket", "ticket_status", "VARCHAR(20) NOT NULL DEFAULT 'ISSUED'");
+      await ensureColumn(connection, "ticket", "checked_in_at", "DATETIME DEFAULT NULL");
+      await ensureColumn(connection, "ticket", "checked_in_by", "VARCHAR(100) DEFAULT NULL");
+      await ensureColumn(connection, "ticket", "seat_label_snapshot", "VARCHAR(20) DEFAULT NULL");
+      await ensureColumn(connection, "ticket", "hall_name_snapshot", "VARCHAR(100) DEFAULT NULL");
+      await ensureColumn(connection, "ticket", "theatre_name_snapshot", "VARCHAR(100) DEFAULT NULL");
+      await query(
+        connection,
+        `UPDATE ticket T
        JOIN hall H ON H.id = T.hall_id
        JOIN theatre TH ON TH.id = H.theatre_id
        LEFT JOIN hallwise_seat HS ON HS.hall_id = T.hall_id AND HS.seat_id = T.seat_id
@@ -786,18 +786,18 @@ async function applySchemaMigrations(connection) {
        SET T.seat_label_snapshot = COALESCE(T.seat_label_snapshot, HS.seat_label, S.name),
            T.hall_name_snapshot = COALESCE(T.hall_name_snapshot, H.name),
            T.theatre_name_snapshot = COALESCE(T.theatre_name_snapshot, TH.name)`
-    );
-    if (!(await indexExists(connection, "ticket", "ticket_screening_seat_unique"))) {
-      await query(
-        connection,
-        "ALTER TABLE ticket ADD UNIQUE KEY ticket_screening_seat_unique (showtimes_id, hall_id, seat_id)"
       );
+      if (!(await indexExists(connection, "ticket", "ticket_screening_seat_unique"))) {
+        await query(
+          connection,
+          "ALTER TABLE ticket ADD UNIQUE KEY ticket_screening_seat_unique (showtimes_id, hall_id, seat_id)"
+        );
+      }
     }
-  }
 
-  await query(
-    connection,
-    `CREATE TABLE IF NOT EXISTS seat_hold (
+    await query(
+      connection,
+      `CREATE TABLE IF NOT EXISTS seat_hold (
       id BIGINT NOT NULL AUTO_INCREMENT,
       order_code BIGINT NOT NULL,
       showtime_id INT NOT NULL,
@@ -816,11 +816,11 @@ async function applySchemaMigrations(connection) {
       CONSTRAINT seat_hold_seat_fk FOREIGN KEY (seat_id) REFERENCES seat(id) ON DELETE CASCADE,
       CONSTRAINT seat_hold_customer_fk FOREIGN KEY (customer_email) REFERENCES person(email) ON DELETE CASCADE ON UPDATE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
-  );
+    );
 
-  await query(
-    connection,
-    `CREATE TABLE IF NOT EXISTS reward_config (
+    await query(
+      connection,
+      `CREATE TABLE IF NOT EXISTS reward_config (
       id TINYINT NOT NULL,
       earn_amount_per_point INT NOT NULL DEFAULT 10000,
       redeem_value_per_point INT NOT NULL DEFAULT 1000,
@@ -829,17 +829,17 @@ async function applySchemaMigrations(connection) {
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
-  );
-  await query(
-    connection,
-    `INSERT IGNORE INTO reward_config
+    );
+    await query(
+      connection,
+      `INSERT IGNORE INTO reward_config
       (id, earn_amount_per_point, redeem_value_per_point, maximum_redemption_percent)
      VALUES (1, 10000, 1000, 50)`
-  );
+    );
 
-  await query(
-    connection,
-    `CREATE TABLE IF NOT EXISTS branch_combo (
+    await query(
+      connection,
+      `CREATE TABLE IF NOT EXISTS branch_combo (
       theatre_id INT NOT NULL,
       combo_id INT NOT NULL,
       price_override INT DEFAULT NULL,
@@ -848,16 +848,16 @@ async function applySchemaMigrations(connection) {
       CONSTRAINT branch_combo_theatre_fk FOREIGN KEY (theatre_id) REFERENCES theatre(id) ON DELETE CASCADE,
       CONSTRAINT branch_combo_combo_fk FOREIGN KEY (combo_id) REFERENCES concession_combo(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
-  );
-  await query(
-    connection,
-    `INSERT IGNORE INTO branch_combo (theatre_id, combo_id)
+    );
+    await query(
+      connection,
+      `INSERT IGNORE INTO branch_combo (theatre_id, combo_id)
      SELECT T.id, C.id FROM theatre T CROSS JOIN concession_combo C`
-  );
+    );
 
-  await query(
-    connection,
-    `CREATE TABLE IF NOT EXISTS audit_log (
+    await query(
+      connection,
+      `CREATE TABLE IF NOT EXISTS audit_log (
       id BIGINT NOT NULL AUTO_INCREMENT,
       actor_email VARCHAR(100) NOT NULL,
       actor_role VARCHAR(20) NOT NULL,
@@ -870,11 +870,11 @@ async function applySchemaMigrations(connection) {
       KEY audit_log_actor_idx (actor_email, created_at),
       KEY audit_log_action_idx (action, created_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
-  );
+    );
 
-  await query(
-    connection,
-    `CREATE TABLE IF NOT EXISTS reward_account (
+    await query(
+      connection,
+      `CREATE TABLE IF NOT EXISTS reward_account (
       customer_email VARCHAR(100) NOT NULL,
       available_points INT NOT NULL DEFAULT 0,
       held_points INT NOT NULL DEFAULT 0,
@@ -886,10 +886,10 @@ async function applySchemaMigrations(connection) {
       CONSTRAINT reward_account_customer_fk FOREIGN KEY (customer_email)
         REFERENCES person(email) ON DELETE CASCADE ON UPDATE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
-  );
-  await query(
-    connection,
-    `CREATE TABLE IF NOT EXISTS reward_point_hold (
+    );
+    await query(
+      connection,
+      `CREATE TABLE IF NOT EXISTS reward_point_hold (
       id INT NOT NULL AUTO_INCREMENT,
       order_code BIGINT NOT NULL,
       customer_email VARCHAR(100) NOT NULL,
@@ -906,10 +906,10 @@ async function applySchemaMigrations(connection) {
       CONSTRAINT reward_point_hold_customer_fk FOREIGN KEY (customer_email)
         REFERENCES person(email) ON DELETE CASCADE ON UPDATE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
-  );
-  await query(
-    connection,
-    `CREATE TABLE IF NOT EXISTS reward_point_ledger (
+    );
+    await query(
+      connection,
+      `CREATE TABLE IF NOT EXISTS reward_point_ledger (
       id BIGINT NOT NULL AUTO_INCREMENT,
       customer_email VARCHAR(100) NOT NULL,
       order_code BIGINT NOT NULL,
@@ -924,62 +924,62 @@ async function applySchemaMigrations(connection) {
       CONSTRAINT reward_point_ledger_customer_fk FOREIGN KEY (customer_email)
         REFERENCES person(email) ON DELETE CASCADE ON UPDATE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
-  );
-  const shouldBackfillRewardLots = !(await columnExists(
-    connection,
-    "reward_point_ledger",
-    "remaining_points"
-  ));
-  await ensureColumn(connection, "reward_point_ledger", "remaining_points", "INT NOT NULL DEFAULT 0");
-  await ensureColumn(connection, "reward_point_ledger", "expires_at", "DATETIME DEFAULT NULL");
-  if (shouldBackfillRewardLots) {
-    await query(
+    );
+    const shouldBackfillRewardLots = !(await columnExists(
       connection,
-      `UPDATE reward_point_ledger
+      "reward_point_ledger",
+      "remaining_points"
+    ));
+    await ensureColumn(connection, "reward_point_ledger", "remaining_points", "INT NOT NULL DEFAULT 0");
+    await ensureColumn(connection, "reward_point_ledger", "expires_at", "DATETIME DEFAULT NULL");
+    if (shouldBackfillRewardLots) {
+      await query(
+        connection,
+        `UPDATE reward_point_ledger
        SET remaining_points = GREATEST(points_delta, 0)
        WHERE entry_type = 'EARN'`
-    );
-  }
-  await ensureColumn(connection, "reward_account", "lifetime_expired", "INT NOT NULL DEFAULT 0");
-  await query(
-    connection,
-    `INSERT IGNORE INTO reward_account (customer_email)
-     SELECT email FROM person WHERE person_type = 'Customer'`
-  );
-
-  await normalizeSeedPhoneNumbers(connection);
-  await normalizeSeedPeople(connection);
-  await query(connection, "ALTER TABLE person MODIFY first_name VARCHAR(100) DEFAULT NULL");
-  await query(connection, "ALTER TABLE person MODIFY last_name VARCHAR(100) DEFAULT NULL");
-  await query(connection, "ALTER TABLE person MODIFY password VARCHAR(255) NOT NULL");
-  await query(connection, "ALTER TABLE person MODIFY person_type VARCHAR(20) NOT NULL");
-
-  const invalidRows = await query(
-    connection,
-    "SELECT COUNT(*) AS invalidCount FROM person WHERE phone_number IS NOT NULL AND phone_number NOT REGEXP '^0[0-9]{9}$'"
-  );
-
-  if (invalidRows[0].invalidCount > 0) {
-    console.warn(
-      `Found ${invalidRows[0].invalidCount} non-Vietnamese phone number(s). ` +
-        "Skipping phone_number CHAR(10) migration to avoid truncating data."
-    );
-    return;
-  }
-
-  await query(
-    connection,
-    "ALTER TABLE person MODIFY phone_number CHAR(10) DEFAULT NULL"
-  );
-  if (!(await indexExists(connection, "person", "person_phone_unique"))) {
+      );
+    }
+    await ensureColumn(connection, "reward_account", "lifetime_expired", "INT NOT NULL DEFAULT 0");
     await query(
       connection,
-      "ALTER TABLE person ADD UNIQUE KEY person_phone_unique (phone_number)"
+      `INSERT IGNORE INTO reward_account (customer_email)
+     SELECT email FROM person WHERE person_type = 'Customer'`
     );
-  }
-  await query(
-    connection,
-    `CREATE TABLE IF NOT EXISTS movie_review (
+
+    await normalizeSeedPhoneNumbers(connection);
+    await normalizeSeedPeople(connection);
+    await query(connection, "ALTER TABLE person MODIFY first_name VARCHAR(100) DEFAULT NULL");
+    await query(connection, "ALTER TABLE person MODIFY last_name VARCHAR(100) DEFAULT NULL");
+    await query(connection, "ALTER TABLE person MODIFY password VARCHAR(255) NOT NULL");
+    await query(connection, "ALTER TABLE person MODIFY person_type VARCHAR(20) NOT NULL");
+
+    const invalidRows = await query(
+      connection,
+      "SELECT COUNT(*) AS invalidCount FROM person WHERE phone_number IS NOT NULL AND phone_number NOT REGEXP '^0[0-9]{9}$'"
+    );
+
+    if (invalidRows[0].invalidCount > 0) {
+      console.warn(
+        `Found ${invalidRows[0].invalidCount} non-Vietnamese phone number(s). ` +
+        "Skipping phone_number CHAR(10) migration to avoid truncating data."
+      );
+      return;
+    }
+
+    await query(
+      connection,
+      "ALTER TABLE person MODIFY phone_number CHAR(10) DEFAULT NULL"
+    );
+    if (!(await indexExists(connection, "person", "person_phone_unique"))) {
+      await query(
+        connection,
+        "ALTER TABLE person ADD UNIQUE KEY person_phone_unique (phone_number)"
+      );
+    }
+    await query(
+      connection,
+      `CREATE TABLE IF NOT EXISTS movie_review (
       id INT NOT NULL AUTO_INCREMENT,
       movie_id INT NOT NULL,
       customer_email VARCHAR(100) NOT NULL,
@@ -994,100 +994,100 @@ async function applySchemaMigrations(connection) {
       CONSTRAINT movie_review_movie_fk FOREIGN KEY (movie_id) REFERENCES movie(id) ON DELETE CASCADE,
       CONSTRAINT movie_review_customer_fk FOREIGN KEY (customer_email) REFERENCES person(email) ON DELETE CASCADE ON UPDATE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
-  );
+    );
 
-  await seedMovieReviews(connection);
-  console.log("Schema migration completed: person.phone_number is CHAR(10), movie_review is ready.");
-}
-
-async function seedMovieReviews(connection) {
-  if (!(await tableExists(connection, "movie_review"))) return;
-  const rows = await query(connection, "SELECT COUNT(*) AS reviewCount FROM movie_review");
-  if (Number(rows[0].reviewCount) > 0) return;
-
-  const sampleReviews = [
-    [1, "nam@gmail.com", 9.5, "Hình ảnh đồ họa đỉnh cao, âm nhạc quá đã tai! Xứng đáng là siêu phẩm hoạt hình xuất sắc."],
-    [1, "Belal123@gmail.com", 9.0, "Cốt truyện đa vũ trụ lôi cuốn và bất ngờ từ đầu đến cuối."],
-    [1, "farhan@gmail.com", 8.5, "Kỹ xảo và phong cách vẽ truyện tranh rất sáng tạo."],
-    [1, "sazin@gmail.com", 9.0, "Trải nghiệm rạp IMAX xem Người Nhện quá mãn nhãn."],
-    [1, "jon@alu.com", 8.0, "Nội dung hấp dẫn, các pha hành động chuyển động cực kỳ mượt mà."],
-
-    [2, "nam@gmail.com", 8.5, "Chris Hemsworth đánh đấm mãn nhãn, nhịp phim dồn dập từ đầu tới cuối."],
-    [2, "Belal123@gmail.com", 8.0, "Phim hành động kịch tính, những pha quay one-shot nghẹt thở."],
-    [2, "jon@potato.com", 7.5, "Hành động đỉnh cao nhưng cốt truyện hơi đơn giản."],
-    [2, "rahim123@gmail.com", 8.0, "Giải trí cực tốt cho những ai mê phim hành động bắn súng."],
-
-    [3, "sazin@gmail.com", 7.0, "Hài hước nhẹ nhàng, giải trí cuối tuần rất hợp với gia đình."],
-    [3, "neloy.saha456@gmail.com", 6.5, "Nhiều pha tấu hài vui vẻ của bộ đôi diễn viên chính."],
-    [3, "farhan@gmail.com", 7.5, "Phim trinh thám pha hài hước xem rất thư giãn."],
-
-    [4, "nam@gmail.com", 9.0, "Tom Cruise tự thực hiện các pha mạo hiểm quá đỉnh cao!"],
-    [4, "Jon@snow.com", 8.5, "Nhịp phim dồn dập nghẹt thở, âm nhạc thương hiệu quá hay."],
-    [4, "farhan@gmail.com", 8.5, "Xứng đáng là một trong những phần hay nhất của series."],
-    [4, "niaz@nafi.com", 9.0, "Kịch bản gay cấn, xem không rời mắt được phút nào."],
-
-    [5, "nam@gmail.com", 10.0, "Kiệt tác điện ảnh của Christopher Nolan! Âm thanh và diễn xuất của Cillian Murphy đỉnh cao."],
-    [5, "Belal123@gmail.com", 9.5, "Bộ phim lịch sử chính kịch sâu sắc và đầy tính triết lý."],
-    [5, "jon@alu.com", 9.0, "Màn thử nghiệm Trinity nín thở đến từng giây, âm thanh bùng nổ."],
-    [5, "niaz@nafi.com", 9.5, "Cực kỳ ấn tượng với chiều sâu tâm lý nhân vật và nhạc nền."],
-
-    [6, "sazin@gmail.com", 8.5, "Màu sắc tươi sáng, thông điệp ý nghĩa và diễn xuất của Margot Robbie rất tuyệt."],
-    [6, "rahim123@gmail.com", 8.0, "Nhạc phim cực kỳ bắt tai, bối cảnh dựng công phu."],
-    [6, "neloy.saha456@gmail.com", 8.0, "Phim giải trí tốt và có nhiều góc nhìn thú vị."]
-  ];
-
-  for (const [movieId, email, rating, comment] of sampleReviews) {
-    try {
-      await query(
-        connection,
-        `INSERT IGNORE INTO movie_review (movie_id, customer_email, rating, comment)
-         VALUES (?, ?, ?, ?)`,
-        [movieId, email, rating, comment]
-      );
-    } catch (e) {
-      console.warn("Could not insert sample review:", e.message);
-    }
+    await seedMovieReviews(connection);
+    console.log("Schema migration completed: person.phone_number is CHAR(10), movie_review is ready.");
   }
 
-  await query(
-    connection,
-    `UPDATE movie m
+  async function seedMovieReviews(connection) {
+    if (!(await tableExists(connection, "movie_review"))) return;
+    const rows = await query(connection, "SELECT COUNT(*) AS reviewCount FROM movie_review");
+    if (Number(rows[0].reviewCount) > 0) return;
+
+    const sampleReviews = [
+      [1, "nam@gmail.com", 9.5, "Hình ảnh đồ họa đỉnh cao, âm nhạc quá đã tai! Xứng đáng là siêu phẩm hoạt hình xuất sắc."],
+      [1, "Belal123@gmail.com", 9.0, "Cốt truyện đa vũ trụ lôi cuốn và bất ngờ từ đầu đến cuối."],
+      [1, "farhan@gmail.com", 8.5, "Kỹ xảo và phong cách vẽ truyện tranh rất sáng tạo."],
+      [1, "sazin@gmail.com", 9.0, "Trải nghiệm rạp IMAX xem Người Nhện quá mãn nhãn."],
+      [1, "jon@alu.com", 8.0, "Nội dung hấp dẫn, các pha hành động chuyển động cực kỳ mượt mà."],
+
+      [2, "nam@gmail.com", 8.5, "Chris Hemsworth đánh đấm mãn nhãn, nhịp phim dồn dập từ đầu tới cuối."],
+      [2, "Belal123@gmail.com", 8.0, "Phim hành động kịch tính, những pha quay one-shot nghẹt thở."],
+      [2, "jon@potato.com", 7.5, "Hành động đỉnh cao nhưng cốt truyện hơi đơn giản."],
+      [2, "rahim123@gmail.com", 8.0, "Giải trí cực tốt cho những ai mê phim hành động bắn súng."],
+
+      [3, "sazin@gmail.com", 7.0, "Hài hước nhẹ nhàng, giải trí cuối tuần rất hợp với gia đình."],
+      [3, "neloy.saha456@gmail.com", 6.5, "Nhiều pha tấu hài vui vẻ của bộ đôi diễn viên chính."],
+      [3, "farhan@gmail.com", 7.5, "Phim trinh thám pha hài hước xem rất thư giãn."],
+
+      [4, "nam@gmail.com", 9.0, "Tom Cruise tự thực hiện các pha mạo hiểm quá đỉnh cao!"],
+      [4, "Jon@snow.com", 8.5, "Nhịp phim dồn dập nghẹt thở, âm nhạc thương hiệu quá hay."],
+      [4, "farhan@gmail.com", 8.5, "Xứng đáng là một trong những phần hay nhất của series."],
+      [4, "niaz@nafi.com", 9.0, "Kịch bản gay cấn, xem không rời mắt được phút nào."],
+
+      [5, "nam@gmail.com", 10.0, "Kiệt tác điện ảnh của Christopher Nolan! Âm thanh và diễn xuất của Cillian Murphy đỉnh cao."],
+      [5, "Belal123@gmail.com", 9.5, "Bộ phim lịch sử chính kịch sâu sắc và đầy tính triết lý."],
+      [5, "jon@alu.com", 9.0, "Màn thử nghiệm Trinity nín thở đến từng giây, âm thanh bùng nổ."],
+      [5, "niaz@nafi.com", 9.5, "Cực kỳ ấn tượng với chiều sâu tâm lý nhân vật và nhạc nền."],
+
+      [6, "sazin@gmail.com", 8.5, "Màu sắc tươi sáng, thông điệp ý nghĩa và diễn xuất của Margot Robbie rất tuyệt."],
+      [6, "rahim123@gmail.com", 8.0, "Nhạc phim cực kỳ bắt tai, bối cảnh dựng công phu."],
+      [6, "neloy.saha456@gmail.com", 8.0, "Phim giải trí tốt và có nhiều góc nhìn thú vị."]
+    ];
+
+    for (const [movieId, email, rating, comment] of sampleReviews) {
+      try {
+        await query(
+          connection,
+          `INSERT IGNORE INTO movie_review (movie_id, customer_email, rating, comment)
+         VALUES (?, ?, ?, ?)`,
+          [movieId, email, rating, comment]
+        );
+      } catch (e) {
+        console.warn("Could not insert sample review:", e.message);
+      }
+    }
+
+    await query(
+      connection,
+      `UPDATE movie m
      SET m.rating = COALESCE(
        (SELECT ROUND(AVG(r.rating), 1) FROM movie_review r WHERE r.movie_id = m.id),
        m.rating
      )`
-  );
-  console.log("Seed movie reviews imported and movie average ratings synchronized.");
-}
-
-async function run() {
-  await createDatabaseIfAllowed();
-
-  const dbConnection = await connect({
-    ...baseConfig,
-    database: dbName,
-  });
-
-  try {
-    await query(dbConnection, "SET time_zone = ?", [process.env.DB_SESSION_TIMEZONE || "+07:00"]);
-    const tableCount = await getTableCount(dbConnection);
-
-    if (tableCount > 0) {
-      console.log(`Database ${dbName} already has tables, skipping seed import.`);
-      await applySchemaMigrations(dbConnection);
-      return;
-    }
-
-    console.log(`Database ${dbName} is empty, importing seed schema.`);
-    await query(dbConnection, loadSeedSql());
-    await applySchemaMigrations(dbConnection);
-    console.log("Database migration completed.");
-  } finally {
-    dbConnection.end();
+    );
+    console.log("Seed movie reviews imported and movie average ratings synchronized.");
   }
-}
 
-run().catch((error) => {
-  console.error("Database migration failed:", error);
-  process.exit(1);
-});
+  async function run() {
+    await createDatabaseIfAllowed();
+
+    const dbConnection = await connect({
+      ...baseConfig,
+      database: dbName,
+    });
+
+    try {
+      await query(dbConnection, "SET time_zone = ?", [process.env.DB_SESSION_TIMEZONE || "+07:00"]);
+      const tableCount = await getTableCount(dbConnection);
+
+      if (tableCount > 0) {
+        console.log(`Database ${dbName} already has tables, skipping seed import.`);
+        await applySchemaMigrations(dbConnection);
+        return;
+      }
+
+      console.log(`Database ${dbName} is empty, importing seed schema.`);
+      await query(dbConnection, loadSeedSql());
+      await applySchemaMigrations(dbConnection);
+      console.log("Database migration completed.");
+    } finally {
+      dbConnection.end();
+    }
+  }
+
+  run().catch((error) => {
+    console.error("Database migration failed:", error);
+    process.exit(1);
+  });

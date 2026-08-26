@@ -1,0 +1,141 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="sd-uc004-standalone" name="SD_UC004_TraCuuPhimLichChieu">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ==================== 1. LIFELINES (CÁC ĐỐI TƯỢNG CLASS) ==================== -->
+        <!-- Khách hàng -->
+        <mxCell id="ll_user" value=":Khách hàng" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="120" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_user" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_user">
+          <mxGeometry x="55" y="60" width="10" height="610" as="geometry" />
+        </mxCell>
+
+        <!-- View: ShowtimesPage -->
+        <mxCell id="ll_view" value=":ShowtimesPage&#xa;(React View)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="230" y="50" width="150" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_view" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_view">
+          <mxGeometry x="70" y="60" width="10" height="610" as="geometry" />
+        </mxCell>
+
+        <!-- Controller: catalogController -->
+        <mxCell id="ll_ctrl" value=":catalogController&#xa;(Controller)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="440" y="50" width="150" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_ctrl" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_ctrl">
+          <mxGeometry x="70" y="80" width="10" height="570" as="geometry" />
+        </mxCell>
+
+        <!-- Model: Showtime -->
+        <mxCell id="ll_showtime" value=":Showtime&#xa;(Domain Class)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="650" y="50" width="130" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_showtime" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_showtime">
+          <mxGeometry x="60" y="150" width="10" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- Model: Movie -->
+        <mxCell id="ll_movie" value=":Movie&#xa;(Domain Class)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="830" y="50" width="130" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_movie" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_movie">
+          <mxGeometry x="60" y="440" width="10" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- Database: MySQL -->
+        <mxCell id="ll_db" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="50" width="140" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_db">
+          <mxGeometry x="65" y="170" width="10" height="430" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== 2. MESSAGES ==================== -->
+        <!-- 1. User chọn rạp & ngày -->
+        <mxCell id="msg_1" value="1. Chọn rạp chiếu &amp; ngày trên giao diện" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_user" target="act_view">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="130" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 2. View -> Controller: POST /showtimes -->
+        <mxCell id="msg_2" value="2. POST /showtimes { theatreName, userGenre }" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_view" target="act_ctrl">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="400" y="160" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 3. Controller -> Showtime: getShowtimes() -->
+        <mxCell id="msg_3" value="3. getShowtimes(theatreName, userGenre)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_ctrl" target="act_showtime">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="600" y="190" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 4. Showtime -> DB: Query showtimes -->
+        <mxCell id="msg_4" value="4. SELECT M.*, S.*, H.name FROM theatre JOIN hall JOIN showtimes JOIN movie..." style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_showtime" target="act_db">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="880" y="220" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 5. DB -> Showtime: Kết quả SQL -->
+        <mxCell id="msg_5" value="5. Trả về bảng ghi các suất chiếu, phòng chiếu &amp; giá vé" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db" target="act_showtime">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="880" y="250" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 6. Showtime -> Controller -->
+        <mxCell id="msg_6" value="6. Danh sách đối tượng Showtime[]" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_showtime" target="act_ctrl">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="600" y="280" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 7. Controller -> View: JSON response -->
+        <mxCell id="msg_7" value="7. Phản hồi JSON danh sách lịch chiếu" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_ctrl" target="act_view">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="400" y="310" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 8. View -> User: Hiển thị thẻ phim & nút giờ chiếu -->
+        <mxCell id="msg_8" value="8. Hiển thị poster, nhãn tuổi &amp; các nút giờ chiếu (ShowtimesCard)" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_view" target="act_user">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="345" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 9. User xem chi tiết phim -->
+        <mxCell id="msg_9" value="9. Nhấp xem chi tiết phim (MovieDetails)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_user" target="act_view">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="420" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 10. View -> Controller: POST /movieDetail -->
+        <mxCell id="msg_10" value="10. POST /movieDetail { movieDetailsId }" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_view" target="act_ctrl">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="400" y="450" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 11. Controller -> Movie: getMovieDetail() -->
+        <mxCell id="msg_11" value="11. getMovieDetail(movieId)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_ctrl" target="act_movie">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="700" y="480" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 12. Movie -> DB: Query chi tiết & rating -->
+        <mxCell id="msg_12" value="12. SELECT M.*, AVG(MR.rating), MD.director FROM movie M..." style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_movie" target="act_db">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="980" y="510" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 13. DB -> Movie: Trả về chi tiết phim -->
+        <mxCell id="msg_13" value="13. Trả về thông tin phim, đạo diễn &amp; điểm đánh giá" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db" target="act_movie">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="980" y="540" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 14. Movie -> Controller -->
+        <mxCell id="msg_14" value="14. Đối tượng Movie detail" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_movie" target="act_ctrl">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="700" y="570" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 15. Controller -> View: JSON Movie Detail -->
+        <mxCell id="msg_15" value="15. Phản hồi JSON chi tiết phim &amp; trailer Youtube" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_ctrl" target="act_view">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="400" y="600" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 16. View -> User: Hiển thị Trailer & Chọn suất chiếu -->
+        <mxCell id="msg_16" value="16. Hiển thị chi tiết phim, trailer &amp; các nút chọn suất chiếu để đặt vé (UC_005)" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_view" target="act_user">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="640" /></Array></mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,169 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="ad-uc004-standalone" name="AD_UC004_TraCuuPhimLichChieu">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ==================== SWIMLANES ==================== -->
+        <!-- Lane 1: Khách hàng -->
+        <mxCell id="lane_user" value="Khách hàng" style="swimlane;" vertex="1" parent="1">
+          <mxGeometry x="100" y="50" width="280" height="860" as="geometry" />
+        </mxCell>
+
+        <!-- Start State -->
+        <mxCell id="node_start" value="" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="lane_user">
+          <mxGeometry x="125" y="30" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u4_open_page" value="Truy cập trang &quot;Lịch chiếu&quot; (/showtimes)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="70" y="95" width="140" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u4_select_theatre_date" value="Chọn cụm rạp CGV &amp; ngày xem phim" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="70" y="205" width="140" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u4_view_cards" value="Xem danh sách phim, poster, trailer &amp; nhãn tuổi" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="65" y="525" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u4_pick_showtime" value="Nhấp chọn suất chiếu mong muốn" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="70" y="625" width="140" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u4_goto_seats" value="Chuyển sang màn hình Đặt vé &amp; Chọn ghế (UC_005)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="65" y="715" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- End State -->
+        <mxCell id="node_end" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="lane_user">
+          <mxGeometry x="125" y="795" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 1 Internal Connections -->
+        <mxCell id="edge_start" edge="1" parent="lane_user" source="node_start" target="u4_open_page" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_view_pick" edge="1" parent="lane_user" source="u4_view_cards" target="u4_pick_showtime" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_goto_end" edge="1" parent="lane_user" source="u4_goto_seats" target="node_end" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 2: Hệ thống -->
+        <mxCell id="lane_sys" value="Hệ thống (Web &amp; Server)" style="swimlane;startSize=23;" vertex="1" parent="1">
+          <mxGeometry x="380" y="50" width="360" height="860" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s4_load_theatres" value="Tải và hiển thị danh sách các cụm rạp CGV" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="105" y="95" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s4_query_db" value="Truy vấn CSDL: movie, showtimes, hall, shown_in" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="105" y="205" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: Has Showtimes? -->
+        <mxCell id="s4_check_st" value="Có suất chiếu phù hợp?" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;" vertex="1" parent="lane_sys">
+          <mxGeometry x="115" y="300" width="130" height="75" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s4_no_st" value="Hiển thị thông báo: &quot;Không có lịch chiếu tại rạp này&quot;" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="190" y="415" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s4_group_st" value="Nhóm dữ liệu: Phim -&gt; Ngày -&gt; Phòng/Định dạng -&gt; Giờ chiếu" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="100" y="415" width="160" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s4_prepare_booking" value="Khởi tạo thông tin phiên đặt vé (showtimeId, hallId, movieId)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="100" y="620" width="160" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 2 Internal Connections -->
+        <mxCell id="edge_query_check" edge="1" parent="lane_sys" source="s4_query_db" target="s4_check_st" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_check_yes" edge="1" parent="lane_sys" source="s4_check_st" target="s4_group_st" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_st_yes" value="Có" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="lane_sys">
+          <mxGeometry x="180" y="380" width="35" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_check_no" edge="1" parent="lane_sys" source="s4_check_st" target="s4_no_st" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="265" y="338" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_st_no" value="Không" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="lane_sys">
+          <mxGeometry x="245" y="318" width="40" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CROSS-LANE CONNECTIONS ==================== -->
+        <!-- 1. Open page -> Load theatres -->
+        <mxCell id="e_open_load" edge="1" parent="1" source="u4_open_page" target="s4_load_theatres" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 2. Load theatres -> Select theatre & date -->
+        <mxCell id="e_load_select" edge="1" parent="1" source="s4_load_theatres" target="u4_select_theatre_date" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="205" />
+              <mxPoint x="240" y="205" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. Select theatre & date -> Query DB -->
+        <mxCell id="e_select_query" edge="1" parent="1" source="u4_select_theatre_date" target="s4_query_db" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 4. No showtimes -> Select other theatre/date -->
+        <mxCell id="e_nost_select" edge="1" parent="1" source="s4_no_st" target="u4_select_theatre_date" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="490" />
+              <mxPoint x="730" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. Group ST -> View cards -->
+        <mxCell id="e_group_view" edge="1" parent="1" source="s4_group_st" target="u4_view_cards" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="525" />
+              <mxPoint x="240" y="525" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. Pick showtime -> Prepare booking -->
+        <mxCell id="e_pick_prepare" edge="1" parent="1" source="u4_pick_showtime" target="s4_prepare_booking" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 7. Prepare booking -> Go to seats -->
+        <mxCell id="e_prepare_seats" edge="1" parent="1" source="s4_prepare_booking" target="u4_goto_seats" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="715" />
+              <mxPoint x="240" y="715" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

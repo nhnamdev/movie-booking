@@ -1,0 +1,146 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="sd-uc005-standalone" name="SD_UC005_DatVeChonGhe">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ==================== 1. LIFELINES (CÁC ĐỐI TƯỢNG CLASS) ==================== -->
+        <!-- Khách hàng -->
+        <mxCell id="ll_user" value=":Khách hàng" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="120" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_user" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_user">
+          <mxGeometry x="55" y="60" width="10" height="610" as="geometry" />
+        </mxCell>
+
+        <!-- View: PurchaseSection / SeatSelector -->
+        <mxCell id="ll_view" value=":SeatSelector&#xa;(React View)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="230" y="50" width="150" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_view" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_view">
+          <mxGeometry x="70" y="60" width="10" height="610" as="geometry" />
+        </mxCell>
+
+        <!-- Controller: bookingController -->
+        <mxCell id="ll_ctrl" value=":bookingController&#xa;(Controller)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="440" y="50" width="150" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_ctrl" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_ctrl">
+          <mxGeometry x="70" y="80" width="10" height="570" as="geometry" />
+        </mxCell>
+
+        <!-- Model: HallwiseSeat -->
+        <mxCell id="ll_seat" value=":HallwiseSeat&#xa;(Domain Class)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="650" y="50" width="130" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_seat" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_seat">
+          <mxGeometry x="60" y="140" width="10" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- Model: SeatHold -->
+        <mxCell id="ll_hold" value=":SeatHold&#xa;(Domain Class)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="830" y="50" width="130" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_hold" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_hold">
+          <mxGeometry x="60" y="270" width="10" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- Database: MySQL -->
+        <mxCell id="ll_db" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="50" width="140" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_db">
+          <mxGeometry x="65" y="160" width="10" height="240" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== 2. MESSAGES ==================== -->
+        <!-- 1. User chọn suất chiếu -->
+        <mxCell id="msg_1" value="1. Chọn suất chiếu (showtimeId, hallId, movieId)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_user" target="act_view">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="120" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 2. View -> Controller: POST /seats -->
+        <mxCell id="msg_2" value="2. POST /seats { userShowtimeId, userHallId, userMovieId }" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_view" target="act_ctrl">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="400" y="150" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 3. Controller -> HallwiseSeat: getSeatLayout() -->
+        <mxCell id="msg_3" value="3. getSeatLayout(hallId, showtimeId)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_ctrl" target="act_seat">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="600" y="180" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 4. HallwiseSeat -> DB: Query seats, price surcharge, booked tickets -->
+        <mxCell id="msg_4" value="4. SELECT S.id, HS.seat_label, HS.seat_type, TPC.price, T.id AS booked FROM seat S JOIN hallwise_seat HS LEFT JOIN ticket T..." style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_seat" target="act_db">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="880" y="210" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 5. DB -> HallwiseSeat: Return seat matrix & tickets -->
+        <mxCell id="msg_5" value="5. Trả về sơ đồ ghế, loại ghế (VIP/Thường) &amp; vé đã bán" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db" target="act_seat">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="880" y="240" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 6. HallwiseSeat -> Controller -->
+        <mxCell id="msg_6" value="6. Danh sách vị trí ghế &amp; giá vé cấu hình" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_seat" target="act_ctrl">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="600" y="265" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 7. Controller -> SeatHold: Check currently held seats -->
+        <mxCell id="msg_7" value="7. getHeldOrderSeatIds(hallId, movieId, showtimeId)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_ctrl" target="act_hold">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="750" y="295" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 8. SeatHold -> DB: Query active seat holds -->
+        <mxCell id="msg_8" value="8. SELECT seat_id FROM seat_hold WHERE expires_at &gt; NOW()" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_hold" target="act_db">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="980" y="325" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 9. DB -> SeatHold: Return held seat IDs -->
+        <mxCell id="msg_9" value="9. Trả về tập danh sách ghế đang bị giữ tạm thời" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db" target="act_hold">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="980" y="355" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 10. SeatHold -> Controller -->
+        <mxCell id="msg_10" value="10. Tập Set&lt;seatId&gt; đang giữ" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_hold" target="act_ctrl">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="750" y="380" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 11. Controller -> View: JSON seat matrix -->
+        <mxCell id="msg_11" value="11. Phản hồi JSON ma trận ghế (trống, đang giữ, đã bán, giá vé)" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_ctrl" target="act_view">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="400" y="415" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 12. View -> User: Render sơ đồ ghế trực quan -->
+        <mxCell id="msg_12" value="12. Hiển thị sơ đồ ghế phòng chiếu kèm chú thích loại ghế" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_view" target="act_user">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="450" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 13. User click chọn ghế -->
+        <mxCell id="msg_13" value="13. Nhấp chọn các ghế mong muốn (vd: E05, E06)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_user" target="act_view">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="495" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 14. View: Cập nhật giỏ hàng & tính tiền -->
+        <mxCell id="msg_14" value="14. Dispatch selectSeats(): Cập nhật Redux Cart &amp; tính tổng tiền vé real-time" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="act_view" target="act_view">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="525" />
+              <mxPoint x="360" y="555" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 15. View -> User: Cập nhật màu ghế & tổng tiền -->
+        <mxCell id="msg_15" value="15. Đổi màu ghế đã chọn &amp; hiển thị thanh tóm tắt giá vé" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_view" target="act_user">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="585" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 16. User bấm Tiếp tục sang Bắp nước -->
+        <mxCell id="msg_16" value="16. Nhấn 'Tiếp tục' để chuyển sang Chọn Bắp Nước (UC_006)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_user" target="act_view">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="635" /></Array></mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

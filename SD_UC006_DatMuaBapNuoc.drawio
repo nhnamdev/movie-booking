@@ -1,0 +1,146 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="sd-uc006-standalone" name="SD_UC006_DatMuaBapNuoc">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ==================== 1. LIFELINES (CÁC ĐỐI TƯỢNG CLASS) ==================== -->
+        <!-- Khách hàng -->
+        <mxCell id="ll_user" value=":Khách hàng" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="120" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_user" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_user">
+          <mxGeometry x="55" y="60" width="10" height="610" as="geometry" />
+        </mxCell>
+
+        <!-- View: ComboSelector -->
+        <mxCell id="ll_view" value=":ComboSelector&#xa;(React View)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="230" y="50" width="150" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_view" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_view">
+          <mxGeometry x="70" y="60" width="10" height="610" as="geometry" />
+        </mxCell>
+
+        <!-- Controller: bookingController -->
+        <mxCell id="ll_ctrl" value=":bookingController&#xa;(Controller)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="430" y="50" width="150" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_ctrl" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_ctrl">
+          <mxGeometry x="70" y="80" width="10" height="570" as="geometry" />
+        </mxCell>
+
+        <!-- Service: comboService -->
+        <mxCell id="ll_svc" value=":comboService&#xa;(Business Logic)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="630" y="50" width="140" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_svc" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_svc">
+          <mxGeometry x="65" y="140" width="10" height="230" as="geometry" />
+        </mxCell>
+
+        <!-- Model: ConcessionCombo -->
+        <mxCell id="ll_combo" value=":ConcessionCombo&#xa;(Domain Class)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="820" y="50" width="140" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_combo" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_combo">
+          <mxGeometry x="65" y="160" width="10" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- Database: MySQL -->
+        <mxCell id="ll_db" value=":Database (MySQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="50" width="140" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="ll_db">
+          <mxGeometry x="65" y="180" width="10" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== 2. MESSAGES ==================== -->
+        <!-- 1. User chuyển bước bắp nước -->
+        <mxCell id="msg_1" value="1. Chuyển bước chọn bắp nước trên quy trình đặt vé" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_user" target="act_view">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="120" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 2. View -> Controller: POST /movieCombos -->
+        <mxCell id="msg_2" value="2. POST /movieCombos { movieId, theatreId }" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_view" target="act_ctrl">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="380" y="150" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 3. Controller -> Service: getMovieCombos() -->
+        <mxCell id="msg_3" value="3. getMovieCombos(movieId, theatreId)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_ctrl" target="act_svc">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="580" y="180" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 4. Service -> Model: Query combo & promotions -->
+        <mxCell id="msg_4" value="4. getCombos(theatreId, movieId)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_svc" target="act_combo">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="760" y="205" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 5. Model -> DB: SQL Query -->
+        <mxCell id="msg_5" value="5. SELECT C.*, BC.price_override, MCP.discount_percent FROM concession_combo C JOIN branch_combo BC LEFT JOIN movie_combo_promotion MCP..." style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_combo" target="act_db">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="960" y="230" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 6. DB -> Model: Return raw records -->
+        <mxCell id="msg_6" value="6. Trả về danh sách combo, giá rạp &amp; ưu đãi theo phim" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_db" target="act_combo">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="960" y="260" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 7. Model -> Service -->
+        <mxCell id="msg_7" value="7. Dữ liệu combo thô" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_combo" target="act_svc">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="760" y="285" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 8. Service: Calculate discount price -->
+        <mxCell id="msg_8" value="8. toPricedCombo(): Tính final_price = base_price * (1 - discount%) &amp; gán nhãn ưu đãi" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="act_svc" target="act_svc">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="305" />
+              <mxPoint x="720" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 9. Service -> Controller -->
+        <mxCell id="msg_9" value="9. Trả về { movieId, theatreId, combos[] }" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_svc" target="act_ctrl">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="580" y="355" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 10. Controller -> View: JSON response -->
+        <mxCell id="msg_10" value="10. Phản hồi JSON danh sách combo bắp nước" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_ctrl" target="act_view">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="380" y="385" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 11. View -> User: Render combo list -->
+        <mxCell id="msg_11" value="11. Hiển thị menu bắp nước (Hình ảnh, Mô tả, Giá gốc, Giá giảm &amp; Nút tăng giảm)" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_view" target="act_user">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="420" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 12. User tăng giảm số lượng combo -->
+        <mxCell id="msg_12" value="12. Nhấp nút '+' / '-' chọn số lượng combo (vd: 1 My Combo)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_user" target="act_view">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="475" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 13. View: Update Redux cart -->
+        <mxCell id="msg_13" value="13. Dispatch setComboItems(): Cập nhật giỏ hàng &amp; cộng dồn tổng tiền đơn hàng" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="act_view" target="act_view">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="505" />
+              <mxPoint x="360" y="535" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 14. View -> User: Hiển thị tóm tắt giỏ hàng -->
+        <mxCell id="msg_14" value="14. Cập nhật số lượng combo đã chọn &amp; tổng thanh toán tạm tính" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_view" target="act_user">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="565" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- 15. User bấm Tiếp tục sang Điểm thưởng & Thanh toán -->
+        <mxCell id="msg_15" value="15. Nhấn 'Tiếp tục' chuyển sang bước Áp dụng điểm thưởng &amp; Thanh toán (UC_007, UC_008)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" edge="1" parent="1" source="act_user" target="act_view">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="620" /></Array></mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,158 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="sd-uc004-standalone" name="SD_UC004_TraCuuPhimLichChieu">
+    <mxGraphModel dx="1484" dy="711" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ll_user" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" value=":Khách hàng" vertex="1">
+          <mxGeometry height="700" width="120" x="50" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_user" parent="ll_user" style="html=1;points=[];perimeter=orthogonalPerimeter;" value="" vertex="1">
+          <mxGeometry height="610" width="10" x="55" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_view" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" value=":ShowtimesPage&#xa;(React View)" vertex="1">
+          <mxGeometry height="700" width="150" x="230" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_view" parent="ll_view" style="html=1;points=[];perimeter=orthogonalPerimeter;" value="" vertex="1">
+          <mxGeometry height="610" width="10" x="70" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_ctrl" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" value=":catalogController&#xa;(Controller)" vertex="1">
+          <mxGeometry height="700" width="150" x="440" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_ctrl" parent="ll_ctrl" style="html=1;points=[];perimeter=orthogonalPerimeter;" value="" vertex="1">
+          <mxGeometry height="570" width="10" x="70" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_showtime" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" value=":Showtime&#xa;(Domain Class)" vertex="1">
+          <mxGeometry height="700" width="130" x="650" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_showtime" parent="ll_showtime" style="html=1;points=[];perimeter=orthogonalPerimeter;" value="" vertex="1">
+          <mxGeometry height="200" width="10" x="60" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_movie" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" value=":Movie&#xa;(Domain Class)" vertex="1">
+          <mxGeometry height="700" width="130" x="830" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_movie" parent="ll_movie" style="html=1;points=[];perimeter=orthogonalPerimeter;" value="" vertex="1">
+          <mxGeometry height="150" width="10" x="60" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_db" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontStyle=1;" value=":Database (MySQL)" vertex="1">
+          <mxGeometry height="700" width="140" x="1010" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db" parent="ll_db" style="html=1;points=[];perimeter=orthogonalPerimeter;" value="" vertex="1">
+          <mxGeometry height="430" width="10" x="65" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_1" edge="1" parent="1" source="act_user" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_view" value="1. Chọn rạp chiếu &amp; ngày trên giao diện">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_2" edge="1" parent="1" source="act_view" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_ctrl" value="2. POST /showtimes { theatreName, userGenre }">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_3" edge="1" parent="1" source="act_ctrl" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_showtime" value="3. getShowtimes(theatreName, userGenre)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_4" edge="1" parent="1" source="act_showtime" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_db" value="4. SELECT M.*, S.*, H.name FROM theatre JOIN hall JOIN showtimes JOIN movie...">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="880" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_5" edge="1" parent="1" source="act_db" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_showtime" value="5. Trả về bảng ghi các suất chiếu, phòng chiếu &amp; giá vé">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="880" y="250" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_6" edge="1" parent="1" source="act_showtime" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_ctrl" value="6. Danh sách đối tượng Showtime[]">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_7" edge="1" parent="1" source="act_ctrl" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_view" value="7. Phản hồi JSON danh sách lịch chiếu">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="310" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_8" edge="1" parent="1" source="act_view" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_user" value="8. Hiển thị poster, nhãn tuổi &amp; các nút giờ chiếu (ShowtimesCard)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="345" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_9" edge="1" parent="1" source="act_user" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_view" value="9. Nhấp xem chi tiết phim (MovieDetails)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_10" edge="1" parent="1" source="act_view" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_ctrl" value="10. POST /movieDetail { movieDetailsId }">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_11" edge="1" parent="1" source="act_ctrl" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_movie" value="11. getMovieDetail(movieId)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_12" edge="1" parent="1" source="act_movie" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeWidth=1.5;" target="act_db" value="12. SELECT M.*, AVG(MR.rating), MD.director FROM movie M...">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="980" y="510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_13" edge="1" parent="1" source="act_db" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_movie" value="13. Trả về thông tin phim, đạo diễn &amp; điểm đánh giá">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="980" y="540" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_14" edge="1" parent="1" source="act_movie" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_ctrl" value="14. Đối tượng Movie detail">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="570" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_15" edge="1" parent="1" source="act_ctrl" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_view" value="15. Phản hồi JSON chi tiết phim &amp; trailer Youtube">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="600" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg_16" edge="1" parent="1" source="act_view" style="html=1;verticalAlign=bottom;endArrow=dashed;rounded=0;strokeWidth=1.5;" target="act_user" value="16. Hiển thị chi tiết phim, trailer &amp; các nút chọn suất chiếu để đặt vé (UC_005)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

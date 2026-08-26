@@ -1,0 +1,182 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="ad-uc001-standalone" name="AD_UC001_DangNhap">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ==================== SWIMLANES ==================== -->
+        <!-- Lane 1: Khách hàng -->
+        <mxCell id="lane_user" value="Khách hàng" style="swimlane;" vertex="1" parent="1">
+          <mxGeometry x="100" y="50" width="280" height="860" as="geometry" />
+        </mxCell>
+
+        <!-- Start State -->
+        <mxCell id="node_start" value="" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="lane_user">
+          <mxGeometry x="125" y="30" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- User Actions -->
+        <mxCell id="u1_click_login" value="Nhấn nút &quot;Đăng nhập&quot;" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="75" y="100" width="130" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u1_input_creds" value="Nhập Email &amp; Mật khẩu" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="75" y="210" width="130" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u1_submit" value="Nhấn &quot;Đăng nhập&quot;" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="75" y="310" width="130" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u1_success_view" value="Chuyển về trang hiện tại kèm trạng thái đã đăng nhập" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
+          <mxGeometry x="65" y="690" width="150" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- End State -->
+        <mxCell id="node_end" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="lane_user">
+          <mxGeometry x="125" y="790" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 1 Internal Connections -->
+        <mxCell id="edge_start" edge="1" parent="lane_user" source="node_start" target="u1_click_login" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_input_submit" edge="1" parent="lane_user" source="u1_input_creds" target="u1_submit" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_view_end" edge="1" parent="lane_user" source="u1_success_view" target="node_end" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 2: Hệ thống -->
+        <mxCell id="lane_sys" value="Hệ thống (Web &amp; Server)" style="swimlane;startSize=23;" vertex="1" parent="1">
+          <mxGeometry x="380" y="50" width="360" height="860" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s1_show_modal" value="Hiển thị Form Đăng nhập" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="110" y="100" width="140" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s1_receive_creds" value="Tiếp nhận thông tin đăng nhập" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="110" y="310" width="140" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- Decision 1: Format Valid -->
+        <mxCell id="s1_check_format" value="Đầy đủ thông tin?" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;" vertex="1" parent="lane_sys">
+          <mxGeometry x="125" y="390" width="110" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s1_err_format" value="Yêu cầu nhập đầy đủ email và mật khẩu" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="190" y="210" width="140" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s1_verify_auth" value="Truy vấn CSDL &amp; xác thực mật khẩu (Bcrypt)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="105" y="490" width="150" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- Decision 2: Auth Valid -->
+        <mxCell id="s1_check_auth" value="Mật khẩu chính xác?" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;" vertex="1" parent="lane_sys">
+          <mxGeometry x="120" y="565" width="120" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s1_err_auth" value="Thông báo sai tài khoản hoặc mật khẩu" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="195" y="650" width="140" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s1_create_session" value="Cấp HttpOnly Cookie &amp; lưu thông tin vào Redux Store" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
+          <mxGeometry x="100" y="690" width="160" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 2 Internal Connections -->
+        <mxCell id="edge_recv_check" edge="1" parent="lane_sys" source="s1_receive_creds" target="s1_check_format" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_format_ok" edge="1" parent="lane_sys" source="s1_check_format" target="s1_verify_auth" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_fmt_ok" value="Đúng" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="lane_sys">
+          <mxGeometry x="180" y="460" width="40" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_format_fail" edge="1" parent="lane_sys" source="s1_check_format" target="s1_err_format" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="260" y="425" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_fmt_fail" value="Sai" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="lane_sys">
+          <mxGeometry x="235" y="405" width="40" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_verify_check" edge="1" parent="lane_sys" source="s1_verify_auth" target="s1_check_auth" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_auth_ok" edge="1" parent="lane_sys" source="s1_check_auth" target="s1_create_session" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_auth_ok" value="Đúng" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="lane_sys">
+          <mxGeometry x="180" y="645" width="40" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_auth_fail" edge="1" parent="lane_sys" source="s1_check_auth" target="s1_err_auth" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="265" y="600" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_auth_fail" value="Sai" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="lane_sys">
+          <mxGeometry x="240" y="580" width="40" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CROSS-LANE CONNECTIONS ==================== -->
+        <!-- 1. Click login -> Show modal -->
+        <mxCell id="e_click_modal" edge="1" parent="1" source="u1_click_login" target="s1_show_modal" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 2. Show modal -> Input creds -->
+        <mxCell id="e_modal_input" edge="1" parent="1" source="s1_show_modal" target="u1_input_creds" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="210" />
+              <mxPoint x="240" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. Submit -> Receive creds -->
+        <mxCell id="e_submit_recv" edge="1" parent="1" source="u1_submit" target="s1_receive_creds" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 4. Format err -> Input creds -->
+        <mxCell id="e_fmterr_input" edge="1" parent="1" source="s1_err_format" target="u1_input_creds" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 5. Auth err -> Input creds -->
+        <mxCell id="e_autherr_input" edge="1" parent="1" source="s1_err_auth" target="u1_input_creds" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="722" />
+              <mxPoint x="730" y="282" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. Create session -> Success view -->
+        <mxCell id="e_session_view" edge="1" parent="1" source="s1_create_session" target="u1_success_view" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
