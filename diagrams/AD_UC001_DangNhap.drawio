@@ -1,11 +1,11 @@
 <mxfile host="app.diagrams.net" agent="Codex">
   <diagram id="ad-uc001-standalone" name="AD_UC001_DangNhap">
-    <mxGraphModel dx="1212" dy="671" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="950" math="0" shadow="0">
+    <mxGraphModel dx="1493" dy="671" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="950" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="lane_user" parent="1" style="swimlane;" value="Khách hàng" vertex="1">
-          <mxGeometry height="860" width="280" x="100" y="50" as="geometry" />
+          <mxGeometry height="780" width="280" x="100" y="50" as="geometry" />
         </mxCell>
         <mxCell id="node_start" parent="lane_user" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#ff0000;" value="" vertex="1">
           <mxGeometry height="30" width="30" x="125" y="30" as="geometry" />
@@ -23,7 +23,7 @@
           <mxGeometry height="55" width="150" x="65" y="690" as="geometry" />
         </mxCell>
         <mxCell id="node_end" parent="lane_user" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" value="" vertex="1">
-          <mxGeometry height="30" width="30" x="125" y="790" as="geometry" />
+          <mxGeometry height="30" width="30" x="125" y="620" as="geometry" />
         </mxCell>
         <mxCell id="edge_start" edge="1" parent="lane_user" source="node_start" style="endArrow=classic;html=1;rounded=0;" target="u1_click_login">
           <mxGeometry relative="1" as="geometry" />
@@ -34,7 +34,7 @@
         <mxCell id="edge_view_end" edge="1" parent="lane_user" source="u1_success_view" style="endArrow=classic;html=1;rounded=0;" target="node_end">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_autherr_input" edge="1" parent="lane_user" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;">
+        <mxCell id="e_autherr_input" edge="1" parent="lane_user" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.959;entryY=0.041;entryDx=0;entryDy=0;entryPerimeter=0;" target="u1_input_creds">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="630" y="652" />
@@ -46,7 +46,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="lane_sys" parent="1" style="swimlane;startSize=23;" value="Hệ thống (Web &amp; Server)" vertex="1">
-          <mxGeometry height="860" width="360" x="380" y="50" as="geometry" />
+          <mxGeometry height="780" width="360" x="380" y="50" as="geometry" />
         </mxCell>
         <mxCell id="s1_show_modal" parent="lane_sys" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Hiển thị Form Đăng nhập" vertex="1">
           <mxGeometry height="45" width="140" x="110" y="100" as="geometry" />

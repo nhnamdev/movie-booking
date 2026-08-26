@@ -1,120 +1,86 @@
 <mxfile host="app.diagrams.net" agent="Codex">
   <diagram id="ad-uc006-standalone" name="AD_UC006_DatMuaBapNuoc">
-    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="950" math="0" shadow="0">
+    <mxGraphModel dx="1058" dy="475" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="950" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-
-        <!-- ==================== SWIMLANES ==================== -->
-        <!-- Lane 1: Khách hàng -->
-        <mxCell id="lane_user" value="Khách hàng" style="swimlane;" vertex="1" parent="1">
-          <mxGeometry x="100" y="50" width="280" height="860" as="geometry" />
+        <mxCell id="lane_user" parent="1" style="swimlane;" value="Khách hàng" vertex="1">
+          <mxGeometry height="860" width="280" x="100" y="50" as="geometry" />
         </mxCell>
-
-        <!-- Start State -->
-        <mxCell id="node_start" value="" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="lane_user">
-          <mxGeometry x="125" y="30" width="30" height="30" as="geometry" />
+        <mxCell id="node_start" parent="lane_user" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#ff0000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="125" y="30" as="geometry" />
         </mxCell>
-
-        <mxCell id="u6_open_step" value="Chuyển bước chọn bắp nước trên quy trình đặt vé" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
-          <mxGeometry x="65" y="95" width="150" height="50" as="geometry" />
+        <mxCell id="u6_open_step" parent="lane_user" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Chuyển bước chọn bắp nước trên quy trình đặt vé" vertex="1">
+          <mxGeometry height="50" width="150" x="65" y="95" as="geometry" />
         </mxCell>
-
-        <mxCell id="u6_view_combos" value="Xem menu combo bắp nước (Hình ảnh, Mô tả, Giá gốc, Giá giảm)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
-          <mxGeometry x="65" y="325" width="150" height="55" as="geometry" />
+        <mxCell id="u6_view_combos" parent="lane_user" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Xem menu combo bắp nước (Hình ảnh, Mô tả, Giá gốc, Giá giảm)" vertex="1">
+          <mxGeometry height="55" width="150" x="65" y="325" as="geometry" />
         </mxCell>
-
-        <mxCell id="u6_pick_qty" value="Nhấn nút '+' / '-' chọn số lượng combo mong muốn" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
-          <mxGeometry x="65" y="425" width="150" height="50" as="geometry" />
+        <mxCell id="u6_pick_qty" parent="lane_user" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Nhấn nút &#39;+&#39; / &#39;-&#39; chọn số lượng combo mong muốn" vertex="1">
+          <mxGeometry height="50" width="150" x="65" y="425" as="geometry" />
         </mxCell>
-
-        <mxCell id="u6_view_summary" value="Xem tóm tắt giỏ hàng (Vé + Bắp nước &amp; Tổng tiền tạm tính)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
-          <mxGeometry x="65" y="625" width="150" height="50" as="geometry" />
+        <mxCell id="u6_view_summary" parent="lane_user" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Xem tóm tắt giỏ hàng (Vé + Bắp nước &amp; Tổng tiền tạm tính)" vertex="1">
+          <mxGeometry height="50" width="150" x="65" y="625" as="geometry" />
         </mxCell>
-
-        <mxCell id="u6_confirm_next" value="Nhấn &quot;Tiếp tục&quot; chuyển sang Điểm thưởng &amp; Thanh toán (UC_008)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
-          <mxGeometry x="60" y="715" width="160" height="50" as="geometry" />
+        <mxCell id="u6_confirm_next" parent="lane_user" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Nhấn &quot;Tiếp tục&quot; chuyển sang Điểm thưởng &amp; Thanh toán (UC_008)" vertex="1">
+          <mxGeometry height="50" width="160" x="60" y="715" as="geometry" />
         </mxCell>
-
-        <!-- End State -->
-        <mxCell id="node_end" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="lane_user">
-          <mxGeometry x="125" y="795" width="30" height="30" as="geometry" />
+        <mxCell id="node_end" parent="lane_user" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="125" y="795" as="geometry" />
         </mxCell>
-
-        <!-- Lane 1 Internal Connections -->
-        <mxCell id="edge_start" edge="1" parent="lane_user" source="node_start" target="u6_open_step" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="edge_start" edge="1" parent="lane_user" source="node_start" style="endArrow=classic;html=1;rounded=0;" target="u6_open_step">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="edge_view_pick" edge="1" parent="lane_user" source="u6_view_combos" target="u6_pick_qty" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="edge_view_pick" edge="1" parent="lane_user" source="u6_view_combos" style="endArrow=classic;html=1;rounded=0;" target="u6_pick_qty">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="edge_sum_confirm" edge="1" parent="lane_user" source="u6_view_summary" target="u6_confirm_next" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="edge_sum_confirm" edge="1" parent="lane_user" source="u6_view_summary" style="endArrow=classic;html=1;rounded=0;" target="u6_confirm_next">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="edge_confirm_end" edge="1" parent="lane_user" source="u6_confirm_next" target="node_end" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="edge_confirm_end" edge="1" parent="lane_user" source="u6_confirm_next" style="endArrow=classic;html=1;rounded=0;" target="node_end">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <!-- Lane 2: Hệ thống -->
-        <mxCell id="lane_sys" value="Hệ thống (Web &amp; Server)" style="swimlane;startSize=23;" vertex="1" parent="1">
-          <mxGeometry x="380" y="50" width="360" height="860" as="geometry" />
+        <mxCell id="lane_sys" parent="1" style="swimlane;startSize=23;" value="Hệ thống (Web &amp; Server)" vertex="1">
+          <mxGeometry height="860" width="360" x="380" y="50" as="geometry" />
         </mxCell>
-
-        <mxCell id="s6_query_combos" value="Truy vấn CSDL: concession_combo, branch_combo &amp; movie_combo_promotion" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
-          <mxGeometry x="100" y="90" width="160" height="60" as="geometry" />
+        <mxCell id="s6_query_combos" parent="lane_sys" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Truy vấn CSDL: concession_combo, branch_combo &amp; movie_combo_promotion" vertex="1">
+          <mxGeometry height="60" width="160" x="100" y="90" as="geometry" />
         </mxCell>
-
-        <mxCell id="s6_calc_promos" value="Tính giá bán sau chiết khấu (final_price) &amp; gắn nhãn ưu đãi theo phim" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
-          <mxGeometry x="100" y="200" width="160" height="55" as="geometry" />
+        <mxCell id="s6_calc_promos" parent="lane_sys" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Tính giá bán sau chiết khấu (final_price) &amp; gắn nhãn ưu đãi theo phim" vertex="1">
+          <mxGeometry height="55" width="160" x="100" y="200" as="geometry" />
         </mxCell>
-
-        <!-- Decision: Select combo or skip? -->
-        <mxCell id="s6_check_selected" value="Có chọn bắp nước?" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;" vertex="1" parent="lane_sys">
-          <mxGeometry x="120" y="415" width="120" height="70" as="geometry" />
+        <mxCell id="s6_check_selected" parent="lane_sys" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;" value="Có chọn bắp nước?" vertex="1">
+          <mxGeometry height="70" width="120" x="120" y="415" as="geometry" />
         </mxCell>
-
-        <mxCell id="s6_update_cart_combo" value="Cập nhật Redux Cart: Lưu danh sách combo &amp; cộng dồn tổng tiền đơn" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
-          <mxGeometry x="100" y="525" width="160" height="55" as="geometry" />
+        <mxCell id="s6_update_cart_combo" parent="lane_sys" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Cập nhật Redux Cart: Lưu danh sách combo &amp; cộng dồn tổng tiền đơn" vertex="1">
+          <mxGeometry height="55" width="160" x="20" y="495" as="geometry" />
         </mxCell>
-
-        <mxCell id="s6_keep_cart" value="Giữ nguyên tổng tiền vé trong giỏ hàng (không có bắp nước)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
-          <mxGeometry x="195" y="525" width="145" height="55" as="geometry" />
+        <mxCell id="s6_keep_cart" parent="lane_sys" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Giữ nguyên tổng tiền vé trong giỏ hàng (không có bắp nước)" vertex="1">
+          <mxGeometry height="55" width="145" x="195" y="525" as="geometry" />
         </mxCell>
-
-        <!-- Lane 2 Internal Connections -->
-        <mxCell id="edge_query_calc" edge="1" parent="lane_sys" source="s6_query_combos" target="s6_calc_promos" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="edge_query_calc" edge="1" parent="lane_sys" source="s6_query_combos" style="endArrow=classic;html=1;rounded=0;" target="s6_calc_promos">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="edge_check_yes" edge="1" parent="lane_sys" source="s6_check_selected" target="s6_update_cart_combo" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="edge_check_yes" edge="1" parent="lane_sys" source="s6_check_selected" style="endArrow=classic;html=1;rounded=0;" target="s6_update_cart_combo">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lbl_combo_yes" value="Có" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="lane_sys">
-          <mxGeometry x="180" y="495" width="35" height="20" as="geometry" />
+        <mxCell id="lbl_combo_yes" parent="lane_sys" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Có" vertex="1">
+          <mxGeometry height="20" width="35" x="180" y="495" as="geometry" />
         </mxCell>
-
-        <mxCell id="edge_check_no" edge="1" parent="lane_sys" source="s6_check_selected" target="s6_keep_cart" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+        <mxCell id="edge_check_no" edge="1" parent="lane_sys" source="s6_check_selected" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="s6_keep_cart">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="267" y="450" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="lbl_combo_no" value="Không" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="lane_sys">
-          <mxGeometry x="240" y="430" width="40" height="20" as="geometry" />
+        <mxCell id="lbl_combo_no" parent="lane_sys" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Không" vertex="1">
+          <mxGeometry height="20" width="40" x="240" y="430" as="geometry" />
         </mxCell>
-
-        <!-- ==================== CROSS-LANE CONNECTIONS ==================== -->
-        <!-- 1. Open step -> Query combos -->
-        <mxCell id="e_open_query" edge="1" parent="1" source="u6_open_step" target="s6_query_combos" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="e_open_query" edge="1" parent="1" source="u6_open_step" style="endArrow=classic;html=1;rounded=0;" target="s6_query_combos">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <!-- 2. Calc promos -> View combos -->
-        <mxCell id="e_calc_view" edge="1" parent="1" source="s6_calc_promos" target="u6_view_combos" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+        <mxCell id="e_calc_view" edge="1" parent="1" source="s6_calc_promos" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="u6_view_combos">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="560" y="325" />
@@ -122,32 +88,25 @@
             </Array>
           </mxGeometry>
         </mxCell>
-
-        <!-- 3. Pick qty -> Check selected -->
-        <mxCell id="e_pick_check" edge="1" parent="1" source="u6_pick_qty" target="s6_check_selected" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="e_pick_check" edge="1" parent="1" source="u6_pick_qty" style="endArrow=classic;html=1;rounded=0;" target="s6_check_selected">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <!-- 4. Update cart combo -> View summary -->
-        <mxCell id="e_update_view" edge="1" parent="1" source="s6_update_cart_combo" target="u6_view_summary" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+        <mxCell id="e_update_view" edge="1" parent="1" source="s6_update_cart_combo" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="u6_view_summary">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="560" y="625" />
+              <mxPoint x="480" y="625" />
               <mxPoint x="240" y="625" />
             </Array>
           </mxGeometry>
         </mxCell>
-
-        <!-- 5. Keep cart -> View summary -->
-        <mxCell id="e_keep_view" edge="1" parent="1" source="s6_keep_cart" target="u6_view_summary" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+        <mxCell id="e_keep_view" edge="1" parent="1" source="s6_keep_cart" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="u6_view_summary">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="647" y="625" />
-              <mxPoint x="240" y="625" />
+              <mxPoint x="647" y="690" />
+              <mxPoint x="360" y="690" />
             </Array>
           </mxGeometry>
         </mxCell>
-
       </root>
     </mxGraphModel>
   </diagram>

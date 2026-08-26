@@ -1,128 +1,88 @@
 <mxfile host="app.diagrams.net" agent="Codex">
   <diagram id="ad-uc005-standalone" name="AD_UC005_DatVeChonGhe">
-    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="950" math="0" shadow="0">
+    <mxGraphModel dx="1813" dy="814" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="950" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-
-        <!-- ==================== SWIMLANES ==================== -->
-        <!-- Lane 1: Khách hàng -->
-        <mxCell id="lane_user" value="Khách hàng" style="swimlane;" vertex="1" parent="1">
-          <mxGeometry x="100" y="50" width="280" height="860" as="geometry" />
+        <mxCell id="lane_user" parent="1" style="swimlane;" value="Khách hàng" vertex="1">
+          <mxGeometry height="750" width="280" x="100" y="50" as="geometry" />
         </mxCell>
-
-        <!-- Start State -->
-        <mxCell id="node_start" value="" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="lane_user">
-          <mxGeometry x="125" y="30" width="30" height="30" as="geometry" />
+        <mxCell id="node_start" parent="lane_user" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#ff0000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="125" y="30" as="geometry" />
         </mxCell>
-
-        <mxCell id="u5_select_st" value="Chọn khung giờ chiếu &amp; phòng chiếu" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
-          <mxGeometry x="65" y="95" width="150" height="45" as="geometry" />
+        <mxCell id="u5_select_st" parent="lane_user" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Chọn khung giờ chiếu &amp; phòng chiếu" vertex="1">
+          <mxGeometry height="45" width="150" x="65" y="95" as="geometry" />
         </mxCell>
-
-        <mxCell id="u5_view_seats" value="Xem sơ đồ bố trí ghế &amp; bảng giá vé theo loại ghế" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
-          <mxGeometry x="65" y="325" width="150" height="50" as="geometry" />
+        <mxCell id="u5_view_seats" parent="lane_user" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Xem sơ đồ bố trí ghế &amp; bảng giá vé theo loại ghế" vertex="1">
+          <mxGeometry height="50" width="150" x="65" y="325" as="geometry" />
         </mxCell>
-
-        <mxCell id="u5_pick_seats" value="Nhấp chọn vị trí các ghế (vd: F08, F09)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
-          <mxGeometry x="65" y="420" width="150" height="45" as="geometry" />
+        <mxCell id="u5_pick_seats" parent="lane_user" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Nhấp chọn vị trí các ghế (vd: F08, F09)" vertex="1">
+          <mxGeometry height="45" width="150" x="65" y="420" as="geometry" />
         </mxCell>
-
-        <mxCell id="u5_view_total" value="Xem lại các ghế đã chọn &amp; tổng tiền vé" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
-          <mxGeometry x="65" y="625" width="150" height="45" as="geometry" />
+        <mxCell id="u5_view_total" parent="lane_user" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Xem lại các ghế đã chọn &amp; tổng tiền vé" vertex="1">
+          <mxGeometry height="45" width="150" x="65" y="625" as="geometry" />
         </mxCell>
-
-        <mxCell id="u5_confirm_next" value="Nhấn &quot;Tiếp tục&quot; chuyển sang Chọn bắp nước (UC_006)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_user">
-          <mxGeometry x="60" y="715" width="160" height="50" as="geometry" />
+        <mxCell id="node_end" parent="lane_user" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="125" y="710" as="geometry" />
         </mxCell>
-
-        <!-- End State -->
-        <mxCell id="node_end" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="lane_user">
-          <mxGeometry x="125" y="795" width="30" height="30" as="geometry" />
-        </mxCell>
-
-        <!-- Lane 1 Internal Connections -->
-        <mxCell id="edge_start" edge="1" parent="lane_user" source="node_start" target="u5_select_st" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="edge_start" edge="1" parent="lane_user" source="node_start" style="endArrow=classic;html=1;rounded=0;" target="u5_select_st">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="edge_view_pick" edge="1" parent="lane_user" source="u5_view_seats" target="u5_pick_seats" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="edge_view_pick" edge="1" parent="lane_user" source="u5_view_seats" style="endArrow=classic;html=1;rounded=0;" target="u5_pick_seats">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="edge_total_confirm" edge="1" parent="lane_user" source="u5_view_total" target="u5_confirm_next" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="edge_total_confirm" edge="1" parent="lane_user" source="u5_view_total" style="endArrow=classic;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="140" y="715" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lane_sys" parent="1" style="swimlane;startSize=23;" value="Hệ thống (Web &amp; Server)" vertex="1">
+          <mxGeometry height="750" width="360" x="380" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="s5_query_layout" parent="lane_sys" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Truy vấn CSDL: hallwise_seat, ticket &amp; seat_hold" vertex="1">
+          <mxGeometry height="45" width="150" x="105" y="95" as="geometry" />
+        </mxCell>
+        <mxCell id="s5_calc_prices" parent="lane_sys" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Tính giá vé theo phòng chiếu (2D/3D), loại ghế (VIP/Thường) &amp; thời điểm" vertex="1">
+          <mxGeometry height="55" width="160" x="100" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="s5_validate_seats" parent="lane_sys" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Kiểm tra trạng thái ghế (ghế chưa bán, chưa bị giữ, quy tắc ghế liền kề)" vertex="1">
+          <mxGeometry height="55" width="160" x="100" y="415" as="geometry" />
+        </mxCell>
+        <mxCell id="s5_check_valid" parent="lane_sys" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;" value="Ghế hợp lệ?" vertex="1">
+          <mxGeometry height="70" width="100" x="130" y="505" as="geometry" />
+        </mxCell>
+        <mxCell id="s5_err_invalid" parent="lane_sys" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Cảnh báo: Ghế đã có người chọn / để lại ghế đơn" vertex="1">
+          <mxGeometry height="50" width="145" x="195" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="s5_update_cart" parent="lane_sys" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" value="Cập nhật Redux Cart: Ghi nhận danh sách ghế &amp; tính tổng tiền vé" vertex="1">
+          <mxGeometry height="55" width="160" x="100" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_layout_calc" edge="1" parent="lane_sys" source="s5_query_layout" style="endArrow=classic;html=1;rounded=0;" target="s5_calc_prices">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="edge_confirm_end" edge="1" parent="lane_user" source="u5_confirm_next" target="node_end" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="edge_validate_check" edge="1" parent="lane_sys" source="s5_validate_seats" style="endArrow=classic;html=1;rounded=0;" target="s5_check_valid">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <!-- Lane 2: Hệ thống -->
-        <mxCell id="lane_sys" value="Hệ thống (Web &amp; Server)" style="swimlane;startSize=23;" vertex="1" parent="1">
-          <mxGeometry x="380" y="50" width="360" height="860" as="geometry" />
-        </mxCell>
-
-        <mxCell id="s5_query_layout" value="Truy vấn CSDL: hallwise_seat, ticket &amp; seat_hold" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
-          <mxGeometry x="105" y="95" width="150" height="45" as="geometry" />
-        </mxCell>
-
-        <mxCell id="s5_calc_prices" value="Tính giá vé theo phòng chiếu (2D/3D), loại ghế (VIP/Thường) &amp; thời điểm" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
-          <mxGeometry x="100" y="200" width="160" height="55" as="geometry" />
-        </mxCell>
-
-        <mxCell id="s5_validate_seats" value="Kiểm tra trạng thái ghế (ghế chưa bán, chưa bị giữ, quy tắc ghế liền kề)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
-          <mxGeometry x="100" y="415" width="160" height="55" as="geometry" />
-        </mxCell>
-
-        <!-- Decision: Seats Valid? -->
-        <mxCell id="s5_check_valid" value="Ghế hợp lệ?" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;" vertex="1" parent="lane_sys">
-          <mxGeometry x="130" y="505" width="100" height="70" as="geometry" />
-        </mxCell>
-
-        <mxCell id="s5_err_invalid" value="Cảnh báo: Ghế đã có người chọn / để lại ghế đơn" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
-          <mxGeometry x="195" y="325" width="145" height="50" as="geometry" />
-        </mxCell>
-
-        <mxCell id="s5_update_cart" value="Cập nhật Redux Cart: Ghi nhận danh sách ghế &amp; tính tổng tiền vé" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="lane_sys">
-          <mxGeometry x="100" y="620" width="160" height="55" as="geometry" />
-        </mxCell>
-
-        <!-- Lane 2 Internal Connections -->
-        <mxCell id="edge_layout_calc" edge="1" parent="lane_sys" source="s5_query_layout" target="s5_calc_prices" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="edge_valid_ok" edge="1" parent="lane_sys" source="s5_check_valid" style="endArrow=classic;html=1;rounded=0;" target="s5_update_cart">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="edge_validate_check" edge="1" parent="lane_sys" source="s5_validate_seats" target="s5_check_valid" style="endArrow=classic;html=1;rounded=0;">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="lbl_seat_ok" parent="lane_sys" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Có" vertex="1">
+          <mxGeometry height="20" width="35" x="180" y="585" as="geometry" />
         </mxCell>
-
-        <mxCell id="edge_valid_ok" edge="1" parent="lane_sys" source="s5_check_valid" target="s5_update_cart" style="endArrow=classic;html=1;rounded=0;">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="lbl_seat_ok" value="Có" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="lane_sys">
-          <mxGeometry x="180" y="585" width="35" height="20" as="geometry" />
-        </mxCell>
-
-        <mxCell id="edge_valid_fail" edge="1" parent="lane_sys" source="s5_check_valid" target="s5_err_invalid" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;">
+        <mxCell id="edge_valid_fail" edge="1" parent="lane_sys" source="s5_check_valid" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="s5_err_invalid">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="267" y="540" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="lbl_seat_fail" value="Không" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="lane_sys">
-          <mxGeometry x="240" y="520" width="40" height="20" as="geometry" />
+        <mxCell id="lbl_seat_fail" parent="lane_sys" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Không" vertex="1">
+          <mxGeometry height="20" width="40" x="220" y="520" as="geometry" />
         </mxCell>
-
-        <!-- ==================== CROSS-LANE CONNECTIONS ==================== -->
-        <!-- 1. Select ST -> Query layout -->
-        <mxCell id="e_select_query" edge="1" parent="1" source="u5_select_st" target="s5_query_layout" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="e_select_query" edge="1" parent="1" source="u5_select_st" style="endArrow=classic;html=1;rounded=0;" target="s5_query_layout">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <!-- 2. Calc prices -> View seats -->
-        <mxCell id="e_calc_view" edge="1" parent="1" source="s5_calc_prices" target="u5_view_seats" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+        <mxCell id="e_calc_view" edge="1" parent="1" source="s5_calc_prices" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="u5_view_seats">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="560" y="325" />
@@ -130,27 +90,20 @@
             </Array>
           </mxGeometry>
         </mxCell>
-
-        <!-- 3. Pick seats -> Validate seats -->
-        <mxCell id="e_pick_validate" edge="1" parent="1" source="u5_pick_seats" target="s5_validate_seats" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="e_pick_validate" edge="1" parent="1" source="u5_pick_seats" style="endArrow=classic;html=1;rounded=0;" target="s5_validate_seats">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <!-- 4. Err invalid -> Pick seats -->
-        <mxCell id="e_err_pick" edge="1" parent="1" source="s5_err_invalid" target="u5_pick_seats" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;">
+        <mxCell id="e_err_pick" edge="1" parent="1" source="s5_err_invalid" style="endArrow=classic;html=1;rounded=1;curved=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="u5_pick_seats">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="480" y="400" />
-              <mxPoint x="340" y="440" />
+              <mxPoint x="450" y="400" />
+              <mxPoint x="450" y="480" />
             </Array>
           </mxGeometry>
         </mxCell>
-
-        <!-- 5. Update cart -> View total -->
-        <mxCell id="e_update_view" edge="1" parent="1" source="s5_update_cart" target="u5_view_total" style="endArrow=classic;html=1;rounded=0;">
+        <mxCell id="e_update_view" edge="1" parent="1" source="s5_update_cart" style="endArrow=classic;html=1;rounded=0;" target="u5_view_total">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
       </root>
     </mxGraphModel>
   </diagram>
