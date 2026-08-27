@@ -3,17 +3,13 @@ import axios from "axios";
 import { Link, useLocation } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import HashLoader from "react-spinners/esm/HashLoader.js";
-import { useDispatch } from "react-redux";
-import { showLoginModal, showSignModal } from "../reducers/authSlice";
 
 export const Footer = () => {
   const [locationData, setLocationData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const dispatch = useDispatch();
-  let pageName;
   const location = useLocation();
 
-  location.pathname === "/" ? (pageName = "home") : (pageName = "");
+  const isHomePage = location.pathname === "/";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,7 +17,7 @@ export const Footer = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_API_URL}/locationDetails`
         );
-        setLocationData(response.data);
+        setLocationData(response.data || []);
       } catch (err) {
         console.log(err);
       } finally {
@@ -32,17 +28,17 @@ export const Footer = () => {
     fetchData();
   }, []);
 
-  const locations = locationData.map((location, idx) => {
+  const locations = locationData.map((loc, idx) => {
     return (
       <p key={idx} className="address">
-        {location.location_details}
+        {loc.location_details}
       </p>
     );
   });
 
   return (
     <section className="section-footer container">
-      {pageName === "home" ? (
+      {isHomePage ? (
         <HashLink className="footer-logo-container" to="#headerTop">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -95,25 +91,15 @@ export const Footer = () => {
       )}
 
       <div className="footer-link-container foot-reg">
-        <button
-          className="footer-btn"
-          onClick={() => {
-            dispatch(showSignModal());
-          }}
-        >
-          Tạo tài khoản
-        </button>
+        <Link className="footer-link" to="/showtimes">
+          Lịch chiếu phim
+        </Link>
       </div>
 
       <div className="footer-link-container">
-        <button
-          className="footer-btn"
-          onClick={() => {
-            dispatch(showLoginModal());
-          }}
-        >
-          Đăng nhập
-        </button>
+        <Link className="footer-link" to="/concessions">
+          Bắp & Nước
+        </Link>
       </div>
 
       <div className="footer-link-container">
@@ -125,7 +111,7 @@ export const Footer = () => {
       <h3 className="footer-heading">Rạp của chúng tôi</h3>
 
       <p className="copyright">
-        Copyright &copy;  2025 bởi CGV Việt Nam. 
+        Copyright &copy; 2026 bởi CGV Việt Nam. 
         Ứng dụng này được phát triển nhằm nâng cao trải nghiệm đặt vé xem phim cho khách hàng CGV. Mọi nội dung và mã nguồn được thiết kế và phát hành bởi Nguyễn Hoàng Nam. Mọi sai sót xin liên hệ nhnam23304@gmail.com.
       </p>
 
