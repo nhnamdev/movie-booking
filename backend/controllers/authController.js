@@ -55,7 +55,21 @@ const createAuthController = ({
       await transaction.commit();
       transaction.release();
       transaction = null;
-      return res.status(201).json({ message: "Chúc mừng! Tạo tài khoản thành công" });
+
+      const newUser = {
+        email,
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber,
+        person_type: "Customer",
+        account_status: "active",
+      };
+      setSessionCookie(res, signSession(newUser));
+
+      return res.status(201).json({
+        message: "Chúc mừng! Đăng ký và đăng nhập thành công",
+        user: publicUser(newUser),
+      });
     } catch (err) {
       if (transaction) {
         await transaction.rollback().catch(() => {});

@@ -2,7 +2,7 @@ require("dotenv").config({ path: __dirname + "/../.env" });
 const mysql = require("mysql2/promise");
 
 const START_DATE = "2026-08-24";
-const END_DATE = "2026-09-10";
+const END_DATE = "2026-09-30";
 
 const AGE_RATINGS = {
   P: "P: Phim dành cho khán giả mọi lứa tuổi",
@@ -384,14 +384,17 @@ const seedCgvData = async (connection) => {
       continue;
     }
 
-    for (const hall of halls) {
-      let currentMinutes = 8 * 60 + 30; // 08:30 sáng
+    for (let hallIdx = 0; hallIdx < halls.length; hallIdx++) {
+      const hall = halls[hallIdx];
+      let currentMinutes = 8 * 60 + 15; // 08:15 sáng
       const closeMinutes = 23 * 60 + 59; // 23:59 đêm
       const buffer = hall.cleaning_buffer_minutes || 15;
+      let movieIndex = (hallIdx + dates.indexOf(dateStr) * 3) % playingMovies.length;
 
       // Xếp các suất chiếu liên tiếp trong ngày cho phòng chiếu
-      while (currentMinutes < 22 * 60 + 30) {
-        const movie = playingMovies[Math.floor(Math.random() * playingMovies.length)];
+      while (currentMinutes < 23 * 60) {
+        const movie = playingMovies[movieIndex % playingMovies.length];
+        movieIndex++;
         const movieDuration = parseDuration(movie.duration);
 
         if (currentMinutes + movieDuration > closeMinutes) {
@@ -402,7 +405,7 @@ const seedCgvData = async (connection) => {
         if (hall.projection_capability === "3D") {
           showType = "3D";
         } else if (hall.projection_capability === "BOTH") {
-          showType = Math.random() > 0.8 ? "3D" : "2D";
+          showType = Math.random() > 0.75 ? "3D" : "2D";
         }
 
         const screenType = hall.screen_type || "Tiêu chuẩn";

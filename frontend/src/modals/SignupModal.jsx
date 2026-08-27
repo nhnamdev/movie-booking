@@ -4,7 +4,7 @@ import { useState } from "react";
 import BarLoader from "react-spinners/esm/BarLoader.js";
 import { signupFailedToast, signupSuccessToast } from "../toasts/toast";
 import { useDispatch } from "react-redux";
-import { hideSignModal } from "../reducers/authSlice";
+import { hideSignModal, login } from "../reducers/authSlice";
 import { API_URL } from "../utils/apiUrl";
 
 export const SignupModal = () => {
@@ -75,8 +75,12 @@ export const SignupModal = () => {
       );
 
       if (response.status === 200 || response.status === 201) {
+        const userData = response.data?.user;
+        if (userData) {
+          dispatch(login(userData));
+        }
         dispatch(hideSignModal());
-        signupSuccessToast(response.data?.message || "Chúc mừng! Tạo tài khoản thành công");
+        signupSuccessToast(response.data?.message || "Chúc mừng! Đăng ký và đăng nhập thành công");
         setSignupDetails({
           firstName: "",
           lastName: "",
