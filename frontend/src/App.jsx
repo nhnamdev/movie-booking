@@ -67,13 +67,12 @@ function App() {
 
   return (
     <>
+      <ToastContainer style={{ zIndex: 99999 }} />
       <div
         style={
           signModalState || loginModalState || menuState ? blurredStyle : {}
         }
       >
-        <ToastContainer />
-
         <ScrollToTop />
         <Suspense fallback={<PageLoader />}>
           <Routes key={currentPage.pathname} location={currentPage}>

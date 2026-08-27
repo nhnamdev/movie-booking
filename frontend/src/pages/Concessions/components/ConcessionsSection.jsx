@@ -107,14 +107,10 @@ export const ConcessionsSection = () => {
           payload
         );
         concessionOrderCreated(response.data.orderCode, response.data.expiresAt);
-        setCompletedOrder({
-          orderCode: response.data.orderCode,
-          title: "Đã gửi đơn đến quầy",
-          message: "Vui lòng đến đúng chi nhánh đã chọn để thanh toán và nhận bắp nước trong 30 phút.",
-        });
         setQuantities({});
         setRewardPoints(0);
         setRewardRefreshKey((current) => current + 1);
+        navigate("/customer", { replace: true });
         return;
       }
 
@@ -147,15 +143,10 @@ export const ConcessionsSection = () => {
         setSubmitting(true);
         await axios.post(`${API_URL}/payos/confirm-return`, { orderCode });
         concessionPurchaseCompletion(orderCode);
-        setCompletedOrder({
-          orderCode,
-          title: "Thanh toán thành công",
-          message: "Đơn bắp nước đã được ghi nhận. Bạn có thể nhận hàng tại chi nhánh đã chọn.",
-        });
         setQuantities({});
         setRewardPoints(0);
         setRewardRefreshKey((current) => current + 1);
-        navigate("/bap-nuoc", { replace: true });
+        navigate("/customer", { replace: true });
       } catch (err) {
         ticketPurchaseError(err?.response?.data?.message || "Không thể xác nhận thanh toán PayOS");
       } finally {

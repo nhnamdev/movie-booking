@@ -55,8 +55,8 @@ export const SignupModal = () => {
       return;
     }
 
-    if (password.length < 8) {
-      signupFailedToast("Mật khẩu phải có ít nhất 8 ký tự");
+    if (password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
+      signupFailedToast("Mật khẩu phải có ít nhất 8 ký tự, gồm chữ và số");
       return;
     }
 
@@ -74,22 +74,22 @@ export const SignupModal = () => {
         }
       );
 
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         dispatch(hideSignModal());
-        signupSuccessToast(response.data.message);
+        signupSuccessToast(response.data?.message || "Chúc mừng! Tạo tài khoản thành công");
+        setSignupDetails({
+          firstName: "",
+          lastName: "",
+          phoneNumber: "",
+          email: "",
+          password: "",
+        });
       }
     } catch (err) {
       console.log("Error during registration:", err?.response?.data?.message || err.message);
       signupFailedToast(err?.response?.data?.message || "Không thể kết nối tới máy chủ");
     } finally {
       setLoading(false);
-      setSignupDetails({
-        firstName: "",
-        lastName: "",
-        phoneNumber: "",
-        email: "",
-        password: "",
-      });
     }
   };
 

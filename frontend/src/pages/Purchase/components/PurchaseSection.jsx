@@ -118,7 +118,7 @@ export const PurchaseSection = () => {
           counterResponse.data.expiresAt
         );
         dispatch(resetCart());
-        navigate("/purchase", { replace: true });
+        navigate("/customer", { replace: true });
         setLoading(false);
         return;
       }
@@ -188,8 +188,10 @@ export const PurchaseSection = () => {
           { orderCode }
         );
 
-        setTicketIds(response.data.tickets || []);
+        const returnedTickets = (response.data?.tickets || []).map((ticket) => ticket.id || ticket);
         dispatch(resetCart());
+        purchaseCompletion(returnedTickets.length > 0 ? returnedTickets : [orderCode]);
+        navigate("/customer", { replace: true });
       } catch (err) {
         console.error(err);
         ticketPurchaseError(
@@ -203,19 +205,6 @@ export const PurchaseSection = () => {
 
     confirmPayOSPayment();
   }, [currentPage.search, dispatch, navigate]);
-
-  useEffect(() => {
-    const tickets = [];
-
-    if (ticketIds.length > 0) {
-      ticketIds.forEach((ticket) => {
-        tickets.push(ticket.id);
-      });
-
-      purchaseCompletion(tickets);
-      navigate("/customer");
-    }
-  }, [ticketIds, navigate]);
 
   return (
     <section className="section-purchase">

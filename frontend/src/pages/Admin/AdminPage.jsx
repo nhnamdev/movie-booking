@@ -48,6 +48,8 @@ const adminTabs = [
 const staffTabs = [
   { id: "pos-concessions", label: "Bán bắp nước", icon: GiPopcorn },
   { id: "orders", label: "Đơn hàng & Soát vé", icon: FaClipboardList },
+  { id: "movies", label: "Quản lý phim", icon: FaFilm },
+  { id: "showtimes", label: "Quản lý suất chiếu", icon: FaClock },
 ];
 
 const AdminPage = () => {
