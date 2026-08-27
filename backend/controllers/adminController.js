@@ -284,167 +284,168 @@ const createAdminController = (dependencies) => {
   };
 
   // Lấy danh sách phim kèm thể loại, đạo diễn và số vé.
-  const adminMovies = (req, res) => {
-  const { email, password } = req.body;
+  const adminMovies = async (req, res) => {
+    const { email, password } = req.body;
 
-  verifyAdmin(email, password, (authErr, isAdmin) => {
-    if (authErr) return res.status(500).json(authErr);
-    if (!isAdmin) return adminAuthFailed(res);
+    try {
+      const isOperator = await requireOperator(email, password);
+      if (!isOperator) return roleAuthFailed(res);
 
-    const sql = `
-      SELECT
-        m.id,
-        m.name,
-        m.image_path,
-        m.trailer_url,
-        m.language,
-        m.synopsis,
-        m.rating,
-        m.duration,
-        m.top_cast,
-        m.release_date,
-        m.end_date,
-        GROUP_CONCAT(DISTINCT mg.genre ORDER BY mg.genre SEPARATOR ', ') AS genres,
-        GROUP_CONCAT(DISTINCT md.director ORDER BY md.director SEPARATOR ', ') AS directors,
-        COUNT(DISTINCT si.showtime_id) AS showtime_count,
-        COUNT(DISTINCT t.id) AS ticket_count
-      FROM movie m
-      LEFT JOIN movie_genre mg ON m.id = mg.movie_id
-      LEFT JOIN movie_directors md ON m.id = md.movie_id
-      LEFT JOIN shown_in si ON m.id = si.movie_id
-      LEFT JOIN ticket t ON m.id = t.movie_id
-      GROUP BY m.id
-      ORDER BY m.release_date DESC, m.id DESC
-    `;
+      const sql = `
+        SELECT
+          m.id,
+          m.name,
+          m.image_path,
+          m.trailer_url,
+          m.language,
+          m.synopsis,
+          m.rating,
+          m.duration,
+          m.top_cast,
+          m.release_date,
+          m.end_date,
+          GROUP_CONCAT(DISTINCT mg.genre ORDER BY mg.genre SEPARATOR ', ') AS genres,
+          GROUP_CONCAT(DISTINCT md.director ORDER BY md.director SEPARATOR ', ') AS directors,
+          COUNT(DISTINCT si.showtime_id) AS showtime_count,
+          COUNT(DISTINCT t.id) AS ticket_count
+        FROM movie m
+        LEFT JOIN movie_genre mg ON m.id = mg.movie_id
+        LEFT JOIN movie_directors md ON m.id = md.movie_id
+        LEFT JOIN shown_in si ON m.id = si.movie_id
+        LEFT JOIN ticket t ON m.id = t.movie_id
+        GROUP BY m.id
+        ORDER BY m.release_date DESC, m.id DESC
+      `;
 
-    db.query(sql, (err, data) => {
-      if (err) return res.status(500).json(err);
+      const data = await queryDb(sql);
       return res.json(data);
-    });
-  });
-};
+    } catch (err) {
+      return res.status(500).json(err);
+    }
+  };
 
   // Cập nhật phim cùng toàn bộ thể loại và đạo diễn trong transaction.
   const adminMovieUpdate = async (req, res) => {
-  const {
-    email,
-    password,
-    movieId,
-    name,
-    image_path,
-    language,
-    synopsis,
-    rating,
-    duration,
-    top_cast,
-    release_date,
-    end_date,
-    trailer_url,
-  } = req.body;
-  const genres = normalizeAdminList(req.body.genres);
-  const directors = normalizeAdminList(req.body.directors);
+    const {
+      email,
+      password,
+      movieId,
+      name,
+      image_path,
+      language,
+      synopsis,
+      rating,
+      duration,
+      top_cast,
+      release_date,
+      end_date,
+      trailer_url,
+    } = req.body;
+    const genres = normalizeAdminList(req.body.genres);
+    const directors = normalizeAdminList(req.body.directors);
 
-  verifyAdmin(email, password, async (authErr, isAdmin) => {
-    if (authErr) return res.status(500).json(authErr);
-    if (!isAdmin) return adminAuthFailed(res);
-
-    if (!movieId || !name || !image_path || !language || !synopsis || !rating || !duration || !top_cast || !release_date || !end_date) {
-      return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin phim" });
-    }
-    if (String(end_date) < String(release_date)) {
-      return res.status(400).json({ message: "Ngày kết thúc phải từ ngày phát hành trở đi" });
-    }
-    if (!Number.isInteger(Number(duration)) || Number(duration) <= 0) {
-      return res.status(400).json({ message: "Thời lượng phim phải là số phút hợp lệ" });
-    }
-    let normalizedTrailerUrl;
     try {
-      normalizedTrailerUrl = normalizeTrailerUrl(trailer_url);
-    } catch (err) {
-      return res.status(err.statusCode || 400).json({ message: err.message });
-    }
+      const isOperator = await requireOperator(email, password);
+      if (!isOperator) return roleAuthFailed(res);
 
-    let transaction;
-    let previousImagePath = null;
-    try {
-      transaction = await withTransaction();
-      const previousRows = await transaction.query("SELECT image_path FROM movie WHERE id = ? FOR UPDATE", [movieId]);
-      previousImagePath = previousRows[0]?.image_path || null;
-      if (image_path !== previousImagePath && !String(image_path).startsWith("/media/movies/")) {
-        throw Object.assign(new Error("Ảnh phim mới phải được tải lên Cloudflare R2"), { statusCode: 400 });
+      if (!movieId || !name || !image_path || !language || !synopsis || !rating || !duration || !top_cast || !release_date || !end_date) {
+        return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin phim" });
       }
-      const invalidSchedules = await transaction.query(
-        `SELECT COUNT(*) AS invalidCount FROM shown_in SI
-         JOIN showtimes S ON S.id = SI.showtime_id
-         WHERE SI.movie_id = ? AND SI.status = 'active'
-           AND (S.showtime_date < ? OR S.showtime_date > ?)`,
-        [movieId, release_date, end_date]
-      );
-      if (Number(invalidSchedules[0].invalidCount) > 0) {
-        throw Object.assign(new Error("Khoảng công chiếu mới không bao phủ các suất đang hoạt động"), { statusCode: 409 });
+      if (String(end_date) < String(release_date)) {
+        return res.status(400).json({ message: "Ngày kết thúc phải từ ngày phát hành trở đi" });
       }
-      await transaction.query(
-        `UPDATE movie
-         SET name = ?, image_path = ?, trailer_url = ?, language = ?, synopsis = ?, rating = ?, duration = ?, top_cast = ?, release_date = ?, end_date = ?
-         WHERE id = ?`,
-        [name, image_path, normalizedTrailerUrl, language, synopsis, rating, duration, top_cast, release_date, end_date, movieId]
-      );
-      await transaction.query("DELETE FROM movie_genre WHERE movie_id = ?", [movieId]);
-      await transaction.query("DELETE FROM movie_directors WHERE movie_id = ?", [movieId]);
-
-      for (const genre of genres) {
-        await transaction.query("INSERT INTO movie_genre(movie_id, genre) VALUES (?, ?)", [movieId, genre]);
+      if (!Number.isInteger(Number(duration)) || Number(duration) <= 0) {
+        return res.status(400).json({ message: "Thời lượng phim phải là số phút hợp lệ" });
+      }
+      let normalizedTrailerUrl;
+      try {
+        normalizedTrailerUrl = normalizeTrailerUrl(trailer_url);
+      } catch (err) {
+        return res.status(err.statusCode || 400).json({ message: err.message });
       }
 
-      for (const director of directors) {
-        await transaction.query("INSERT INTO movie_directors(movie_id, director) VALUES (?, ?)", [movieId, director]);
-      }
-      const futureSchedules = await transaction.query(
-        `SELECT SI.hall_id, S.id, DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date, S.movie_start_time
-         FROM shown_in SI JOIN showtimes S ON S.id = SI.showtime_id
-         WHERE SI.movie_id = ? AND SI.status = 'active' AND S.status = 'active' AND S.showtime_date >= CURDATE()`,
-        [movieId]
-      );
-      for (const schedule of futureSchedules) {
-        await assertNoShowtimeOverlap({
-          movieId,
-          hallId: schedule.hall_id,
-          showtimeDate: schedule.showtime_date,
-          movieStartTime: schedule.movie_start_time,
-          excludeShowtimeId: schedule.id,
-          query: transaction.query,
-        });
-      }
-      await transaction.commit();
-      transaction.release();
-      transaction = null;
-      if (previousImagePath && previousImagePath !== image_path && previousImagePath.startsWith("/media/")) {
-        await deleteFromR2(previousImagePath).catch((error) => console.error("Delete old movie image error:", error.message));
-      }
-      return res.json({ message: "Cập nhật phim thành công" });
-    } catch (err) {
-      if (transaction) {
-        await transaction.rollback().catch(() => {});
+      let transaction;
+      let previousImagePath = null;
+      try {
+        transaction = await withTransaction();
+        const previousRows = await transaction.query("SELECT image_path FROM movie WHERE id = ? FOR UPDATE", [movieId]);
+        previousImagePath = previousRows[0]?.image_path || null;
+        if (image_path !== previousImagePath && !String(image_path).startsWith("/media/movies/")) {
+          throw Object.assign(new Error("Ảnh phim mới phải được tải lên Cloudflare R2"), { statusCode: 400 });
+        }
+        const invalidSchedules = await transaction.query(
+          `SELECT COUNT(*) AS invalidCount FROM shown_in SI
+           JOIN showtimes S ON S.id = SI.showtime_id
+           WHERE SI.movie_id = ? AND SI.status = 'active'
+             AND (S.showtime_date < ? OR S.showtime_date > ?)`,
+          [movieId, release_date, end_date]
+        );
+        if (Number(invalidSchedules[0].invalidCount) > 0) {
+          throw Object.assign(new Error("Khoảng công chiếu mới không bao phủ các suất đang hoạt động"), { statusCode: 409 });
+        }
+        await transaction.query(
+          `UPDATE movie
+           SET name = ?, image_path = ?, trailer_url = ?, language = ?, synopsis = ?, rating = ?, duration = ?, top_cast = ?, release_date = ?, end_date = ?
+           WHERE id = ?`,
+          [name, image_path, normalizedTrailerUrl, language, synopsis, rating, duration, top_cast, release_date, end_date, movieId]
+        );
+        await transaction.query("DELETE FROM movie_genre WHERE movie_id = ?", [movieId]);
+        await transaction.query("DELETE FROM movie_directors WHERE movie_id = ?", [movieId]);
+
+        for (const genre of genres) {
+          await transaction.query("INSERT INTO movie_genre(movie_id, genre) VALUES (?, ?)", [movieId, genre]);
+        }
+
+        for (const director of directors) {
+          await transaction.query("INSERT INTO movie_directors(movie_id, director) VALUES (?, ?)", [movieId, director]);
+        }
+        const futureSchedules = await transaction.query(
+          `SELECT SI.hall_id, S.id, DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date, S.movie_start_time
+           FROM shown_in SI JOIN showtimes S ON S.id = SI.showtime_id
+           WHERE SI.movie_id = ? AND SI.status = 'active' AND S.status = 'active' AND S.showtime_date >= CURDATE()`,
+          [movieId]
+        );
+        for (const schedule of futureSchedules) {
+          await assertNoShowtimeOverlap({
+            movieId,
+            hallId: schedule.hall_id,
+            showtimeDate: schedule.showtime_date,
+            movieStartTime: schedule.movie_start_time,
+            excludeShowtimeId: schedule.id,
+            query: transaction.query,
+          });
+        }
+        await transaction.commit();
         transaction.release();
+        transaction = null;
+        if (previousImagePath && previousImagePath !== image_path && previousImagePath.startsWith("/media/")) {
+          await deleteFromR2(previousImagePath).catch((error) => console.error("Delete old movie image error:", error.message));
+        }
+        return res.json({ message: "Cập nhật phim thành công" });
+      } catch (err) {
+        if (transaction) {
+          await transaction.rollback().catch(() => {});
+          transaction.release();
+        }
+        return res.status(err.statusCode || 500).json({ message: err.message || "Không thể cập nhật phim" });
       }
-      return res.status(err.statusCode || 500).json({ message: err.message || "Không thể cập nhật phim" });
+    } catch (err) {
+      return res.status(500).json(err);
     }
-  });
-};
+  };
 
   // Xoá phim chưa phát sinh vé để bảo toàn lịch sử mua.
-  const adminMovieDelete = (req, res) => {
-  const { email, password, movieId } = req.body;
-
-  verifyAdmin(email, password, async (authErr, isAdmin) => {
-    if (authErr) return res.status(500).json(authErr);
-    if (!isAdmin) return adminAuthFailed(res);
-    if (!movieId) return res.status(400).json({ message: "Thiếu mã phim" });
+  const adminMovieDelete = async (req, res) => {
+    const { email, password, movieId } = req.body;
 
     try {
+      const isOperator = await requireOperator(email, password);
+      if (!isOperator) return roleAuthFailed(res);
+      if (!movieId) return res.status(400).json({ message: "Thiếu mã phim" });
+
       const movieRows = await queryDb("SELECT image_path FROM movie WHERE id = ?", [movieId]);
       const ticketRows = await queryDb("SELECT COUNT(*) AS ticketCount FROM ticket WHERE movie_id = ?", [movieId]);
-      if (ticketRows[0].ticketCount > 0) {
+      if (ticketRows[0]?.ticketCount > 0) {
         return res.status(409).json({
           message: "Không thể xoá phim đã có vé để tránh mất lịch sử mua vé",
         });
@@ -453,7 +454,7 @@ const createAdminController = (dependencies) => {
         "SELECT COUNT(*) AS scheduleCount FROM shown_in WHERE movie_id = ?",
         [movieId]
       );
-      if (Number(scheduleRows[0].scheduleCount) > 0) {
+      if (Number(scheduleRows[0]?.scheduleCount) > 0) {
         return res.status(409).json({
           message: "Phim đang có suất chiếu. Hãy xoá các suất chưa có vé trước khi xoá phim",
         });
@@ -467,17 +468,21 @@ const createAdminController = (dependencies) => {
     } catch (err) {
       return res.status(500).json(err);
     }
-  });
-};
+  };
 
   // Thêm phim mới và trả về mã phim vừa tạo.
   const adminMovieAdd = async (req, res) => {
-    const { name, image_path, trailer_url, language, synopsis, rating, duration, top_cast, release_date, end_date } = req.body;
-    const genres = normalizeAdminList(req.body.genres);
-    const directors = normalizeAdminList(req.body.directors);
-    if (!name || !image_path || !language || !synopsis || !rating || !duration || !top_cast || !release_date || !end_date || genres.length === 0 || directors.length === 0) {
-      return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin phim, thể loại và đạo diễn" });
-    }
+    const { email, password, name, image_path, trailer_url, language, synopsis, rating, duration, top_cast, release_date, end_date } = req.body;
+
+    try {
+      const isOperator = await requireOperator(email, password);
+      if (!isOperator) return roleAuthFailed(res);
+
+      const genres = normalizeAdminList(req.body.genres);
+      const directors = normalizeAdminList(req.body.directors);
+      if (!name || !image_path || !language || !synopsis || !rating || !duration || !top_cast || !release_date || !end_date || genres.length === 0 || directors.length === 0) {
+        return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin phim, thể loại và đạo diễn" });
+      }
     if (!String(image_path).startsWith("/media/movies/")) {
       return res.status(400).json({ message: "Ảnh phim phải được tải lên Cloudflare R2" });
     }
@@ -493,26 +498,29 @@ const createAdminController = (dependencies) => {
     } catch (err) {
       return res.status(err.statusCode || 400).json({ message: err.message });
     }
-    const transaction = await withTransaction();
-    try {
-      const result = await transaction.query(
-        `INSERT INTO movie (name,image_path,trailer_url,language,synopsis,rating,duration,top_cast,release_date,end_date)
-         VALUES (?,?,?,?,?,?,?,?,?,?)`,
-        [name, image_path, normalizedTrailerUrl, language, synopsis, rating, duration, top_cast, release_date, end_date]
-      );
-      for (const genre of genres) {
-        await transaction.query("INSERT INTO movie_genre(movie_id,genre) VALUES (?,?)", [result.insertId, genre]);
+      const transaction = await withTransaction();
+      try {
+        const result = await transaction.query(
+          `INSERT INTO movie (name,image_path,trailer_url,language,synopsis,rating,duration,top_cast,release_date,end_date)
+           VALUES (?,?,?,?,?,?,?,?,?,?)`,
+          [name, image_path, normalizedTrailerUrl, language, synopsis, rating, duration, top_cast, release_date, end_date]
+        );
+        for (const genre of genres) {
+          await transaction.query("INSERT INTO movie_genre(movie_id,genre) VALUES (?,?)", [result.insertId, genre]);
+        }
+        for (const director of directors) {
+          await transaction.query("INSERT INTO movie_directors(movie_id,director) VALUES (?,?)", [result.insertId, director]);
+        }
+        await transaction.commit();
+        return res.status(201).json([{ last_id: result.insertId }]);
+      } catch (err) {
+        await transaction.rollback();
+        return res.status(500).json({ message: err.message || "Không thể thêm phim" });
+      } finally {
+        transaction.release();
       }
-      for (const director of directors) {
-        await transaction.query("INSERT INTO movie_directors(movie_id,director) VALUES (?,?)", [result.insertId, director]);
-      }
-      await transaction.commit();
-      return res.status(201).json([{ last_id: result.insertId }]);
-    } catch (err) {
-      await transaction.rollback();
-      return res.status(500).json({ message: err.message || "Không thể thêm phim" });
-    } finally {
-      transaction.release();
+    } catch (outerErr) {
+      return res.status(500).json({ message: outerErr.message || "Không thể thêm phim" });
     }
   };
 
@@ -1688,34 +1696,38 @@ const createAdminController = (dependencies) => {
 
   // Kiểm tra quyền và tải ảnh phim hoặc combo lên Cloudflare R2.
   const adminUploadImage = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+    try {
+      const { email, password } = req.body;
 
-    const isAdmin = await requireAdmin(email, password);
-    if (!isAdmin) return adminAuthFailed(res);
+      const isOperator = await requireOperator(email, password);
+      if (!isOperator) return roleAuthFailed(res);
 
-    if (!req.file) {
-      return res.status(400).json({ message: "Vui lòng chọn ảnh" });
+      if (!req.file) {
+        return res.status(400).json({ message: "Vui lòng chọn ảnh" });
+      }
+
+      const folder = req.body.folder === "combos" ? "combos" : "movies";
+      const fileName = generateFileName(req.file.originalname);
+      const uploadedImage = await uploadToR2({
+        buffer: req.file.buffer,
+        fileName,
+        mimeType: req.file.mimetype,
+        folder,
+      });
+
+      return res.json({ ...uploadedImage, fileName });
+    } catch (err) {
+      console.error("Upload image error:", err);
+      return res.status(500).json({ message: "Không thể tải ảnh lên" });
     }
-
-    const folder = req.body.folder === "combos" ? "combos" : "movies";
-    const fileName = generateFileName(req.file.originalname);
-    const uploadedImage = await uploadToR2({
-      buffer: req.file.buffer,
-      fileName,
-      mimeType: req.file.mimetype,
-      folder,
-    });
-
-    return res.json({ ...uploadedImage, fileName });
-  } catch (err) {
-    console.error("Upload image error:", err);
-    return res.status(500).json({ message: "Không thể tải ảnh lên" });
-  }
-};
+  };
 
   const adminMediaDelete = async (req, res) => {
     try {
+      const { email, password } = req.body;
+      const isOperator = await requireOperator(email, password);
+      if (!isOperator) return roleAuthFailed(res);
+
       const mediaUrl = String(req.body.mediaUrl || "");
       if (!mediaUrl.startsWith("/media/")) return res.status(400).json({ message: "Đường dẫn ảnh không hợp lệ" });
       await deleteFromR2(mediaUrl);

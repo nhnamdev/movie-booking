@@ -406,7 +406,8 @@
     display: none;
   }
 
-  .purchase-history-item {
+  .purchase-history-item,
+  .customer-held-item {
     grid-template-columns: 1fr;
     padding: 2.4rem 1.2rem;
   }

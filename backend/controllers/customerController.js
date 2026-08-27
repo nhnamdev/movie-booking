@@ -1,5 +1,112 @@
-const createCustomerController = ({ queryDbAsync, parsePayOSOrderPayload }) => {
+const createCustomerController = ({
+  queryDbAsync,
+  parsePayOSOrderPayload,
+  releaseSeatHolds,
+  releaseRewardHold,
+  expireStaleOrders,
+}) => {
   const customerProfile = (req, res) => res.json([req.user]);
+
+  const customerHeldOrders = async (req, res) => {
+    try {
+      if (typeof expireStaleOrders === "function") {
+        await expireStaleOrders();
+      }
+      const orders = await queryDbAsync(
+        `SELECT PO.id, PO.order_code, PO.status, PO.fulfillment_status, PO.amount, PO.payment_method,
+          PO.payment_id, PO.payload_json, PO.created_at, PO.expires_at, PO.checkout_url
+         FROM payos_orders PO
+         WHERE PO.customer_email = ?
+           AND PO.status IN ('UNPAID', 'PENDING')
+           AND (PO.expires_at IS NULL OR PO.expires_at > NOW())
+         ORDER BY PO.created_at DESC, PO.id DESC`,
+        [req.user.email]
+      );
+
+      const heldList = orders.map((order) => {
+        const payload = parsePayOSOrderPayload(order.payload_json) || {};
+        const seatNames = Array.isArray(payload.seatPrices)
+          ? payload.seatPrices.map((seat) => seat.seatName).filter(Boolean)
+          : [];
+        return {
+          order_code: order.order_code,
+          order_type: payload.orderType || "TICKET",
+          payment_method: order.payment_method || payload.paymentMethod || "Thanh toán tại rạp",
+          status: order.status,
+          checkout_url: order.checkout_url,
+          seat_numbers: seatNames.join(", "),
+          theatre_name: payload.theatreName || "",
+          theatre_address: payload.theatreAddress || "",
+          hall_name: payload.hallName || "",
+          movie_name: payload.movieName || (payload.orderType === "CONCESSION" ? "Đơn bắp nước" : "Vé xem phim"),
+          movie_id: payload.userMovieId || null,
+          movie_image: payload.movieImage || null,
+          movie_start_time: payload.movieStartTime || null,
+          show_type: payload.showType || null,
+          showtime_date: payload.showtimeDate || null,
+          combo_items: Array.isArray(payload.comboItems) ? payload.comboItems : [],
+          ticket_subtotal: Number(payload.ticketSubtotal || 0),
+          combo_subtotal: Number(payload.comboSubtotal || 0),
+          combo_discount: Number(payload.comboDiscount || 0),
+          combo_total: Number(payload.comboTotal || 0),
+          gross_amount: Number(payload.grossAmount ?? order.amount ?? 0),
+          reward_points_used: Number(payload.rewardPointsUsed || 0),
+          reward_discount: Number(payload.rewardDiscount || 0),
+          total_amount: Number(order.amount || 0),
+          created_at: order.created_at,
+          expires_at: order.expires_at,
+        };
+      });
+
+      return res.json(heldList);
+    } catch (err) {
+      console.error("Customer held orders load error:", err.message);
+      return res.status(500).json({ message: "Không thể tải danh sách vé đang giữ" });
+    }
+  };
+
+  const customerCancelHeldOrder = async (req, res) => {
+    const orderCode = Number(req.body.orderCode);
+    if (!orderCode) {
+      return res.status(400).json({ message: "Mã đơn hàng không hợp lệ" });
+    }
+
+    try {
+      const rows = await queryDbAsync(
+        `SELECT order_code, status, customer_email FROM payos_orders
+         WHERE order_code = ? AND customer_email = ?`,
+        [orderCode, req.user.email]
+      );
+
+      if (rows.length === 0) {
+        return res.status(404).json({ message: "Không tìm thấy đơn giữ chỗ hoặc đơn không thuộc về bạn" });
+      }
+
+      const order = rows[0];
+      if (!["UNPAID", "PENDING"].includes(order.status)) {
+        return res.status(400).json({ message: "Chỉ có thể hủy đơn đang trong trạng thái giữ chỗ" });
+      }
+
+      await queryDbAsync(
+        `UPDATE payos_orders
+         SET status = 'EXPIRED', error_message = 'Khách hàng chủ động hủy giữ chỗ'
+         WHERE order_code = ?`,
+        [orderCode]
+      );
+
+      if (typeof releaseSeatHolds === "function") {
+        await releaseSeatHolds(orderCode);
+      }
+      if (typeof releaseRewardHold === "function") {
+        await releaseRewardHold(orderCode);
+      }
+
+      return res.json({ message: "Đã hủy giữ chỗ thành công" });
+    } catch (err) {
+      console.error("Customer cancel held order error:", err.message);
+      return res.status(500).json({ message: "Không thể hủy giữ chỗ" });
+    }
+  };
 
   const customerPurchases = async (req, res) => {
     try {
@@ -122,7 +229,7 @@ const createCustomerController = ({ queryDbAsync, parsePayOSOrderPayload }) => {
     }
   };
 
-  return { customerProfile, customerPurchases };
+  return { customerProfile, customerPurchases, customerHeldOrders, customerCancelHeldOrder };
 };
 
 module.exports = createCustomerController;

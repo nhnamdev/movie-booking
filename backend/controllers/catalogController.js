@@ -137,7 +137,7 @@ const createCatalogController = (dependencies) => {
       S.movie_start_time,
       S.show_type,
       S.screen_type,
-      S.price_per_seat,
+      COALESCE(TPC.price, S.price_per_seat) AS price_per_seat,
       MG.genre
     FROM theatre T
     JOIN hall H ON T.id = H.theatre_id
@@ -145,6 +145,11 @@ const createCatalogController = (dependencies) => {
     JOIN showtimes S ON SI.showtime_id = S.id
     JOIN movie M ON SI.movie_id = M.id
     JOIN movie_genre MG ON MG.movie_id = M.id
+    LEFT JOIN ticket_price_config TPC ON
+      TPC.room_type = H.screen_type AND
+      TPC.show_type = S.show_type AND
+      TPC.day_type = CASE WHEN DAYOFWEEK(S.showtime_date) IN (1, 6, 7) THEN 'WEEKEND' ELSE 'WEEKDAY' END AND
+      TPC.seat_type = 'STANDARD'
     JOIN (
       SELECT s2.showtime_date
       FROM showtimes s2
@@ -567,17 +572,17 @@ GROUP BY
 
   // Lấy các suất chiếu của một phim tại rạp đã chọn.
   const movieWiseShowtime = (req, res) => {
-  const movieId = req.body.movieDetailsId;
-  const theatreId = req.body.theatreId;
+    const movieId = req.body.movieDetailsId;
+    const theatreId = req.body.theatreId;
 
-  const sql = `SELECT S.id AS showtime_id, H.id AS hall_id, M.id AS movie_id, DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date, S.movie_start_time, S.show_type, S.price_per_seat FROM theatre T JOIN hall H ON T.id = H.theatre_id JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id JOIN movie M ON SI.movie_id = M.id JOIN ( SELECT s2.showtime_date FROM showtimes s2 JOIN shown_in si2 ON s2.id = si2.showtime_id JOIN movie m2 ON m2.id = si2.movie_id JOIN hall h2 ON h2.id = si2.hall_id WHERE h2.theatre_id = ? AND si2.movie_id = ? AND s2.status = 'active' AND si2.status = 'active' AND (m2.end_date IS NULL OR m2.end_date >= CURDATE()) AND TIMESTAMPADD(MINUTE, CAST(m2.duration AS UNSIGNED), TIMESTAMP(s2.showtime_date, s2.movie_start_time)) > NOW() GROUP BY s2.showtime_date ORDER BY s2.showtime_date ASC LIMIT 4 ) AS LatestDates ON S.showtime_date = LatestDates.showtime_date WHERE T.id = ? AND M.id = ? AND T.status = 'active' AND H.status = 'active' AND S.status = 'active' AND SI.status = 'active' AND (M.end_date IS NULL OR M.end_date >= CURDATE()) AND TIMESTAMPADD(MINUTE, CAST(M.duration AS UNSIGNED), TIMESTAMP(S.showtime_date, S.movie_start_time)) > NOW() ORDER BY S.showtime_date ASC, S.movie_start_time ASC`;
+    const sql = `SELECT S.id AS showtime_id, H.id AS hall_id, M.id AS movie_id, DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date, S.movie_start_time, S.show_type, COALESCE(TPC.price, S.price_per_seat) AS price_per_seat FROM theatre T JOIN hall H ON T.id = H.theatre_id JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id JOIN movie M ON SI.movie_id = M.id LEFT JOIN ticket_price_config TPC ON TPC.room_type = H.screen_type AND TPC.show_type = S.show_type AND TPC.day_type = CASE WHEN DAYOFWEEK(S.showtime_date) IN (1, 6, 7) THEN 'WEEKEND' ELSE 'WEEKDAY' END AND TPC.seat_type = 'STANDARD' JOIN ( SELECT s2.showtime_date FROM showtimes s2 JOIN shown_in si2 ON s2.id = si2.showtime_id JOIN movie m2 ON m2.id = si2.movie_id JOIN hall h2 ON h2.id = si2.hall_id WHERE h2.theatre_id = ? AND si2.movie_id = ? AND s2.status = 'active' AND si2.status = 'active' AND (m2.end_date IS NULL OR m2.end_date >= CURDATE()) AND TIMESTAMPADD(MINUTE, CAST(m2.duration AS UNSIGNED), TIMESTAMP(s2.showtime_date, s2.movie_start_time)) > NOW() GROUP BY s2.showtime_date ORDER BY s2.showtime_date ASC LIMIT 4 ) AS LatestDates ON S.showtime_date = LatestDates.showtime_date WHERE T.id = ? AND M.id = ? AND T.status = 'active' AND H.status = 'active' AND S.status = 'active' AND SI.status = 'active' AND (M.end_date IS NULL OR M.end_date >= CURDATE()) AND TIMESTAMPADD(MINUTE, CAST(M.duration AS UNSIGNED), TIMESTAMP(S.showtime_date, S.movie_start_time)) > NOW() ORDER BY S.showtime_date ASC, S.movie_start_time ASC`;
 
-  db.query(sql, [theatreId, movieId, theatreId, movieId], (err, data) => {
-    if (err) return res.json(err);
+    db.query(sql, [theatreId, movieId, theatreId, movieId], (err, data) => {
+      if (err) return res.json(err);
 
-    return res.json(data);
-  });
-};
+      return res.json(data);
+    });
+  };
 
   // Lấy các phim khác để hiển thị nội dung liên quan.
   const otherMovies = (req, res) => {

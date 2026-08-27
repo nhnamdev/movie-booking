@@ -71,18 +71,18 @@ const createBookingController = (dependencies) => {
 
   // Lấy phòng và suất chiếu phù hợp với phim đã chọn.
   const halls = (req, res) => {
-  const theatreId = req.body.theatreId;
-  const showtimeDate = req.body.userDate;
-  const movieId = req.body.userMovieId;
+    const theatreId = req.body.theatreId;
+    const showtimeDate = req.body.userDate;
+    const movieId = req.body.userMovieId;
 
-  const sql =
-    "SELECT H.id AS hall_id, H.name AS hall_name, SI.showtime_id, S.show_type, S.screen_type, S.movie_start_time, S.price_per_seat FROM hall H JOIN theatre T ON T.id = H.theatre_id JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id JOIN movie M ON M.id = SI.movie_id WHERE H.theatre_id = ? AND S.showtime_date = ? AND SI.movie_id = ? AND T.status = 'active' AND H.status = 'active' AND S.status = 'active' AND SI.status = 'active' AND (M.end_date IS NULL OR M.end_date >= CURDATE()) AND TIMESTAMPADD(MINUTE, CAST(M.duration AS UNSIGNED), TIMESTAMP(S.showtime_date, S.movie_start_time)) > NOW()";
-  db.query(sql, [theatreId, showtimeDate, movieId], (err, data) => {
-    if (err) return res.json(err);
+    const sql =
+      "SELECT H.id AS hall_id, H.name AS hall_name, SI.showtime_id, S.show_type, S.screen_type, S.movie_start_time, COALESCE(TPC.price, S.price_per_seat) AS price_per_seat FROM hall H JOIN theatre T ON T.id = H.theatre_id JOIN shown_in SI ON H.id = SI.hall_id JOIN showtimes S ON SI.showtime_id = S.id JOIN movie M ON M.id = SI.movie_id LEFT JOIN ticket_price_config TPC ON TPC.room_type = H.screen_type AND TPC.show_type = S.show_type AND TPC.day_type = CASE WHEN DAYOFWEEK(S.showtime_date) IN (1, 6, 7) THEN 'WEEKEND' ELSE 'WEEKDAY' END AND TPC.seat_type = 'STANDARD' WHERE H.theatre_id = ? AND S.showtime_date = ? AND SI.movie_id = ? AND T.status = 'active' AND H.status = 'active' AND S.status = 'active' AND SI.status = 'active' AND (M.end_date IS NULL OR M.end_date >= CURDATE()) AND TIMESTAMPADD(MINUTE, CAST(M.duration AS UNSIGNED), TIMESTAMP(S.showtime_date, S.movie_start_time)) > NOW()";
+    db.query(sql, [theatreId, showtimeDate, movieId], (err, data) => {
+      if (err) return res.json(err);
 
-    return res.json(data);
-  });
-};
+      return res.json(data);
+    });
+  };
 
   // Trả trạng thái ghế, gồm ghế đã bán và ghế đang được giữ.
   const seats = async (req, res) => {

@@ -132,24 +132,9 @@ const TicketPriceTable = () => {
           })}
         </div>
       ) : (
-        <div className="showtimes-price-grid">
-          <div>
-            <span>Tiêu chuẩn 2D (Ngày thường)</span>
-            <strong>120.000 VNĐ</strong>
-          </div>
-          <div>
-            <span>Tiêu chuẩn 3D (Ngày thường)</span>
-            <strong>150.000 VNĐ</strong>
-          </div>
-          <div>
-            <span>Cao cấp 2D (Ngày thường)</span>
-            <strong>150.000 VNĐ</strong>
-          </div>
-          <div>
-            <span>Cao cấp 3D (Ngày thường)</span>
-            <strong>180.000 VNĐ</strong>
-          </div>
-        </div>
+        <p className="showtimes-empty-price-msg" style={{ textAlign: "center", padding: "3rem 1.6rem", color: "#94a3b8", fontSize: "1.4rem" }}>
+          Hiện chưa có thông tin bảng giá vé niêm yết từ hệ thống.
+        </p>
       )}
     </div>
   );

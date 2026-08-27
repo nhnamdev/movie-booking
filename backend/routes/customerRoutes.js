@@ -5,6 +5,8 @@ const createCustomerRoutes = (controller, { allowRoles }) => {
 
   router.post("/customerProfile", ...allowRoles("Customer"), controller.customerProfile);
   router.post("/customerPurchases", ...allowRoles("Customer"), controller.customerPurchases);
+  router.post("/customerHeldOrders", ...allowRoles("Customer"), controller.customerHeldOrders);
+  router.post("/customerCancelHeldOrder", ...allowRoles("Customer"), controller.customerCancelHeldOrder);
 
   return router;
 };

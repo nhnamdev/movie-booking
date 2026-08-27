@@ -100,6 +100,14 @@ export const counterOrderCreated = (orderCode, expiresAt) => {
   );
 };
 
+export const customerCancelHoldToast = (msg = "Đã hủy giữ chỗ thành công") => {
+  toast.success(msg, {
+    ...toastPrimaryCategories,
+    theme: "colored",
+    style: toastFontStyle,
+  });
+};
+
 export const concessionOrderCreated = (orderCode, expiresAt) => {
   const deadline = expiresAt
     ? new Date(expiresAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })

@@ -264,7 +264,7 @@ const createShowtimeAvailabilityService = ({ queryDbAsync }) => {
   }) => {
     const rows = await query(
       `SELECT
-        S.price_per_seat,
+        COALESCE(TPC.price, S.price_per_seat) AS price_per_seat,
         S.movie_start_time,
         S.show_type,
         DATE_FORMAT(S.showtime_date, '%Y-%m-%d') AS showtime_date,
@@ -281,6 +281,11 @@ const createShowtimeAvailabilityService = ({ queryDbAsync }) => {
        JOIN hall H ON SI.hall_id = H.id
        JOIN theatre TH ON H.theatre_id = TH.id
        JOIN movie M ON SI.movie_id = M.id
+       LEFT JOIN ticket_price_config TPC ON
+         TPC.room_type = H.screen_type AND
+         TPC.show_type = S.show_type AND
+         TPC.day_type = CASE WHEN DAYOFWEEK(S.showtime_date) IN (1, 6, 7) THEN 'WEEKEND' ELSE 'WEEKDAY' END AND
+         TPC.seat_type = 'STANDARD'
        WHERE SI.movie_id = ?
          AND SI.hall_id = ?
          AND SI.showtime_id = ?
